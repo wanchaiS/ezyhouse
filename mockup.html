@@ -1,0 +1,1508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Household Expenses — mobile mockup</title>
+<style>
+  :root {
+    --bg: #f2f2f7; --surface: #fff; --ink: #111114; --muted: #6e6e76; --line: #e7e7ec;
+    --accent: #4f46e5; --accent-soft: #eef0ff;
+    --pos: #13804f; --pos-soft: #e7f6ee; --neg: #c2410c; --neg-soft: #fdf0e8; --warn: #9a5b00; --warn-soft: #fff5de;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: #dedee5; -webkit-font-smoothing: antialiased; }
+  button, input, select { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
+  /* stage: demo panel + phone */
+  .stage { display: flex; justify-content: center; align-items: flex-start; gap: 40px; padding: 32px 24px; }
+  .phone { position: relative; width: 390px; height: 844px; flex: none; background: var(--bg); border: 10px solid #131316; border-radius: 48px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.18); }
+  #app { position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .screen { flex: 1; overflow-y: auto; padding: 0 16px 28px; }
+
+  /* typography */
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 50px 4px 14px; }
+  .top.col { flex-direction: column; align-items: flex-start; gap: 0; }
+  .eyebrow { font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+  .lead { color: var(--muted); margin: -6px 4px 18px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted); margin: 24px 4px 8px; }
+  .label, .sub { font-size: 13px; color: var(--muted); }
+  .big { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; }
+  .amount { font-variant-numeric: tabular-nums; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); } .muted { color: var(--muted); }
+  .note { font-size: 13px; color: var(--muted); margin: 10px 4px; }
+  .center { text-align: center; }
+
+  /* surfaces */
+  .card { background: var(--surface); border-radius: var(--radius); padding: 16px; }
+  .card h3 { font-size: 17px; margin: 0 0 12px; }
+  .card-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .card-actions .btn { flex: 1; }
+  .lines { margin-top: 8px; }
+  .line { display: flex; justify-content: space-between; padding: 5px 0; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 20px 16px; }
+  .list { background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+  .list-head { padding: 16px 14px 10px; }
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 14px; border: 0; background: none; text-align: left; }
+  button.row { cursor: pointer; }
+  button.row:active { background: #f6f6f9; }
+  .row + .row, .list-head + .row, .row + .fact, .fact + .row { border-top: 1px solid var(--line); }
+  .row .main { flex: 1; min-width: 0; }
+  .row .title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .end { text-align: right; white-space: nowrap; }
+  .row .chev { width: 18px; height: 18px; color: #c4c4cc; flex: none; }
+  .fact { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; }
+  .fact + .fact { border-top: 1px solid var(--line); }
+  .fact > span:first-child { color: var(--muted); }
+  .fact > span:last-child { text-align: right; }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tile { background: var(--surface); border: 0; border-radius: var(--radius); padding: 12px; text-align: left; cursor: pointer; min-width: 0; }
+  .tile .value { font-size: 16px; font-weight: 700; margin: 4px 0 1px; white-space: nowrap; }
+  .tile .hint { font-size: 11.5px; color: var(--muted); }
+
+  .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; color: #fff; font-weight: 600; font-size: 14px; }
+  .avatar.sm { width: 28px; height: 28px; font-size: 12px; }
+  .icon-circle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+  .icon-circle svg { width: 18px; height: 18px; }
+  .date-badge { width: 36px; flex: none; text-align: center; font-size: 11px; line-height: 1.1; color: var(--muted); text-transform: uppercase; }
+  .date-badge b { display: block; font-size: 18px; font-weight: 600; color: var(--ink); }
+  .code { font: 700 26px ui-monospace, Menlo, monospace; letter-spacing: .1em; margin: 6px 0 2px; }
+
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: #f0f0f4; color: var(--muted); }
+  .pill.pos { background: var(--pos-soft); color: var(--pos); }
+  .pill.neg { background: var(--neg-soft); color: var(--neg); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+  /* controls */
+  .btn { height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-weight: 600; cursor: pointer; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.danger { background: var(--neg-soft); color: var(--neg); }
+  .btn.plain { background: transparent; color: var(--muted); }
+  .btn.quiet-danger { background: transparent; color: var(--neg); }
+  .btn.block { display: block; width: 100%; }
+  .btn.small { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 14px; flex: none; }
+  .icon-btn { width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .icon-btn.accent { background: var(--accent); color: #fff; }
+  .back { display: flex; align-items: center; gap: 2px; border: 0; background: none; padding: 0; margin: 0 0 8px -6px; color: var(--accent); font-size: 16px; cursor: pointer; }
+  .back svg { width: 22px; height: 22px; }
+  .link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+  .tick { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1.5px solid #c4c4cc; background: #fff; color: transparent; display: grid; place-items: center; cursor: pointer; padding: 0; }
+  .tick svg { width: 16px; height: 16px; }
+  .tick.on { background: var(--pos); border-color: var(--pos); color: #fff; }
+  .tick:disabled { cursor: default; }
+  .tick:disabled:not(.on) { border-style: dashed; }
+  .seg { display: flex; background: #e4e4ea; border-radius: 11px; padding: 2px; }
+  .seg > * { flex: 1; border: 0; background: none; padding: 8px 0; border-radius: 9px; font-size: 14px; font-weight: 500; text-align: center; cursor: pointer; }
+  .seg button.on, .seg label:has(input:checked) { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+
+  /* tab bar */
+  .tabbar { display: flex; background: rgba(255,255,255,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 6px 4px 24px; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; padding: 4px 0; font-size: 11px; color: var(--muted); cursor: pointer; }
+  .tab svg { width: 24px; height: 24px; }
+  .tab.on { color: var(--accent); font-weight: 600; }
+
+  /* sheets & forms */
+  #sheet-root { position: absolute; inset: 0; z-index: 20; }
+  .scrim { position: absolute; inset: 0; background: rgba(10,10,20,.35); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow-y: auto; background: var(--bg); border-radius: 22px 22px 0 0; padding: 8px 16px 30px; }
+  .grabber { width: 36px; height: 5px; border-radius: 3px; background: #c7c7cf; margin: 0 auto 12px; }
+  .sheet h2 { font-size: 21px; margin: 2px 4px 12px; letter-spacing: -.01em; }
+  .sheet-head { display: flex; align-items: baseline; gap: 12px; }
+  .sheet-head h2 { flex: 1; }
+  .sheet-head .link { margin-right: 4px; font-size: 16px; }
+  .sheet .big-amount { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 0 4px; }
+  .sheet-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+  .field { display: block; margin-bottom: 12px; }
+  .field > span { display: block; font-size: 13px; color: var(--muted); margin: 0 4px 5px; }
+  .input { width: 100%; height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+  .input.big { height: 58px; font-size: 26px; font-weight: 700; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-error { background: var(--neg-soft); color: var(--neg); border-radius: 12px; padding: 10px 12px; font-size: 14px; margin-top: 12px; }
+  .people { background: #fff; border-radius: 12px; margin-top: 8px; }
+  .person { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; }
+  .person + .person { border-top: 1px solid var(--line); }
+  .person label { flex: 1; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .person input[type=checkbox] { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin: 0; flex: none; border: 1.5px solid #c4c4cc; border-radius: 50%; display: grid; place-items: center; }
+  .person input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+  .person input[type=checkbox]:checked::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+  .person input[type=checkbox]:disabled { opacity: .55; }
+  .person .input { width: 100px; height: 38px; text-align: right; }
+  .person .each { color: var(--muted); font-size: 14px; }
+
+  .toast { position: absolute; left: 16px; right: 16px; top: 50px; z-index: 30; background: #1c1c21; color: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+
+  /* auth & setup */
+  .auth { padding: 76px 8px 24px; text-align: center; }
+  .auth form { text-align: left; margin-top: 28px; }
+  .brand-mark { width: 64px; height: 64px; border-radius: 18px; background: var(--accent); color: #fff; display: grid; place-items: center; margin: 0 auto 16px; }
+  .brand-mark svg { width: 34px; height: 34px; }
+  .auth h1 { font-size: 26px; }
+  .auth .muted { margin: 6px 0 0; }
+  .switch { margin-top: 18px; color: var(--muted); }
+  .or { text-align: center; color: var(--muted); font-size: 13px; margin: 14px 0; }
+  .stack-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 28px; }
+
+  /* demo panel (not part of the app) */
+  .side { width: 320px; flex: none; font-size: 14px; color: #333; }
+  .side h2 { font-size: 18px; margin: 4px 0 6px; }
+  .side p { margin: 0 0 12px; color: #555; }
+  .side .ctl { display: block; margin: 10px 0 6px; }
+  .side select { margin-left: 6px; padding: 4px 6px; border-radius: 8px; border: 1px solid #c9c9d1; background: #fff; color: #111; }
+  .side .ctl-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+  .side .ctl-row button { border: 1px solid #c9c9d1; background: #fff; color: #111; border-radius: 8px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+  .side h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #888; margin: 20px 0 6px; }
+  .side ul { margin: 0; padding-left: 18px; }
+  .side li { margin: 5px 0; color: #444; }
+  .side ol.log { list-style: none; padding: 0; margin: 0; font: 11.5px/1.55 ui-monospace, Menlo, monospace; }
+  .side ol.log li { margin: 0; }
+  .s2 { color: #13804f; } .s4 { color: #c2410c; }
+  .demo-toggle { display: none; }
+
+  @media (max-width: 820px) {
+    body { background: var(--bg); }
+    .stage { display: block; padding: 0; }
+    .side { width: auto; background: #1c1c21; color: #eee; padding: 0 14px; }
+    .side p, .side li { color: #ccc; }
+    .demo-toggle { display: block; width: 100%; border: 0; background: none; color: #fff; padding: 9px 0; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .side .side-body { display: none; padding-bottom: 14px; }
+    .side.open .side-body { display: block; }
+    .phone { width: 100%; height: calc(100dvh - 38px); border: 0; border-radius: 0; box-shadow: none; }
+    .top { padding-top: 20px; }
+    .toast { top: 16px; }
+    .tabbar { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <aside class="side" id="side">
+    <button class="demo-toggle" data-act="toggleDemo">Demo controls ▾</button>
+    <div class="side-body">
+      <h2>Household Expenses mockup</h2>
+      <p><b>The question:</b> is this simple, mobile-first layout the right shape for the app? It has five tabs: Home, Groceries, Bills, Rent and Furniture. Household settings and the bond sit behind the people icon on Home. It uses the same fake data and the same rules as <code>wireframe.html</code>. Nothing is saved.</p>
+      <div id="side-controls"></div>
+      <h3>Try</h3>
+      <ul>
+        <li>As Alice (primary), enter the Electricity bill from Home's <i>To do</i>.</li>
+        <li>Switch to Bob: the + buttons and admin actions disappear, and he can tick only his own shares.</li>
+        <li>Press +1 month: new rent and bills show up in <i>To do</i>.</li>
+        <li>As Cara, open Household and tap <i>Leave household</i>.</li>
+        <li>Switch to Dan and join with <code>ELM-4821</code>.</li>
+      </ul>
+      <h3>API calls</h3>
+      <ol class="log" id="log"></ol>
+    </div>
+  </aside>
+
+  <div class="phone">
+    <div id="app"></div>
+    <div id="sheet-root" hidden></div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     Business logic: copied verbatim from wireframe.html (pure, no DOM).
+     =================================================================== -->
+<script>
+const Model = (() => {
+  class ApiError extends Error {
+    constructor(status, message, details = []) { super(message); this.status = status; this.details = details; }
+  }
+  const fail = (status, message, details) => { throw new ApiError(status, message, details); };
+
+  // ---------- money (integer cents) ----------
+  function parseMoney(value, { allowZero = false, label = 'Amount' } = {}) {
+    const text = String(value ?? '').trim();
+    if (text === '') fail(400, `${label} is required.`);
+    if (!/^\d+(\.\d+)?$/.test(text)) fail(400, `${label} must be a number like 12.50.`);
+    const [whole, frac = ''] = text.split('.');
+    if (frac.length > 2) fail(400, `${label} can have at most 2 decimal places.`);
+    const cents = Number(whole) * 100 + Number(frac.padEnd(2, '0'));
+    if (!allowZero && cents === 0) fail(400, `${label} must be more than $0.00.`);
+    return cents;
+  }
+  const fmt = c => (c < 0 ? '-$' : '$') + (Math.abs(c) / 100).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPlain = c => (c / 100).toFixed(2);
+
+  // ---------- dates (YYYY-MM-DD strings) ----------
+  const toDate = s => new Date(s + 'T00:00:00Z');
+  const fromDate = d => d.toISOString().slice(0, 10);
+  const addDays = (s, n) => { const d = toDate(s); d.setUTCDate(d.getUTCDate() + n); return fromDate(d); };
+  function addMonths(s, n) {
+    const d = toDate(s);
+    const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1));
+    const lastDay = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate();
+    t.setUTCDate(Math.min(d.getUTCDate(), lastDay));
+    return fromDate(t);
+  }
+  function checkDate(v, label, { optional = false } = {}) {
+    if (!v) { if (optional) return null; fail(400, `${label} is required.`); }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || isNaN(toDate(v))) fail(400, `${label} must be a date (YYYY-MM-DD).`);
+    return v;
+  }
+  const FREQUENCIES = ['weekly', 'fortnightly', 'monthly', 'quarterly'];
+  const checkFrequency = f => FREQUENCIES.includes(f) ? f : fail(400, 'Unknown frequency.');
+  function occurrence(start, frequency, k) {
+    switch (frequency) {
+      case 'weekly': return addDays(start, 7 * k);
+      case 'fortnightly': return addDays(start, 14 * k);
+      case 'monthly': return addMonths(start, k);
+      case 'quarterly': return addMonths(start, 3 * k);
+    }
+  }
+  // Calls fn(date, nextDate) for every occurrence on or before today (and on or before endDate).
+  function eachOccurrence({ startDate, frequency, endDate }, today, fn) {
+    for (let k = 0; ; k++) {
+      const d = occurrence(startDate, frequency, k);
+      if (d > today || (endDate && d > endDate)) return;
+      fn(d, occurrence(startDate, frequency, k + 1));
+    }
+  }
+  function nextDueDate({ startDate, frequency, endDate }, today) {
+    for (let k = 0; ; k++) {
+      const d = occurrence(startDate, frequency, k);
+      if (endDate && d > endDate) return null;
+      if (d > today) return d;
+    }
+  }
+
+  // ---------- lookups & permissions ----------
+  const user = (s, id) => s.users.find(u => u.id === id) ?? null;
+  const userName = (s, id) => user(s, id)?.name ?? `User ${id}`;
+  const household = (s, id) => s.households.find(h => h.id === id) ?? null;
+  const memberIds = (s, hid) => s.users.filter(u => u.householdId === hid).map(u => u.id);
+  const isPrimary = (s, uid) => { const u = user(s, uid); const h = u && household(s, u.householdId); return !!h && h.primaryId === uid; };
+  const can = {
+    editExpense: (s, uid, e) => e.createdById === uid,
+    manageFurniture: (s, uid, f) => f.createdById === uid || isPrimary(s, uid),
+    tick: (s, uid, shareUserId) => uid === shareUserId || isPrimary(s, uid),
+    recordSettlement: (s, uid, fromId, toId) => uid === fromId || uid === toId,
+  };
+  const billName = (s, b) => s.billTypes.find(t => t.id === b.billTypeId)?.name ?? b.billTypeName;
+  const bondOutstanding = b => b.total - b.contributions.reduce((a, c) => a + c.amount, 0);
+
+  function ctx(s, actorId, { needHousehold = true } = {}) {
+    const me = user(s, actorId);
+    if (!me) fail(401, 'You need to log in.');
+    if (!needHousehold) return { me };
+    const h = household(s, me.householdId);
+    if (!h) fail(403, 'You are not in a household.');
+    return { me, h, members: memberIds(s, h.id) };
+  }
+  const requirePrimary = (h, uid) => { if (h.primaryId !== uid) fail(403, 'Only the primary can do this.'); };
+  function find(list, id, hid, what) {
+    const x = list.find(x => x.id === id && x.householdId === hid);
+    if (!x) fail(404, `${what} not found.`);
+    return x;
+  }
+  const newId = s => s.nextId++;
+  const requiredText = (v, label) => (v ?? '').trim() || fail(400, `${label} is required.`);
+
+  // ---------- splitting ----------
+  function buildShares(amount, splitType, inputs, members) {
+    if (!['equal', 'exact'].includes(splitType)) fail(400, 'Split must be equal or exact.');
+    if (!inputs.length) fail(400, 'Choose at least one person to split with.');
+    const ids = inputs.map(i => i.userId);
+    if (new Set(ids).size !== ids.length) fail(400, 'Each person can appear in a split only once.');
+    if (ids.some(id => !members.includes(id))) fail(400, 'Everyone in a split must be a current household member.');
+    if (splitType === 'equal') {
+      const base = Math.floor(amount / ids.length), leftover = amount - base * ids.length;
+      return ids.map((userId, i) => ({ userId, amount: base + (i === 0 ? leftover : 0) }));
+    }
+    const shares = inputs.map(i => ({ userId: i.userId, amount: parseMoney(i.amount, { allowZero: true, label: 'Each share' }) }));
+    const sum = shares.reduce((a, x) => a + x.amount, 0);
+    if (sum !== amount) fail(400, `The shares add up to ${fmt(sum)} but the total is ${fmt(amount)}.`);
+    return shares;
+  }
+  // A dated amount someone paid (or received), split between members.
+  function moneyEvent(input, members, { personKey, personField, label, allowZero = false }) {
+    const date = checkDate(input.date, 'Date');
+    const amount = parseMoney(input.amount, { allowZero });
+    if (!members.includes(input[personKey])) fail(400, `${label} must be a current household member.`);
+    return { date, amount, [personField]: input[personKey], splitType: input.splitType, shares: buildShares(amount, input.splitType, input.shares ?? [], members) };
+  }
+  const paidBy = { personKey: 'paidByUserId', personField: 'paidById', label: 'Paid by' };
+
+  function tickShare(s, actor, rec, userId, paid) {
+    const share = rec.shares.find(x => x.userId === userId);
+    if (!share) fail(404, 'That person has no share here.');
+    if (!can.tick(s, actor, userId)) fail(403, "You can only tick your own share. The primary can tick anyone's.");
+    share.paid = !!paid;
+    share.paidDate = paid ? s.today : null;
+  }
+
+  // ---------- balances (expenses + furniture + settlements; no simplification) ----------
+  function balances(s, hid) {
+    const owes = new Map(); // "a>b" -> cents a owes b
+    const add = (a, b, c) => { if (a !== b && c) owes.set(`${a}>${b}`, (owes.get(`${a}>${b}`) ?? 0) + c); };
+    const charge = (payerId, shares) => shares.forEach(x => add(x.userId, payerId, x.amount));
+    for (const e of s.expenses) if (e.householdId === hid) charge(e.paidById, e.shares);
+    for (const f of s.furniture) if (f.householdId === hid) {
+      charge(f.purchase.paidById, f.purchase.shares);
+      if (f.disposal) charge(f.disposal.paidById, f.disposal.shares);
+      if (f.sale) f.sale.shares.forEach(x => add(f.sale.receivedById, x.userId, x.amount));
+    }
+    for (const st of s.settlements) if (st.householdId === hid) add(st.toId, st.fromId, st.amount);
+
+    const current = memberIds(s, hid);
+    const ids = new Set(current);
+    for (const k of owes.keys()) k.split('>').forEach(id => ids.add(+id));
+    const net = new Map([...ids].map(id => [id, 0]));
+    for (const [k, c] of owes) {
+      const [a, b] = k.split('>').map(Number);
+      net.set(a, net.get(a) - c);
+      net.set(b, net.get(b) + c);
+    }
+    const list = [...ids].sort((a, b) => a - b);
+    const debts = [];
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      const a = list[i], b = list[j];
+      const d = (owes.get(`${a}>${b}`) ?? 0) - (owes.get(`${b}>${a}`) ?? 0);
+      if (d > 0) debts.push({ fromId: a, toId: b, amount: d });
+      if (d < 0) debts.push({ fromId: b, toId: a, amount: -d });
+    }
+    return { members: list.filter(id => current.includes(id) || net.get(id) !== 0).map(id => ({ userId: id, net: net.get(id) })), debts };
+  }
+  const netOf = (bal, uid) => bal.members.find(m => m.userId === uid)?.net ?? 0;
+
+  // ---------- leaving ----------
+  function leaveBlockers(s, uid) {
+    const me = user(s, uid);
+    const h = me && household(s, me.householdId);
+    if (!h) return [];
+    const out = [];
+    const debts = balances(s, h.id).debts.filter(d => d.fromId === uid || d.toId === uid);
+    if (debts.length) out.push(`You still owe or are owed money in groceries and furniture (${debts.length} ${debts.length === 1 ? 'debt' : 'debts'}). Settle up first.`);
+    const unpaid = list => list.filter(r => r.householdId === h.id && r.status !== 'pending')
+      .flatMap(r => r.shares.filter(x => !x.paid).map(x => ({ r, x })));
+    const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+    for (const [label, list] of [['rent', s.rentPeriods], ['bill', s.bills]]) {
+      const open = unpaid(list);
+      const byMe = open.filter(({ x }) => x.userId === uid).length;
+      const toMe = open.filter(({ r, x }) => r.payeeId === uid && x.userId !== uid).length;
+      if (byMe) out.push(`You have ${plural(byMe, `unpaid ${label} share`)}.`);
+      if (toMe) out.push(`${plural(toMe, `${label} share`)} owed to you ${toMe === 1 ? 'is' : 'are'} still unpaid.`);
+    }
+    if (s.rentSchedules.some(r => r.householdId === h.id && r.shares.some(x => x.userId === uid) && (!r.endDate || r.endDate >= s.today)))
+      out.push('You are in the split of a rent schedule that has not ended. The primary must end it or take you off.');
+    if (h.primaryId === uid && memberIds(s, h.id).length > 1)
+      out.push('You are the primary and other members remain. Hand over primary first.');
+    return out;
+  }
+
+  // ---------- lazy creation: rent periods & bill placeholders "created on read" ----------
+  function sync(state) {
+    const s = structuredClone(state);
+    for (const r of s.rentSchedules) {
+      const h = household(s, r.householdId);
+      eachOccurrence(r, s.today, (startDate, nextStart) => {
+        if (s.rentPeriods.some(p => p.scheduleId === r.id && p.startDate === startDate)) return;
+        const payeeId = h.primaryId;
+        s.rentPeriods.push({
+          id: newId(s), householdId: r.householdId, scheduleId: r.id, startDate, endDate: addDays(nextStart, -1),
+          amount: r.amount, payeeId,
+          shares: r.shares.map(x => ({ userId: x.userId, amount: x.amount, paid: x.userId === payeeId, paidDate: x.userId === payeeId ? s.today : null })),
+        });
+      });
+    }
+    for (const t of s.billTypes) {
+      eachOccurrence(t, s.today, dueDate => {
+        if (s.bills.some(b => b.billTypeId === t.id && b.dueDate === dueDate)) return;
+        s.bills.push({ id: newId(s), householdId: t.householdId, billTypeId: t.id, billTypeName: t.name, dueDate,
+          status: 'pending', amount: null, payeeId: null, submittedDate: null, splitType: null, shares: [] });
+      });
+    }
+    return s;
+  }
+
+  // ---------- input mappers ----------
+  function expenseFrom(input, members) {
+    return { description: requiredText(input.description, 'Description'), ...moneyEvent(input, members, paidBy) };
+  }
+  function scheduleFrom(input, members) {
+    const amount = parseMoney(input.amount);
+    const startDate = checkDate(input.startDate, 'Start date');
+    const endDate = checkDate(input.endDate, 'End date', { optional: true });
+    if (endDate && endDate < startDate) fail(400, 'End date must be after the start date.');
+    return { amount, frequency: checkFrequency(input.frequency), startDate, endDate, splitType: input.splitType,
+      shares: buildShares(amount, input.splitType, input.shares ?? [], members) };
+  }
+  function billTypeFrom(input, members) {
+    const startDate = checkDate(input.startDate, 'Start date');
+    const endDate = checkDate(input.endDate, 'End date', { optional: true });
+    if (endDate && endDate < startDate) fail(400, 'End date must be after the start date.');
+    const ids = [...new Set(input.memberIds ?? [])];
+    if (!ids.length) fail(400, 'Pick at least one person to share this bill.');
+    if (ids.some(id => !members.includes(id))) fail(400, 'Everyone sharing a bill must be a current member.');
+    return { name: requiredText(input.name, 'Bill name'), frequency: checkFrequency(input.frequency), startDate, endDate, memberIds: ids };
+  }
+  function bondFrom(input, members) {
+    const total = parseMoney(input.total, { label: 'Bond total' });
+    const contributions = (input.contributions ?? []).map(c => {
+      if (!members.includes(c.userId)) fail(400, 'Contributors must be current members.');
+      return { userId: c.userId, amount: parseMoney(c.amount, { label: 'Contribution' }), date: checkDate(c.date, 'Contribution date') };
+    });
+    const sum = contributions.reduce((a, c) => a + c.amount, 0);
+    if (sum > total) fail(400, `Contributions add up to ${fmt(sum)}, which is more than the bond total of ${fmt(total)}.`);
+    return { total, paidDate: checkDate(input.paidDate, 'Paid date'), contributions };
+  }
+  function manageableItem(s, actor, id, { mustBeOwned }) {
+    const { h, members } = ctx(s, actor);
+    const f = find(s.furniture, id, h.id, 'Item');
+    if (!can.manageFurniture(s, actor, f)) fail(403, 'Only the person who added this item, or the primary, can manage it.');
+    if (mustBeOwned && f.status !== 'owned') fail(409, `This item is already ${f.status}, so it can't be changed.`);
+    return { f, members };
+  }
+  const inviteCodeFor = (name, id) =>
+    (name.replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase().padEnd(3, 'X')) + '-' + (1000 + (id * 7919) % 9000);
+
+  // ---------- actions (one per write endpoint) ----------
+  const handlers = {
+    register(s, _actor, { name, email, password }) {
+      email = (email ?? '').trim().toLowerCase();
+      if (!(name ?? '').trim() || !email || !password) fail(400, 'Name, email and password are all required.');
+      if (s.users.some(u => u.email === email)) fail(409, 'That email is already registered.');
+      const id = newId(s);
+      s.users.push({ id, name: name.trim(), email, password, householdId: null });
+      return id;
+    },
+    createHousehold(s, actor, { name }) {
+      const { me } = ctx(s, actor, { needHousehold: false });
+      if (me.householdId) fail(409, 'You are already in a household. Leave it first.');
+      const id = newId(s);
+      const clean = requiredText(name, 'Household name');
+      s.households.push({ id, name: clean, inviteCode: inviteCodeFor(clean, id), primaryId: me.id });
+      me.householdId = id;
+    },
+    joinHousehold(s, actor, { inviteCode }) {
+      const { me } = ctx(s, actor, { needHousehold: false });
+      if (me.householdId) fail(409, 'You are already in a household. Leave it first.');
+      const h = s.households.find(h => h.inviteCode === (inviteCode ?? '').trim().toUpperCase());
+      if (!h) fail(404, 'No household has that invite code.');
+      me.householdId = h.id;
+    },
+    leaveHousehold(s, actor) {
+      const { me, h } = ctx(s, actor);
+      const blockers = leaveBlockers(s, me.id);
+      if (blockers.length) fail(409, "You can't leave the household yet.", blockers);
+      me.householdId = null;
+      for (const t of s.billTypes) if (t.householdId === h.id) t.memberIds = t.memberIds.filter(id => id !== me.id);
+    },
+    setPrimary(s, actor, { userId }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      if (!members.includes(userId)) fail(400, 'The new primary must be a current member.');
+      h.primaryId = userId;
+    },
+
+    addExpense(s, actor, { input }) {
+      const { h, members } = ctx(s, actor);
+      s.expenses.push({ id: newId(s), householdId: h.id, createdById: actor, ...expenseFrom(input, members) });
+    },
+    editExpense(s, actor, { id, input }) {
+      const { h, members } = ctx(s, actor);
+      const e = find(s.expenses, id, h.id, 'Expense');
+      if (!can.editExpense(s, actor, e)) fail(403, 'Only the person who added this expense can change it.');
+      Object.assign(e, expenseFrom(input, members));
+    },
+    deleteExpense(s, actor, { id }) {
+      const { h } = ctx(s, actor);
+      const e = find(s.expenses, id, h.id, 'Expense');
+      if (!can.editExpense(s, actor, e)) fail(403, 'Only the person who added this expense can delete it.');
+      s.expenses = s.expenses.filter(x => x !== e);
+    },
+    addSettlement(s, actor, { fromUserId, toUserId, amount }) {
+      const { h, members } = ctx(s, actor);
+      if (!members.includes(fromUserId) || !members.includes(toUserId)) fail(400, 'Both people must be current members.');
+      if (fromUserId === toUserId) fail(400, 'Pick two different people.');
+      if (!can.recordSettlement(s, actor, fromUserId, toUserId)) fail(403, 'Only the person paying or the person being paid can record a settlement.');
+      s.settlements.push({ id: newId(s), householdId: h.id, fromId: fromUserId, toId: toUserId, amount: parseMoney(amount), date: s.today, createdById: actor });
+    },
+
+    addRentSchedule(s, actor, { input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      s.rentSchedules.push({ id: newId(s), householdId: h.id, ...scheduleFrom(input, members) });
+    },
+    editRentSchedule(s, actor, { id, input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      Object.assign(find(s.rentSchedules, id, h.id, 'Rent schedule'), scheduleFrom(input, members));
+    },
+    deleteRentSchedule(s, actor, { id }) {
+      const { h } = ctx(s, actor);
+      requirePrimary(h, actor);
+      const r = find(s.rentSchedules, id, h.id, 'Rent schedule');
+      s.rentSchedules = s.rentSchedules.filter(x => x !== r);
+      s.rentPeriods = s.rentPeriods.filter(p => p.scheduleId !== id);
+    },
+    tickRentShare(s, actor, { periodId, userId, paid }) {
+      const { h } = ctx(s, actor);
+      tickShare(s, actor, find(s.rentPeriods, periodId, h.id, 'Rent period'), userId, paid);
+    },
+
+    addBillType(s, actor, { input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      s.billTypes.push({ id: newId(s), householdId: h.id, ...billTypeFrom(input, members) });
+    },
+    editBillType(s, actor, { id, input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      Object.assign(find(s.billTypes, id, h.id, 'Bill type'), billTypeFrom(input, members));
+    },
+    deleteBillType(s, actor, { id }) {
+      const { h } = ctx(s, actor);
+      requirePrimary(h, actor);
+      const t = find(s.billTypes, id, h.id, 'Bill type');
+      s.billTypes = s.billTypes.filter(x => x !== t);
+      s.bills = s.bills.filter(b => !(b.billTypeId === id && b.status === 'pending')); // submitted bills stay as history
+    },
+    submitBill(s, actor, { billId, amount, splitType, shares }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      const b = find(s.bills, billId, h.id, 'Bill');
+      if (b.status !== 'pending') fail(409, "This bill has already been submitted, so its amount can't be changed.");
+      const cents = parseMoney(amount, { label: 'Bill amount' });
+      let inputs = shares;
+      if (!inputs) {
+        if (splitType === 'exact') fail(400, 'An exact split needs an amount for each person.');
+        const t = s.billTypes.find(t => t.id === b.billTypeId);
+        inputs = (t?.memberIds ?? []).filter(id => members.includes(id)).map(userId => ({ userId }));
+      }
+      const built = buildShares(cents, splitType, inputs, members);
+      Object.assign(b, {
+        status: 'submitted', amount: cents, payeeId: actor, submittedDate: s.today, splitType,
+        shares: built.map(x => ({ ...x, paid: x.userId === actor, paidDate: x.userId === actor ? s.today : null })),
+      });
+    },
+    tickBillShare(s, actor, { billId, userId, paid }) {
+      const { h } = ctx(s, actor);
+      const b = find(s.bills, billId, h.id, 'Bill');
+      if (b.status === 'pending') fail(409, 'This bill has no amount yet.');
+      tickShare(s, actor, b, userId, paid);
+    },
+
+    addFurniture(s, actor, { input }) {
+      const { h, members } = ctx(s, actor);
+      s.furniture.push({ id: newId(s), householdId: h.id, name: requiredText(input.name, 'Item name'), status: 'owned', createdById: actor,
+        purchase: moneyEvent(input.purchase, members, paidBy), sale: null, disposal: null });
+    },
+    editFurniture(s, actor, { id, input }) {
+      const { f, members } = manageableItem(s, actor, id, { mustBeOwned: true });
+      f.name = requiredText(input.name, 'Item name');
+      f.purchase = moneyEvent(input.purchase, members, paidBy);
+    },
+    deleteFurniture(s, actor, { id }) {
+      const { f } = manageableItem(s, actor, id, { mustBeOwned: false });
+      s.furniture = s.furniture.filter(x => x !== f);
+    },
+    sellFurniture(s, actor, { id, input }) {
+      const { f, members } = manageableItem(s, actor, id, { mustBeOwned: true });
+      f.sale = moneyEvent(input, members, { personKey: 'receivedByUserId', personField: 'receivedById', label: 'Received by' });
+      f.status = 'sold';
+    },
+    disposeFurniture(s, actor, { id, input }) {
+      const { f, members } = manageableItem(s, actor, id, { mustBeOwned: true });
+      f.disposal = moneyEvent(input, members, { ...paidBy, allowZero: true });
+      f.status = 'disposed';
+    },
+
+    addBond(s, actor, { input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      s.bonds.push({ id: newId(s), householdId: h.id, ...bondFrom(input, members) });
+    },
+    editBond(s, actor, { id, input }) {
+      const { h, members } = ctx(s, actor);
+      requirePrimary(h, actor);
+      Object.assign(find(s.bonds, id, h.id, 'Bond'), bondFrom(input, members));
+    },
+    deleteBond(s, actor, { id }) {
+      const { h } = ctx(s, actor);
+      requirePrimary(h, actor);
+      const b = find(s.bonds, id, h.id, 'Bond');
+      s.bonds = s.bonds.filter(x => x !== b);
+    },
+  };
+
+  function dispatch(state, actorId, action) {
+    const handler = handlers[action.type];
+    if (!handler) throw new Error(`Unknown action ${action.type}`);
+    const s = structuredClone(state);
+    const result = handler(s, actorId, action);
+    return { state: s, result };
+  }
+  function login(s, email, password) {
+    const u = s.users.find(u => u.email === (email ?? '').trim().toLowerCase() && u.password === password);
+    if (!u) fail(401, 'Wrong email or password.');
+    return u.id;
+  }
+  const setToday = (state, today) => ({ ...state, today });
+
+  return { ApiError, dispatch, sync, login, setToday, balances, netOf, leaveBlockers, nextDueDate, billName, bondOutstanding,
+    user, userName, household, memberIds, isPrimary, can, fmt, fmtPlain, addDays, addMonths };
+})();
+</script>
+
+<!-- ===================================================================
+     Throwaway mockup shell. Not production code.
+     =================================================================== -->
+<script>
+const share = (userId, amount) => ({ userId, amount });
+const paidShare = (userId, amount, paidDate) => ({ userId, amount, paid: !!paidDate, paidDate: paidDate ?? null });
+
+function seed() {
+  return {
+    today: '2026-03-15',
+    nextId: 100,
+    users: [
+      { id: 1, name: 'Alice', email: 'alice@example.com', password: 'password', householdId: 1 },
+      { id: 2, name: 'Bob', email: 'bob@example.com', password: 'password', householdId: 1 },
+      { id: 3, name: 'Cara', email: 'cara@example.com', password: 'password', householdId: 1 },
+      { id: 4, name: 'Dan', email: 'dan@example.com', password: 'password', householdId: null },
+    ],
+    households: [{ id: 1, name: 'Elm Street House', inviteCode: 'ELM-4821', primaryId: 1 }],
+    expenses: [
+      { id: 10, householdId: 1, description: 'Woolworths weekly shop', amount: 9000, date: '2026-02-20', paidById: 1, createdById: 1,
+        splitType: 'equal', shares: [share(1, 3000), share(2, 3000), share(3, 3000)] },
+      { id: 11, householdId: 1, description: 'Costco run', amount: 6100, date: '2026-03-03', paidById: 2, createdById: 2,
+        splitType: 'equal', shares: [share(1, 2034), share(2, 2033), share(3, 2033)] },
+      { id: 12, householdId: 1, description: 'Cleaning supplies', amount: 2400, date: '2026-03-10', paidById: 3, createdById: 3,
+        splitType: 'exact', shares: [share(1, 1200), share(3, 1200)] },
+    ],
+    settlements: [{ id: 20, householdId: 1, fromId: 3, toId: 1, amount: 3000, date: '2026-03-01', createdById: 3 }],
+    rentSchedules: [{ id: 30, householdId: 1, amount: 150000, frequency: 'fortnightly', startDate: '2026-02-16', endDate: null,
+      splitType: 'equal', shares: [share(1, 50000), share(2, 50000), share(3, 50000)] }],
+    rentPeriods: [
+      { id: 31, householdId: 1, scheduleId: 30, startDate: '2026-02-16', endDate: '2026-03-01', amount: 150000, payeeId: 1,
+        shares: [paidShare(1, 50000, '2026-02-16'), paidShare(2, 50000, '2026-02-17'), paidShare(3, 50000, '2026-02-20')] },
+      { id: 32, householdId: 1, scheduleId: 30, startDate: '2026-03-02', endDate: '2026-03-15', amount: 150000, payeeId: 1,
+        shares: [paidShare(1, 50000, '2026-03-02'), paidShare(2, 50000, '2026-03-03'), paidShare(3, 50000)] },
+    ],
+    billTypes: [
+      { id: 40, householdId: 1, name: 'Electricity', frequency: 'quarterly', startDate: '2025-12-01', endDate: null, memberIds: [1, 2, 3] },
+      { id: 41, householdId: 1, name: 'Internet', frequency: 'monthly', startDate: '2026-01-05', endDate: null, memberIds: [1, 2, 3] },
+      { id: 42, householdId: 1, name: 'Gas', frequency: 'quarterly', startDate: '2026-01-20', endDate: null, memberIds: [1, 2, 3] },
+    ],
+    // Pending placeholders (Electricity 1 Mar, Internet 5 Mar) are created by Model.sync on first read.
+    bills: [
+      { id: 50, householdId: 1, billTypeId: 40, billTypeName: 'Electricity', dueDate: '2025-12-01', status: 'submitted', amount: 27000,
+        payeeId: 1, submittedDate: '2025-12-04', splitType: 'equal',
+        shares: [paidShare(1, 9000, '2025-12-04'), paidShare(2, 9000, '2025-12-10'), paidShare(3, 9000, '2025-12-12')] },
+      { id: 51, householdId: 1, billTypeId: 41, billTypeName: 'Internet', dueDate: '2026-01-05', status: 'submitted', amount: 7500,
+        payeeId: 1, submittedDate: '2026-01-06', splitType: 'equal',
+        shares: [paidShare(1, 2500, '2026-01-06'), paidShare(2, 2500, '2026-01-09'), paidShare(3, 2500, '2026-01-08')] },
+      { id: 52, householdId: 1, billTypeId: 41, billTypeName: 'Internet', dueDate: '2026-02-05', status: 'submitted', amount: 7500,
+        payeeId: 1, submittedDate: '2026-02-06', splitType: 'equal',
+        shares: [paidShare(1, 2500, '2026-02-06'), paidShare(2, 2500), paidShare(3, 2500, '2026-02-10')] },
+      { id: 53, householdId: 1, billTypeId: 42, billTypeName: 'Gas', dueDate: '2026-01-20', status: 'submitted', amount: 9550,
+        payeeId: 1, submittedDate: '2026-01-23', splitType: 'equal',
+        shares: [paidShare(1, 3184, '2026-01-23'), paidShare(2, 3183, '2026-01-30'), paidShare(3, 3183)] },
+    ],
+    furniture: [
+      { id: 60, householdId: 1, name: 'Couch', status: 'owned', createdById: 1, sale: null, disposal: null,
+        purchase: { date: '2026-01-10', amount: 60000, paidById: 1, splitType: 'equal', shares: [share(1, 20000), share(2, 20000), share(3, 20000)] } },
+      { id: 61, householdId: 1, name: 'Microwave', status: 'owned', createdById: 3, sale: null, disposal: null,
+        purchase: { date: '2026-02-01', amount: 12000, paidById: 3, splitType: 'equal', shares: [share(1, 4000), share(2, 4000), share(3, 4000)] } },
+      { id: 62, householdId: 1, name: 'Old bookshelf', status: 'disposed', createdById: 2, sale: null,
+        purchase: { date: '2026-01-12', amount: 6000, paidById: 2, splitType: 'equal', shares: [share(1, 2000), share(2, 2000), share(3, 2000)] },
+        disposal: { date: '2026-02-25', amount: 0, paidById: 2, splitType: 'equal', shares: [share(1, 0), share(2, 0), share(3, 0)] } },
+    ],
+    bonds: [{ id: 70, householdId: 1, total: 200000, paidDate: '2026-01-08',
+      contributions: [{ userId: 1, amount: 70000, date: '2026-01-05' }, { userId: 2, amount: 65000, date: '2026-01-06' }, { userId: 3, amount: 50000, date: '2026-01-07' }] }],
+  };
+}
+
+// ---------- icons ----------
+const svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const I = {
+  home: svg('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'),
+  cart: svg('<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2h11.7L21.5 7H6"/>'),
+  bill: svg('<path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2z"/><path d="M9 7.5h6M9 11.5h6M9 15.5h4"/>'),
+  key: svg('<circle cx="8" cy="15" r="4.5"/><path d="M11.2 11.8 20 3M16 7l3 3M13.5 9.5l2 2"/>'),
+  sofa: svg('<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 12.5a2 2 0 0 1 4 0V15h10v-2.5a2 2 0 0 1 4 0V18H3z"/><path d="M5 18v2M19 18v2"/>'),
+  people: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14a5 5 0 0 1 5 5"/>'),
+  shield: svg('<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  chev: svg('<path d="m9 6 6 6-6 6"/>').replace('<svg', '<svg class="chev"'),
+  back: svg('<path d="m15 6-6 6 6 6"/>'),
+  check: svg('<path d="m5 12.5 4.5 4.5L19 7.5"/>'),
+};
+
+// ---------- shell state ----------
+let state, viewer, screen, prevScreen, furnFilter, authMode, logEntries, demoOpen = false;
+let detail = null;     // (ctx) => html | null, re-rendered after every change while its sheet is open
+let confirmFn = null;
+
+// ---------- formatting ----------
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = Model.fmt;
+const name = id => esc(Model.userName(state, id));
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const parts = d => { const [y, m, day] = d.split('-'); return { y, m: +m - 1, day: +day }; };
+const short = d => { if (!d) return ''; const p = parts(d); return `${p.day} ${MONTHS[p.m]}`; };
+const full = d => { if (!d) return ''; const p = parts(d); return `${p.day} ${MONTHS[p.m]} ${p.y}`; };
+const monthLabel = ym => { const [y, m] = ym.split('-'); return `${MONTHS_LONG[+m - 1]} ${y}`; };
+const rangeText = p => `${short(p.startDate)} – ${short(p.endDate)}`;
+const FREQ = { weekly: 'Weekly', fortnightly: 'Fortnightly', monthly: 'Monthly', quarterly: 'Quarterly' };
+const FREQ_OPTS = Object.entries(FREQ);
+const billName = b => esc(Model.billName(state, b));
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const byId = (list, id) => list.find(x => x.id === +id);
+const groupBy = (list, key) => { const m = new Map(); for (const x of list) { const k = key(x); if (!m.has(k)) m.set(k, []); m.get(k).push(x); } return [...m]; };
+const cleanMoney = v => String(v ?? '').trim().replace(/^\$/, '');
+
+// ---------- small components ----------
+const AVATAR = ['#6366f1', '#0891b2', '#d97706', '#db2777', '#059669', '#7c3aed', '#dc2626'];
+const avatar = (id, size = '') => `<span class="avatar ${size}" style="background:${AVATAR[id % AVATAR.length]}">${esc(Model.userName(state, id)[0])}</span>`;
+const iconCircle = icon => `<span class="icon-circle">${icon}</span>`;
+const dateBadge = d => { const p = parts(d); return `<span class="date-badge"><b>${p.day}</b>${MONTHS[p.m]}</span>`; };
+const money = (c, cls = '') => `<span class="amount ${cls}">${fmt(c)}</span>`;
+const pill = (text, cls = '') => `<span class="pill ${cls}">${text}</span>`;
+const dataAttrs = data => Object.entries(data).map(([k, v]) => ` data-${k}="${esc(v)}"`).join('');
+const smallBtn = (label, act, data = {}, cls = '') => `<button class="btn small ${cls}" data-act="${act}"${dataAttrs(data)}>${label}</button>`;
+const fact = (label, value) => `<div class="fact"><span>${label}</span><span>${value}</span></div>`;
+const header = (title, eyebrow = '', right = '') => `<header class="top"><div>${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}<h1>${title}</h1></div>${right}</header>`;
+const backHeader = title => `<header class="top col"><button class="back" data-act="back">${I.back}<span>Back</span></button><h1>${title}</h1></header>`;
+const addBtn = (act, label) => `<button class="icon-btn accent" data-act="${act}" aria-label="${label}">${I.plus}</button>`;
+
+// A row is either tappable (act) or carries its own action button, never both.
+function row({ lead = '', title, sub = '', end = '', act = null, data = {}, action = '' }) {
+  const inner = `${lead}<div class="main"><div class="title">${title}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${end ? `<div class="end">${end}</div>` : ''}`;
+  return act ? `<button class="row" data-act="${act}"${dataAttrs(data)}>${inner}${I.chev}</button>` : `<div class="row">${inner}${action}</div>`;
+}
+function tickBtn(kind, rec, x) {
+  const allowed = Model.can.tick(state, viewer, x.userId);
+  return `<button class="tick${x.paid ? ' on' : ''}" data-act="tick" data-kind="${kind}" data-id="${rec.id}" data-user="${x.userId}" data-paid="${x.paid ? '' : '1'}" aria-label="${x.paid ? 'Paid' : 'Mark as paid'}"${allowed ? '' : ' disabled'}>${I.check}</button>`;
+}
+const shareRows = (kind, rec) => rec.shares.map(x => row({
+  lead: avatar(x.userId),
+  title: `${name(x.userId)}${x.userId === viewer ? ' <span class="muted">(you)</span>' : ''}`,
+  sub: x.paid ? `Paid ${short(x.paidDate)}` : 'Not paid yet',
+  end: money(x.amount),
+  action: tickBtn(kind, rec, x),
+})).join('');
+function shareStatus(rec, me) {
+  if (rec.payeeId === me) {
+    const open = rec.shares.filter(x => !x.paid && x.userId !== me).length;
+    return open ? pill(`${open} unpaid`, 'warn') : pill('All paid', 'pos');
+  }
+  const mine = rec.shares.find(x => x.userId === me);
+  if (!mine) return pill('Not yours');
+  return mine.paid ? pill('Paid', 'pos') : pill(`You owe ${fmt(mine.amount)}`, 'neg');
+}
+
+// ---------- form helpers ----------
+const field = (label, inner) => `<label class="field"><span>${label}</span>${inner}</label>`;
+const inp = (nm, value = '', type = 'text', extra = '') => `<input class="input" name="${nm}" type="${type}" value="${esc(value)}" ${extra}>`;
+const moneyInput = (nm, cents, big = true) => `<input class="input${big ? ' big' : ''}" name="${nm}" inputmode="decimal" placeholder="$0.00" value="${cents == null ? '' : Model.fmtPlain(cents)}">`;
+const sel = (nm, options, selected) => `<select class="input" name="${nm}">${options.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(selected) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+const peopleOpts = ids => ids.map(id => [id, Model.userName(state, id)]);
+
+function splitEditor(members, { splitType = 'equal', shares = null, fixedEqualIds = null } = {}) {
+  const checked = new Set(shares ? shares.map(x => x.userId) : (fixedEqualIds ?? members));
+  const amountOf = id => { const x = shares?.find(s => s.userId === id); return x && splitType === 'exact' ? Model.fmtPlain(x.amount) : ''; };
+  return `<div class="field"><span>Split</span>
+    <div data-split${fixedEqualIds ? ` data-fixed="${fixedEqualIds.join(',')}"` : ''}>
+      <div class="seg">
+        <label><input type="radio" name="splitType" value="equal"${splitType === 'equal' ? ' checked' : ''}>Equally</label>
+        <label><input type="radio" name="splitType" value="exact"${splitType === 'exact' ? ' checked' : ''}>Exact amounts</label>
+      </div>
+      <div class="people">${members.map(id => `<div class="person">
+        <label><input type="checkbox" value="${id}"${checked.has(id) ? ' checked' : ''}>${avatar(id, 'sm')}<span>${name(id)}</span></label>
+        <span class="each amount" data-each></span>
+        <input class="input" data-amount inputmode="decimal" placeholder="0.00" value="${amountOf(id)}"></div>`).join('')}</div>
+      ${fixedEqualIds ? `<p class="note">Equally between this bill's usual people.</p>` : ''}
+    </div></div>`;
+}
+const previewCents = v => { const t = cleanMoney(v); if (!/^\d+(\.\d{1,2})?$/.test(t)) return null; const [w, f = ''] = t.split('.'); return Number(w) * 100 + Number(f.padEnd(2, '0')); };
+// Shows/hides exact inputs and previews the equal split ("$80.01 each") as the amount is typed.
+function syncSplit(box, form) {
+  const exact = box.querySelector('input[name=splitType]:checked').value === 'exact';
+  const fixed = box.dataset.fixed;
+  const rows = [...box.querySelectorAll('.person')];
+  for (const r of rows) {
+    const cb = r.querySelector('input[type=checkbox]'), amt = r.querySelector('[data-amount]');
+    if (fixed !== undefined && !exact) { cb.checked = fixed.split(',').includes(cb.value); cb.disabled = true; } else cb.disabled = false;
+    amt.hidden = !exact;
+    amt.disabled = !exact || !cb.checked;
+    r.querySelector('[data-each]').textContent = '';
+  }
+  const totalCents = previewCents(form.querySelector('[name=amount]')?.value);
+  const on = rows.filter(r => r.querySelector('input[type=checkbox]').checked);
+  if (!exact && totalCents != null && on.length) {
+    const base = Math.floor(totalCents / on.length), leftover = totalCents - base * on.length;
+    on.forEach((r, i) => { r.querySelector('[data-each]').textContent = fmt(base + (i === 0 ? leftover : 0)); });
+  }
+}
+function readSplit(form) {
+  const box = form.querySelector('[data-split]');
+  const splitType = box.querySelector('input[name=splitType]:checked').value;
+  if (splitType === 'equal' && box.dataset.fixed !== undefined) return { splitType };
+  const shares = [...box.querySelectorAll('.person')]
+    .filter(r => r.querySelector('input[type=checkbox]').checked)
+    .map(r => {
+      const userId = +r.querySelector('input[type=checkbox]').value;
+      return splitType === 'exact' ? { userId, amount: cleanMoney(r.querySelector('[data-amount]').value) } : { userId };
+    });
+  return { splitType, shares };
+}
+
+// ---------- API calls (logged in the demo panel) ----------
+const STATUS = { 200: 'OK', 201: 'Created', 204: 'No Content', 400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found', 409: 'Conflict' };
+const ENDPOINTS = {
+  register: () => ['POST', '/api/auth/register', 201],
+  createHousehold: () => ['POST', '/api/household', 201],
+  joinHousehold: () => ['POST', '/api/household/join', 200],
+  leaveHousehold: () => ['POST', '/api/household/leave', 204],
+  setPrimary: () => ['PUT', '/api/household/primary', 200],
+  addExpense: () => ['POST', '/api/expenses', 201],
+  editExpense: a => ['PUT', `/api/expenses/${a.id}`, 200],
+  deleteExpense: a => ['DELETE', `/api/expenses/${a.id}`, 204],
+  addSettlement: () => ['POST', '/api/settlements', 201],
+  addRentSchedule: () => ['POST', '/api/rent-schedules', 201],
+  editRentSchedule: a => ['PUT', `/api/rent-schedules/${a.id}`, 200],
+  deleteRentSchedule: a => ['DELETE', `/api/rent-schedules/${a.id}`, 204],
+  tickRentShare: a => ['PUT', `/api/rent-periods/${a.periodId}/shares/${a.userId}`, 200],
+  addBillType: () => ['POST', '/api/bill-types', 201],
+  editBillType: a => ['PUT', `/api/bill-types/${a.id}`, 200],
+  deleteBillType: a => ['DELETE', `/api/bill-types/${a.id}`, 204],
+  submitBill: a => ['POST', `/api/bills/${a.billId}/submit`, 200],
+  tickBillShare: a => ['PUT', `/api/bills/${a.billId}/shares/${a.userId}`, 200],
+  addFurniture: () => ['POST', '/api/furniture', 201],
+  editFurniture: a => ['PUT', `/api/furniture/${a.id}`, 200],
+  deleteFurniture: a => ['DELETE', `/api/furniture/${a.id}`, 204],
+  sellFurniture: a => ['POST', `/api/furniture/${a.id}/sell`, 200],
+  disposeFurniture: a => ['POST', `/api/furniture/${a.id}/dispose`, 200],
+  addBond: () => ['POST', '/api/bonds', 201],
+  editBond: a => ['PUT', `/api/bonds/${a.id}`, 200],
+  deleteBond: a => ['DELETE', `/api/bonds/${a.id}`, 204],
+};
+function logCall(method, path, status, message) {
+  logEntries.unshift({ who: viewer ? Model.userName(state, viewer) : 'Anonymous', method, path, status, message });
+}
+function call(action) {
+  const [method, path, okStatus] = ENDPOINTS[action.type](action);
+  try {
+    const { state: next, result } = Model.dispatch(state, viewer, action);
+    logCall(method, path, okStatus);
+    state = Model.sync(next);
+    return result;
+  } catch (err) {
+    if (err instanceof Model.ApiError) logCall(method, path, err.status, err.message);
+    throw err;
+  }
+}
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3500);
+}
+function attempt(fn) {
+  try { fn(); } catch (err) { if (!(err instanceof Model.ApiError)) throw err; toast(err.message); }
+  render();
+}
+function ctxNow() {
+  const user = viewer ? Model.user(state, viewer) : null;
+  const h = user ? Model.household(state, user.householdId) : null;
+  return { me: viewer, user, h, members: h ? Model.memberIds(state, h.id) : [], isPrimary: !!h && h.primaryId === viewer };
+}
+
+// ---------- sheets ----------
+const sheetRoot = () => document.getElementById('sheet-root');
+function showSheet(inner) {
+  const root = sheetRoot();
+  root.innerHTML = `<div class="scrim" data-act="closeSheet"></div><div class="sheet" role="dialog"><div class="grabber"></div><div id="sheet-body">${inner}</div></div>`;
+  root.hidden = false;
+}
+function closeSheet() {
+  detail = null;
+  confirmFn = null;
+  sheetRoot().hidden = true;
+  sheetRoot().innerHTML = '';
+}
+function openDetail(fn) {
+  const html = fn(ctxNow());
+  if (html == null) return;
+  confirmFn = null;
+  detail = fn;
+  showSheet(html);
+}
+function openForm({ title, body, submit = 'Save', onSubmit }) {
+  detail = null;
+  confirmFn = null;
+  showSheet(`<form><h2>${esc(title)}</h2>${body}<div class="form-error" hidden></div>
+    <div class="sheet-actions"><button class="btn primary block" type="submit">${esc(submit)}</button><button class="btn plain block" type="button" data-act="closeSheet">Cancel</button></div></form>`);
+  const form = sheetRoot().querySelector('form');
+  const sync = () => form.querySelectorAll('[data-split]').forEach(box => syncSplit(box, form));
+  sync();
+  form.addEventListener('input', sync);
+  form.addEventListener('change', sync);
+  form.onsubmit = e => {
+    e.preventDefault();
+    try { onSubmit(form, new FormData(form)); closeSheet(); }
+    catch (err) {
+      if (!(err instanceof Model.ApiError)) throw err;
+      const box = form.querySelector('.form-error');
+      box.hidden = false;
+      box.textContent = err.message;
+      box.scrollIntoView({ block: 'nearest' });
+    }
+    render();
+  };
+}
+function confirmSheet({ title, text = '', label, danger = false, run }) {
+  detail = null;
+  showSheet(`<h2>${esc(title)}</h2>${text ? `<p class="note">${text}</p>` : ''}
+    <div class="sheet-actions"><button class="btn ${danger ? 'danger' : 'primary'} block" data-act="confirmYes">${esc(label)}</button><button class="btn plain block" data-act="closeSheet">Cancel</button></div>`);
+  confirmFn = run;
+}
+
+// ---------- forms ----------
+function expenseForm(e) {
+  const c = ctxNow();
+  openForm({
+    title: e ? 'Edit expense' : 'Add expense', submit: e ? 'Save' : 'Add expense',
+    body: field('What was it?', inp('description', e?.description ?? '', 'text', 'placeholder="e.g. Woolworths"'))
+      + field('Amount', moneyInput('amount', e?.amount))
+      + `<div class="two">${field('Paid by', sel('paidBy', peopleOpts(c.members), e?.paidById ?? viewer))}${field('Date', inp('date', e?.date ?? state.today, 'date'))}</div>`
+      + splitEditor(c.members, e ? { splitType: e.splitType, shares: e.shares } : {}),
+    onSubmit: (f, fd) => {
+      const input = { description: fd.get('description'), amount: cleanMoney(fd.get('amount')), date: fd.get('date'), paidByUserId: +fd.get('paidBy'), ...readSplit(f) };
+      call(e ? { type: 'editExpense', id: e.id, input } : { type: 'addExpense', input });
+    },
+  });
+}
+function settleForm(toId) {
+  const c = ctxNow();
+  const debts = Model.balances(state, c.h.id).debts.filter(d => d.fromId === viewer);
+  const debt = debts.find(d => d.toId === toId) ?? debts[0];
+  openForm({
+    title: 'Settle up', submit: 'Record payment',
+    body: `<div class="two">${field('From', sel('from', peopleOpts(c.members), viewer))}${field('To', sel('to', peopleOpts(c.members), debt?.toId ?? c.members.find(id => id !== viewer)))}</div>`
+      + field('Amount', moneyInput('amount', debt?.amount))
+      + `<p class="note">Record money that has already changed hands. It can't be undone. If you make a mistake, record a payment the other way.</p>`,
+    onSubmit: (f, fd) => call({ type: 'addSettlement', fromUserId: +fd.get('from'), toUserId: +fd.get('to'), amount: cleanMoney(fd.get('amount')) }),
+  });
+}
+function billTypeForm(t) {
+  const c = ctxNow();
+  const chosen = new Set(t?.memberIds ?? c.members);
+  openForm({
+    title: t ? 'Edit bill type' : 'New bill type', submit: t ? 'Save' : 'Add bill type',
+    body: field('Name', inp('name', t?.name ?? '', 'text', 'placeholder="e.g. Water"'))
+      + `<div class="two">${field('How often', sel('frequency', FREQ_OPTS, t?.frequency ?? 'monthly'))}${field('First due', inp('startDate', t?.startDate ?? state.today, 'date'))}</div>`
+      + field('Ends (optional)', inp('endDate', t?.endDate ?? '', 'date'))
+      + `<div class="field"><span>Shared by</span><div class="people">${c.members.map(id => `<div class="person"><label><input type="checkbox" name="member" value="${id}"${chosen.has(id) ? ' checked' : ''}>${avatar(id, 'sm')}<span>${name(id)}</span></label></div>`).join('')}</div></div>`
+      + `<p class="note">Each time it's due, a bill appears with no amount. You fill in the amount when the bill arrives.</p>`,
+    onSubmit: (f, fd) => {
+      const input = { name: fd.get('name'), frequency: fd.get('frequency'), startDate: fd.get('startDate'), endDate: fd.get('endDate') || null, memberIds: fd.getAll('member').map(Number) };
+      call(t ? { type: 'editBillType', id: t.id, input } : { type: 'addBillType', input });
+    },
+  });
+}
+function enterBillForm(b) {
+  const c = ctxNow();
+  const type = state.billTypes.find(t => t.id === b.billTypeId);
+  openForm({
+    title: `${Model.billName(state, b)} bill`, submit: 'Submit bill',
+    body: `<p class="note" style="margin-top:-6px">Due ${full(b.dueDate)}</p>`
+      + field('Amount on the bill', moneyInput('amount'))
+      + splitEditor(c.members, { fixedEqualIds: (type?.memberIds ?? []).filter(id => c.members.includes(id)) })
+      + `<p class="note">Submit once you've paid the provider. Everyone then owes you their share.</p>`,
+    onSubmit: (f, fd) => call({ type: 'submitBill', billId: b.id, amount: cleanMoney(fd.get('amount')), ...readSplit(f) }),
+  });
+}
+function rentForm(r) {
+  const c = ctxNow();
+  openForm({
+    title: r ? 'Edit rent' : 'Set up rent', submit: r ? 'Save' : 'Set up rent',
+    body: field('Rent each period', moneyInput('amount', r?.amount))
+      + `<div class="two">${field('How often', sel('frequency', FREQ_OPTS, r?.frequency ?? 'weekly'))}${field('Starts', inp('startDate', r?.startDate ?? state.today, 'date'))}</div>`
+      + field('Ends (optional)', inp('endDate', r?.endDate ?? '', 'date'))
+      + splitEditor(c.members, r ? { splitType: r.splitType, shares: r.shares } : {})
+      + (r ? `<p class="note">Changes apply from the next period.</p>` : ''),
+    onSubmit: (f, fd) => {
+      const input = { amount: cleanMoney(fd.get('amount')), frequency: fd.get('frequency'), startDate: fd.get('startDate'), endDate: fd.get('endDate') || null, ...readSplit(f) };
+      call(r ? { type: 'editRentSchedule', id: r.id, input } : { type: 'addRentSchedule', input });
+    },
+  });
+}
+function furnitureForm(item) {
+  const c = ctxNow(), p = item?.purchase;
+  openForm({
+    title: item ? 'Edit item' : 'Add furniture', submit: item ? 'Save' : 'Add item',
+    body: field('Item', inp('name', item?.name ?? '', 'text', 'placeholder="e.g. Couch"'))
+      + field('Price', moneyInput('amount', p?.amount))
+      + `<div class="two">${field('Paid by', sel('paidBy', peopleOpts(c.members), p?.paidById ?? viewer))}${field('Bought on', inp('date', p?.date ?? state.today, 'date'))}</div>`
+      + splitEditor(c.members, p ? { splitType: p.splitType, shares: p.shares } : {}),
+    onSubmit: (f, fd) => {
+      const input = { name: fd.get('name'), purchase: { date: fd.get('date'), amount: cleanMoney(fd.get('amount')), paidByUserId: +fd.get('paidBy'), ...readSplit(f) } };
+      call(item ? { type: 'editFurniture', id: item.id, input } : { type: 'addFurniture', input });
+    },
+  });
+}
+function sellForm(item) {
+  const c = ctxNow();
+  openForm({
+    title: `Sell ${item.name}`, submit: 'Record sale',
+    body: field('Sold for', moneyInput('amount'))
+      + `<div class="two">${field('Money went to', sel('receivedBy', peopleOpts(c.members), viewer))}${field('Sold on', inp('date', state.today, 'date'))}</div>`
+      + splitEditor(c.members, { shares: item.purchase.shares.filter(x => c.members.includes(x.userId)) })
+      + `<p class="note">Whoever got the money owes everyone else their share. Once sold, the item can't be changed.</p>`,
+    onSubmit: (f, fd) => call({ type: 'sellFurniture', id: item.id, input: { date: fd.get('date'), amount: cleanMoney(fd.get('amount')), receivedByUserId: +fd.get('receivedBy'), ...readSplit(f) } }),
+  });
+}
+function disposeForm(item) {
+  const c = ctxNow();
+  openForm({
+    title: `Get rid of ${item.name}`, submit: 'Record disposal',
+    body: field('Cost to get rid of it', moneyInput('amount', 0))
+      + `<div class="two">${field('Paid by', sel('paidBy', peopleOpts(c.members), viewer))}${field('Date', inp('date', state.today, 'date'))}</div>`
+      + splitEditor(c.members, { shares: item.purchase.shares.filter(x => c.members.includes(x.userId)) })
+      + `<p class="note">Leave it at $0.00 if it cost nothing. Once disposed, the item can't be changed.</p>`,
+    onSubmit: (f, fd) => call({ type: 'disposeFurniture', id: item.id, input: { date: fd.get('date'), amount: cleanMoney(fd.get('amount')), paidByUserId: +fd.get('paidBy'), ...readSplit(f) } }),
+  });
+}
+function bondForm(b) {
+  const c = ctxNow();
+  openForm({
+    title: b ? 'Edit bond' : 'Add bond', submit: b ? 'Save' : 'Add bond',
+    body: field('Bond total', moneyInput('total', b?.total))
+      + field('Paid to the agent on', inp('paidDate', b?.paidDate ?? state.today, 'date'))
+      + `<div class="field"><span>Who put in what</span><div class="people">${c.members.map(id => {
+        const x = b?.contributions.find(k => k.userId === id);
+        return `<div class="person"><label>${avatar(id, 'sm')}<span>${name(id)}</span></label><input class="input" name="c-amt-${id}" inputmode="decimal" placeholder="0.00" value="${x ? Model.fmtPlain(x.amount) : ''}"><input type="hidden" name="c-date-${id}" value="${x?.date ?? state.today}"></div>`;
+      }).join('')}</div></div>`,
+    onSubmit: (f, fd) => {
+      const contributions = c.members.filter(id => cleanMoney(fd.get(`c-amt-${id}`)) !== '')
+        .map(id => ({ userId: id, amount: cleanMoney(fd.get(`c-amt-${id}`)), date: fd.get(`c-date-${id}`) }));
+      const input = { total: cleanMoney(fd.get('total')), paidDate: fd.get('paidDate'), contributions };
+      call(b ? { type: 'editBond', id: b.id, input } : { type: 'addBond', input });
+    },
+  });
+}
+
+// ---------- detail sheets: id => (ctx) => html | null (null closes the sheet) ----------
+// Edit lives in the sheet header; Delete is a quiet text button at the bottom.
+const sheetHead = (title, edit = null) =>
+  `<div class="sheet-head"><h2>${title}</h2>${edit ? `<button class="link" data-act="${edit.act}" data-id="${edit.id}">Edit</button>` : ''}</div>`;
+const deleteBtn = (act, id) => `<button class="btn quiet-danger block" data-act="${act}" data-id="${id}">Delete</button>`;
+const actionBtn = (label, act, id, cls = '') => `<button class="btn ${cls} block" data-act="${act}" data-id="${id}">${label}</button>`;
+const onlyNote = text => `<p class="note center">${text}</p>`;
+
+const expenseDetail = id => c => {
+  const e = byId(state.expenses, id);
+  if (!e) return null;
+  const mine = Model.can.editExpense(state, c.me, e);
+  return `${sheetHead(esc(e.description), mine && { act: 'editExpense', id: e.id })}<div class="big-amount amount">${fmt(e.amount)}</div>
+    <p class="note">${name(e.paidById)} paid on ${full(e.date)} · ${e.splitType === 'equal' ? 'split equally' : 'exact amounts'}</p>
+    <div class="list">${e.shares.map(x => row({ lead: avatar(x.userId), title: name(x.userId), end: money(x.amount) })).join('')}</div>
+    ${mine ? `<div class="sheet-actions">${deleteBtn('deleteExpense', e.id)}</div>` : onlyNote(`Added by ${name(e.createdById)}. Only they can change it.`)}`;
+};
+const balancesDetail = c => {
+  const bal = Model.balances(state, c.h.id);
+  return `<h2>Everyone's balances</h2>
+    <div class="list">${bal.members.map(m => row({ lead: avatar(m.userId), title: name(m.userId),
+      end: m.net > 0 ? `<div class="sub">is owed</div>${money(m.net, 'pos')}` : m.net < 0 ? `<div class="sub">owes</div>${money(-m.net, 'neg')}` : '<span class="sub">settled</span>' })).join('')}</div>
+    <div class="section-title">Who owes whom</div>
+    ${bal.debts.length ? `<div class="list">${bal.debts.map(d => row({ lead: avatar(d.fromId), title: `${name(d.fromId)} owes ${name(d.toId)}`, end: money(d.amount) })).join('')}</div>` : '<div class="card empty">Nobody owes anybody.</div>'}
+    <p class="note">Groceries and furniture only. Rent and bills have their own tabs.</p>`;
+};
+const billDetail = id => c => {
+  const b = byId(state.bills, id);
+  if (!b || b.status !== 'submitted') return null;
+  return `<h2>${billName(b)}</h2><div class="big-amount amount">${fmt(b.amount)}</div>
+    <p class="note">Due ${full(b.dueDate)} · ${name(b.payeeId)} paid it on ${full(b.submittedDate)}</p>
+    <div class="list">${shareRows('bill', b)}</div>
+    <p class="note">Tick your share once you've paid ${name(b.payeeId)} back.</p>`;
+};
+const billTypeDetail = id => c => {
+  const t = byId(state.billTypes, id);
+  if (!t) return null;
+  return `${sheetHead(esc(t.name), c.isPrimary && { act: 'editBillType', id: t.id })}
+    <div class="list">${fact('How often', FREQ[t.frequency])}${fact('Next due', full(Model.nextDueDate(t, state.today)) || '—')}${fact('Ends', t.endDate ? full(t.endDate) : 'Ongoing')}${fact('Shared by', t.memberIds.length ? t.memberIds.map(name).join(', ') : 'Nobody')}</div>
+    ${c.isPrimary ? `<div class="sheet-actions">${deleteBtn('deleteBillType', t.id)}</div>` : onlyNote(`Only ${name(c.h.primaryId)} (primary) can change bill types.`)}`;
+};
+const periodDetail = id => c => {
+  const p = byId(state.rentPeriods, id);
+  if (!p) return null;
+  return `<h2>Rent ${rangeText(p)}</h2><div class="big-amount amount">${fmt(p.amount)}</div>
+    <p class="note">Pay ${name(p.payeeId)}</p>
+    <div class="list">${shareRows('rent', p)}</div>`;
+};
+const scheduleDetail = id => c => {
+  const r = byId(state.rentSchedules, id);
+  if (!r) return null;
+  return `${sheetHead(`${fmt(r.amount)} ${FREQ[r.frequency].toLowerCase()}`, c.isPrimary && { act: 'editRent', id: r.id })}
+    <div class="list">${fact('Started', full(r.startDate))}${fact('Ends', r.endDate ? full(r.endDate) : 'Ongoing')}${fact('Next period', full(Model.nextDueDate(r, state.today)) || '—')}</div>
+    <div class="section-title">Each period</div>
+    <div class="list">${r.shares.map(x => row({ lead: avatar(x.userId), title: name(x.userId), end: money(x.amount) })).join('')}</div>
+    ${c.isPrimary ? `<div class="sheet-actions">${deleteBtn('deleteRent', r.id)}</div>` : onlyNote(`Only ${name(c.h.primaryId)} (primary) can change the rent.`)}`;
+};
+const itemDetail = id => c => {
+  const f = byId(state.furniture, id);
+  if (!f) return null;
+  const p = f.purchase;
+  const canManage = Model.can.manageFurniture(state, c.me, f);
+  const owned = f.status === 'owned';
+  const sharesText = shares => shares.map(x => `${name(x.userId)} ${fmt(x.amount)}`).join(' · ');
+  const actions = !canManage ? onlyNote(`Only ${name(f.createdById)} (who added it) or the primary can change this.`)
+    : owned ? `<div class="sheet-actions">${actionBtn('Sell', 'sellItem', f.id, 'primary')}${actionBtn('Get rid of it', 'disposeItem', f.id)}${deleteBtn('deleteItem', f.id)}</div>`
+    : `<div class="sheet-actions">${deleteBtn('deleteItem', f.id)}</div>`;
+  return `${sheetHead(`${esc(f.name)} ${owned ? '' : pill(f.status === 'sold' ? 'Sold' : 'Disposed')}`, canManage && owned && { act: 'editItem', id: f.id })}
+    <div class="list">${fact('Bought', full(p.date))}${fact('Price', fmt(p.amount))}${fact('Paid by', name(p.paidById))}</div>
+    <p class="note">${sharesText(p.shares)}</p>
+    ${f.sale ? `<div class="list">${fact('Sold', full(f.sale.date))}${fact('Sold for', fmt(f.sale.amount))}${fact('Money went to', name(f.sale.receivedById))}</div><p class="note">${sharesText(f.sale.shares)}</p>` : ''}
+    ${f.disposal ? `<div class="list">${fact('Disposed', full(f.disposal.date))}${fact('Cost', fmt(f.disposal.amount))}${fact('Paid by', name(f.disposal.paidById))}</div>` : ''}
+    ${actions}`;
+};
+const bondDetail = id => c => {
+  const b = byId(state.bonds, id);
+  if (!b) return null;
+  const out = Model.bondOutstanding(b);
+  return `${sheetHead('Bond', c.isPrimary && { act: 'editBond', id: b.id })}<div class="big-amount amount">${fmt(b.total)}</div>
+    <p class="note">Paid to the agent on ${full(b.paidDate)}</p>
+    <div class="list">${b.contributions.map(x => row({ lead: avatar(x.userId), title: name(x.userId), sub: `Put in ${short(x.date)}`, end: money(x.amount) })).join('')}${fact('Still to collect', money(out, out ? 'neg' : 'pos'))}</div>
+    <p class="note">A record only. The bond never affects anyone's balance.</p>
+    ${c.isPrimary ? `<div class="sheet-actions">${deleteBtn('deleteBond', b.id)}</div>` : ''}`;
+};
+const leaveBlockedDetail = c => {
+  const blockers = Model.leaveBlockers(state, c.me);
+  if (!blockers.length) return null;
+  return `<h2>You can't leave yet</h2>
+    <div class="list">${blockers.map(b => `<div class="row"><div class="main">${esc(b)}</div></div>`).join('')}</div>
+    <div class="sheet-actions"><button class="btn primary block" data-act="closeSheet">OK</button></div>`;
+};
+
+// ---------- screens ----------
+function tile(label, net, target) {
+  const [cls, value, hint] = net > 0 ? ['pos', fmt(net), 'owed to you'] : net < 0 ? ['neg', fmt(-net), 'you owe'] : ['', '$0.00', 'all settled'];
+  return `<button class="tile" data-act="go" data-screen="${target}"><div class="label">${label}</div><div class="value amount ${cls}">${value}</div><div class="hint">${hint}</div></button>`;
+}
+
+function screenHome(c) {
+  const { h, me, isPrimary } = c;
+  const bal = Model.balances(state, h.id);
+  const periods = state.rentPeriods.filter(p => p.householdId === h.id);
+  const bills = state.bills.filter(b => b.householdId === h.id && b.status === 'submitted');
+  const iOwe = list => list.filter(r => r.payeeId !== me).flatMap(r => r.shares.filter(x => x.userId === me && !x.paid).map(x => ({ r, x })));
+  const owedToMe = list => list.filter(r => r.payeeId === me).flatMap(r => r.shares.filter(x => x.userId !== me && !x.paid).map(x => ({ r, x })));
+  const sum = arr => arr.reduce((a, { x }) => a + x.amount, 0);
+  const rentBy = iOwe(periods), rentTo = owedToMe(periods), billBy = iOwe(bills), billTo = owedToMe(bills);
+  const pending = isPrimary ? state.bills.filter(b => b.householdId === h.id && b.status === 'pending').sort((a, b) => a.dueDate.localeCompare(b.dueDate)) : [];
+  const owned = state.furniture.filter(f => f.householdId === h.id && f.status === 'owned').length;
+
+  const todo = [
+    ...pending.map(b => row({ lead: iconCircle(I.bill), title: `Enter the ${billName(b)} bill`, sub: `Due ${short(b.dueDate)}`, action: smallBtn('Enter', 'enterBill', { id: b.id }, 'primary') })),
+    ...rentBy.map(({ r, x }) => row({ lead: avatar(r.payeeId), title: `Pay ${name(r.payeeId)} rent`, sub: `${rangeText(r)} · ${fmt(x.amount)}`, action: smallBtn('Paid', 'tick', { kind: 'rent', id: r.id, user: me, paid: 1 }) })),
+    ...billBy.map(({ r, x }) => row({ lead: avatar(r.payeeId), title: `Pay ${name(r.payeeId)} for ${billName(r)}`, sub: `Due ${short(r.dueDate)} · ${fmt(x.amount)}`, action: smallBtn('Paid', 'tick', { kind: 'bill', id: r.id, user: me, paid: 1 }) })),
+    ...bal.debts.filter(d => d.fromId === me).map(d => row({ lead: avatar(d.toId), title: `Settle up with ${name(d.toId)}`, sub: `Groceries · ${fmt(d.amount)}`, action: smallBtn('Settle', 'settle', { to: d.toId }) })),
+  ];
+  const waiting = [
+    ...rentTo.map(({ r, x }) => row({ lead: avatar(x.userId), title: name(x.userId), sub: `Rent ${rangeText(r)}`, end: money(x.amount), action: tickBtn('rent', r, x) })),
+    ...billTo.map(({ r, x }) => row({ lead: avatar(x.userId), title: name(x.userId), sub: `${billName(r)} · due ${short(r.dueDate)}`, end: money(x.amount), action: tickBtn('bill', r, x) })),
+  ];
+  return `${header(`Hi, ${esc(c.user.name)}`, esc(h.name), `<button class="icon-btn" data-act="go" data-screen="household" aria-label="Household">${I.people}</button>`)}
+    <div class="tiles">${tile('Groceries', Model.netOf(bal, me), 'groceries')}${tile('Rent', sum(rentTo) - sum(rentBy), 'rent')}${tile('Bills', sum(billTo) - sum(billBy), 'bills')}</div>
+    <div class="section-title">To do</div>
+    ${todo.length ? `<div class="list">${todo.join('')}</div>` : `<div class="card empty">You're all caught up.</div>`}
+    ${waiting.length ? `<div class="section-title">Waiting on others</div><div class="list">${waiting.join('')}</div>` : ''}
+    <div class="section-title">Furniture</div>
+    <div class="list">${row({ lead: iconCircle(I.sofa), title: `${plural(owned, 'item')} owned`, act: 'go', data: { screen: 'furniture' } })}</div>`;
+}
+
+function screenGroceries(c) {
+  const { h, me } = c;
+  const bal = Model.balances(state, h.id), net = Model.netOf(bal, me);
+  const mine = bal.debts.filter(d => d.fromId === me || d.toId === me);
+  const items = [
+    ...state.expenses.filter(e => e.householdId === h.id).map(e => ({ date: e.date, id: e.id, e })),
+    ...state.settlements.filter(s => s.householdId === h.id).map(s => ({ date: s.date, id: s.id, s })),
+  ].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+  const headline = net > 0 ? `<span class="pos">You're owed ${fmt(net)}</span>` : net < 0 ? `<span class="neg">You owe ${fmt(-net)}</span>` : `You're all settled`;
+  const expenseRow = e => {
+    const myShare = e.shares.find(x => x.userId === me)?.amount ?? 0;
+    const lent = e.amount - myShare;
+    const end = e.paidById === me ? (lent ? `<div class="sub">you lent</div>${money(lent, 'pos')}` : '<span class="sub">just you</span>')
+      : myShare ? `<div class="sub">you owe</div>${money(myShare, 'neg')}` : '<span class="sub">not involved</span>';
+    return row({ lead: dateBadge(e.date), title: esc(e.description), sub: `${name(e.paidById)} paid ${fmt(e.amount)}`, end, act: 'viewExpense', data: { id: e.id } });
+  };
+  const settlementRow = s => row({ lead: dateBadge(s.date), title: `${name(s.fromId)} paid ${name(s.toId)}`, sub: 'Settle-up', end: money(s.amount, 'muted') });
+  return `${header('Groceries', '', addBtn('addExpense', 'Add expense'))}
+    <div class="card">
+      <div class="big">${headline}</div>
+      ${mine.length ? `<div class="lines">${mine.map(d => d.fromId === me
+        ? `<div class="line"><span>You owe ${name(d.toId)}</span>${money(d.amount, 'neg')}</div>`
+        : `<div class="line"><span>${name(d.fromId)} owes you</span>${money(d.amount, 'pos')}</div>`).join('')}</div>` : ''}
+      <div class="card-actions"><button class="btn primary" data-act="settle">Settle up</button><button class="btn" data-act="allBalances">Everyone</button></div>
+    </div>
+    ${items.length ? groupBy(items, i => i.date.slice(0, 7)).map(([ym, list]) => `<div class="section-title">${monthLabel(ym)}</div><div class="list">${list.map(i => i.e ? expenseRow(i.e) : settlementRow(i.s)).join('')}</div>`).join('')
+      : '<div class="card empty" style="margin-top:16px">No expenses yet. Tap + to add one.</div>'}`;
+}
+
+function screenBills(c) {
+  const { h, me, isPrimary } = c;
+  const bills = state.bills.filter(b => b.householdId === h.id);
+  const pending = bills.filter(b => b.status === 'pending').sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const done = bills.filter(b => b.status === 'submitted').sort((a, b) => b.dueDate.localeCompare(a.dueDate));
+  const types = state.billTypes.filter(t => t.householdId === h.id);
+  const first = ' style="margin-top:4px"';
+  return `${header('Bills', '', isPrimary ? addBtn('addBillType', 'New bill type') : '')}
+    ${pending.length ? `<div class="section-title"${first}>Needs an amount</div><div class="list">${pending.map(b => row({
+      lead: iconCircle(I.bill), title: billName(b), sub: `Due ${short(b.dueDate)}`,
+      action: isPrimary ? smallBtn('Enter', 'enterBill', { id: b.id }, 'primary') : '',
+      end: isPrimary ? '' : `<span class="sub">Waiting for ${name(h.primaryId)}</span>`,
+    })).join('')}</div>` : ''}
+    <div class="section-title"${pending.length ? '' : first}>History</div>
+    ${done.length ? `<div class="list">${done.map(b => row({ lead: iconCircle(I.bill), title: billName(b), sub: `${short(b.dueDate)} · ${fmt(b.amount)}`, end: shareStatus(b, me), act: 'viewBill', data: { id: b.id } })).join('')}</div>` : '<div class="card empty">No bills yet.</div>'}
+    <div class="section-title">Bill types</div>
+    ${types.length ? `<div class="list">${types.map(t => row({ title: esc(t.name), sub: `${FREQ[t.frequency]} · next ${short(Model.nextDueDate(t, state.today)) || '—'}`, act: 'viewBillType', data: { id: t.id } })).join('')}</div>`
+      : `<div class="card empty">${isPrimary ? 'No bill types yet. Tap + to add one.' : 'No bill types yet.'}</div>`}`;
+}
+
+function screenRent(c) {
+  const { h, me, isPrimary } = c;
+  const schedules = state.rentSchedules.filter(r => r.householdId === h.id);
+  const periods = state.rentPeriods.filter(p => p.householdId === h.id).sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const current = periods.filter(p => p.startDate <= state.today && state.today <= p.endDate);
+  const earlier = periods.filter(p => !current.includes(p));
+  const none = schedules.length ? 'No rent due right now.' : isPrimary ? 'No rent set up yet. Tap + to set it up.' : 'No rent set up yet.';
+  return `${header('Rent', '', isPrimary ? addBtn('addRent', 'Set up rent') : '')}
+    ${current.length ? current.map(p => `<div class="list" style="margin-bottom:12px"><div class="list-head"><div class="label">${rangeText(p)} · pay ${name(p.payeeId)}</div><div class="big amount">${fmt(p.amount)}</div></div>${shareRows('rent', p)}</div>`).join('')
+      : `<div class="card empty">${none}</div>`}
+    ${earlier.length ? `<div class="section-title">Earlier</div><div class="list">${earlier.map(p => row({ title: rangeText(p), sub: `${fmt(p.amount)} · pay ${name(p.payeeId)}`, end: shareStatus(p, me), act: 'viewPeriod', data: { id: p.id } })).join('')}</div>` : ''}
+    ${schedules.length ? `<div class="section-title">Schedule</div><div class="list">${schedules.map(r => row({ title: `${fmt(r.amount)} ${FREQ[r.frequency].toLowerCase()}`, sub: r.endDate ? `${short(r.startDate)} – ${short(r.endDate)}` : `Since ${full(r.startDate)}`, act: 'viewSchedule', data: { id: r.id } })).join('')}</div>` : ''}`;
+}
+
+function screenFurniture(c) {
+  const all = state.furniture.filter(f => f.householdId === c.h.id);
+  const items = all.filter(f => f.status === furnFilter).sort((a, b) => b.purchase.date.localeCompare(a.purchase.date));
+  const sub = f => f.status === 'owned' ? `Bought ${short(f.purchase.date)} · ${name(f.purchase.paidById)} paid`
+    : f.status === 'sold' ? `Sold ${short(f.sale.date)} · money to ${name(f.sale.receivedById)}`
+    : `Disposed ${short(f.disposal.date)}`;
+  const amount = f => f.status === 'sold' ? f.sale.amount : f.purchase.amount;
+  return `${header('Furniture', '', addBtn('addItem', 'Add furniture'))}
+    <div class="seg" style="margin-bottom:14px">${['owned', 'sold', 'disposed'].map(s => `<button class="${furnFilter === s ? 'on' : ''}" data-act="furnFilter" data-status="${s}">${s[0].toUpperCase() + s.slice(1)} ${all.filter(f => f.status === s).length}</button>`).join('')}</div>
+    ${items.length ? `<div class="list">${items.map(f => row({ lead: iconCircle(I.sofa), title: esc(f.name), sub: sub(f), end: money(amount(f)), act: 'viewItem', data: { id: f.id } })).join('')}</div>`
+      : `<div class="card empty">Nothing ${furnFilter} yet.</div>`}`;
+}
+
+function screenHousehold(c) {
+  const { h, me, isPrimary, members } = c;
+  const bonds = state.bonds.filter(b => b.householdId === h.id);
+  const bondRows = bonds.map(b => {
+    const out = Model.bondOutstanding(b);
+    return row({ lead: iconCircle(I.shield), title: fmt(b.total), sub: out ? `${fmt(out)} still to collect` : 'Fully paid', act: 'viewBond', data: { id: b.id } });
+  });
+  if (isPrimary) bondRows.push(row({ lead: iconCircle(I.plus), title: 'Add bond', act: 'addBond' }));
+  return `${backHeader(esc(h.name))}
+    <div class="card"><div class="label">Invite code</div><div class="code">${esc(h.inviteCode)}</div><div class="sub">Share it so housemates can join.</div>
+      <div class="card-actions"><button class="btn" data-act="copyCode">Copy code</button></div></div>
+    <div class="section-title">Members</div>
+    <div class="list">${members.map(id => row({
+      lead: avatar(id), title: `${name(id)}${id === me ? ' <span class="muted">(you)</span>' : ''}`,
+      sub: id === h.primaryId ? 'Primary · manages rent, bills and bond' : '',
+      ...(isPrimary && id !== me ? { act: 'makePrimary', data: { id } } : {}),
+    })).join('')}</div>
+    ${isPrimary && members.length > 1 ? '<p class="note">Tap a member to make them the primary.</p>' : ''}
+    <div class="section-title">Bond</div>
+    ${bondRows.length ? `<div class="list">${bondRows.join('')}</div>` : '<div class="card empty">No bond recorded.</div>'}
+    <div class="stack-actions"><button class="btn danger block" data-act="leave">Leave household</button><button class="btn plain block" data-act="logout">Log out</button></div>`;
+}
+
+function screenAuth() {
+  const login = authMode !== 'register';
+  return `<div class="auth"><div class="brand-mark">${I.home}</div><h1>Household Expenses</h1><p class="muted">Split groceries, rent and bills with your housemates.</p>
+    ${login
+      ? `<form data-form="login">${field('Email', inp('email', 'alice@example.com', 'email', 'autocomplete="email"'))}${field('Password', inp('password', 'password', 'password'))}<button class="btn primary block">Log in</button></form>
+         <p class="switch">New here? <button class="link" data-act="authMode" data-mode="register">Create an account</button></p>`
+      : `<form data-form="register">${field('Name', inp('name'))}${field('Email', inp('email', '', 'email'))}${field('Password', inp('password', '', 'password'))}<button class="btn primary block">Create account</button></form>
+         <p class="switch">Have an account? <button class="link" data-act="authMode" data-mode="login">Log in</button></p>`}
+  </div>`;
+}
+
+function screenSetup(c) {
+  return `${header(`Welcome, ${esc(c.user.name)}`)}
+    <p class="lead">You're not in a household yet.</p>
+    <div class="card"><h3>Join your housemates</h3><form data-form="joinHousehold">${field('Invite code', inp('inviteCode', '', 'text', 'placeholder="e.g. ELM-4821" autocapitalize="characters"'))}<button class="btn primary block">Join household</button></form></div>
+    <div class="or">or</div>
+    <div class="card"><h3>Start a new household</h3><form data-form="createHousehold">${field('Household name', inp('name', '', 'text', 'placeholder="e.g. Elm Street House"'))}<button class="btn block">Create household</button></form>
+      <p class="note" style="margin-bottom:0">You'll be the primary: you manage rent, bills and bond.</p></div>
+    <div class="stack-actions"><button class="btn plain block" data-act="logout">Log out</button></div>`;
+}
+
+const SCREENS = { home: screenHome, groceries: screenGroceries, bills: screenBills, rent: screenRent, furniture: screenFurniture, household: screenHousehold };
+const TABS = [['home', 'Home', I.home], ['groceries', 'Groceries', I.cart], ['bills', 'Bills', I.bill], ['rent', 'Rent', I.key], ['furniture', 'Furniture', I.sofa]];
+const tabbar = () => `<nav class="tabbar">${TABS.map(([id, label, icon]) => `<button class="tab${screen === id ? ' on' : ''}" data-act="go" data-screen="${id}">${icon}<span>${label}</span></button>`).join('')}</nav>`;
+
+// ---------- render ----------
+function renderSide() {
+  document.getElementById('side').classList.toggle('open', demoOpen);
+  document.getElementById('side-controls').innerHTML = `
+    <label class="ctl">Viewing as<select id="viewer"><option value="">Logged out</option>${state.users.map(u => `<option value="${u.id}"${u.id === viewer ? ' selected' : ''}>${esc(u.name)} (${!u.householdId ? 'no household' : Model.isPrimary(state, u.id) ? 'primary' : 'member'})</option>`).join('')}</select></label>
+    <div class="ctl">Today is <b>${full(state.today)}</b></div>
+    <div class="ctl-row"><button data-act="advance" data-days="1">+1 day</button><button data-act="advance" data-days="7">+1 week</button><button data-act="advance" data-months="1">+1 month</button><button data-act="reset">Reset</button></div>`;
+  document.getElementById('log').innerHTML = logEntries.length
+    ? logEntries.slice(0, 8).map(e => e.info ? `<li class="muted">${esc(e.info)}</li>`
+      : `<li>${esc(e.who)} ${e.method} ${e.path} <span class="s${String(e.status)[0]}">${e.status} ${STATUS[e.status]}</span></li>`).join('')
+    : '<li class="muted">Nothing yet.</li>';
+}
+function render() {
+  renderSide();
+  const c = ctxNow();
+  const app = document.getElementById('app');
+  const prevKey = app.dataset.key, prevScroll = document.getElementById('screen')?.scrollTop ?? 0;
+  let key, html;
+  if (!c.user) { key = 'auth'; html = `<div class="screen" id="screen">${screenAuth()}</div>`; }
+  else if (!c.h) { key = 'setup'; html = `<div class="screen" id="screen">${screenSetup(c)}</div>`; }
+  else {
+    if (!SCREENS[screen]) screen = 'home';
+    key = screen;
+    html = `<div class="screen" id="screen">${SCREENS[screen](c)}</div>${tabbar()}`;
+  }
+  app.innerHTML = html;
+  app.dataset.key = key;
+  if (key === prevKey) document.getElementById('screen').scrollTop = prevScroll;
+  if (detail) {
+    const body = c.h ? detail(c) : null;
+    if (body == null) closeSheet(); else document.getElementById('sheet-body').innerHTML = body;
+  }
+}
+
+// ---------- events ----------
+const deleteAct = (title, type, text = '') => d => confirmSheet({ title, text, label: 'Delete', danger: true, run: () => call({ type, id: +d.id }) });
+const ACTS = {
+  go: d => { if (d.screen !== screen) { prevScreen = screen; screen = d.screen; } closeSheet(); render(); },
+  back: () => { screen = prevScreen && prevScreen !== 'household' ? prevScreen : 'home'; render(); },
+  closeSheet: () => closeSheet(),
+  confirmYes: () => {
+    const run = confirmFn;
+    closeSheet();
+    try { run(); }
+    catch (err) {
+      if (!(err instanceof Model.ApiError)) throw err;
+      if (err.details?.length) openDetail(leaveBlockedDetail); else toast(err.message);
+    }
+    render();
+  },
+  authMode: d => { authMode = d.mode; render(); },
+  toggleDemo: () => { demoOpen = !demoOpen; renderSide(); },
+  reset: () => reset(),
+  logout: () => { viewer = null; authMode = 'login'; closeSheet(); render(); },
+  advance: d => {
+    const rentBefore = state.rentPeriods.length, billsBefore = state.bills.length;
+    const today = d.months ? Model.addMonths(state.today, +d.months) : Model.addDays(state.today, +d.days);
+    state = Model.sync(Model.setToday(state, today));
+    logEntries.unshift({ info: `Now ${full(today)}: +${state.rentPeriods.length - rentBefore} rent, +${state.bills.length - billsBefore} bills` });
+    render();
+  },
+  tick: d => attempt(() => call(d.kind === 'rent'
+    ? { type: 'tickRentShare', periodId: +d.id, userId: +d.user, paid: !!d.paid }
+    : { type: 'tickBillShare', billId: +d.id, userId: +d.user, paid: !!d.paid })),
+  settle: d => settleForm(d.to ? +d.to : undefined),
+  allBalances: () => openDetail(balancesDetail),
+
+  addExpense: () => expenseForm(null),
+  viewExpense: d => openDetail(expenseDetail(+d.id)),
+  editExpense: d => expenseForm(byId(state.expenses, d.id)),
+  deleteExpense: deleteAct('Delete this expense?', 'deleteExpense'),
+
+  enterBill: d => enterBillForm(byId(state.bills, d.id)),
+  viewBill: d => openDetail(billDetail(+d.id)),
+  addBillType: () => billTypeForm(null),
+  viewBillType: d => openDetail(billTypeDetail(+d.id)),
+  editBillType: d => billTypeForm(byId(state.billTypes, d.id)),
+  deleteBillType: deleteAct('Delete this bill type?', 'deleteBillType', 'Bills still waiting for an amount are removed. Past bills stay in the history.'),
+
+  addRent: () => rentForm(null),
+  viewPeriod: d => openDetail(periodDetail(+d.id)),
+  viewSchedule: d => openDetail(scheduleDetail(+d.id)),
+  editRent: d => rentForm(byId(state.rentSchedules, d.id)),
+  deleteRent: deleteAct('Delete this rent schedule?', 'deleteRentSchedule', 'All of its rent periods are deleted too.'),
+
+  furnFilter: d => { furnFilter = d.status; render(); },
+  addItem: () => furnitureForm(null),
+  viewItem: d => openDetail(itemDetail(+d.id)),
+  editItem: d => furnitureForm(byId(state.furniture, d.id)),
+  sellItem: d => sellForm(byId(state.furniture, d.id)),
+  disposeItem: d => disposeForm(byId(state.furniture, d.id)),
+  deleteItem: deleteAct('Delete this item?', 'deleteFurniture', 'Its money is removed from everyone\'s balances.'),
+
+  addBond: () => bondForm(null),
+  viewBond: d => openDetail(bondDetail(+d.id)),
+  editBond: d => bondForm(byId(state.bonds, d.id)),
+  deleteBond: deleteAct('Delete this bond record?', 'deleteBond'),
+
+  copyCode: () => { const h = ctxNow().h; navigator.clipboard?.writeText(h.inviteCode).catch(() => {}); toast(`Copied ${h.inviteCode}`); },
+  makePrimary: d => confirmSheet({
+    title: `Make ${Model.userName(state, +d.id)} the primary?`,
+    text: 'They will manage rent, bills and bond, and get paid back for new rent and bills. You become a normal member.',
+    label: 'Make primary', run: () => call({ type: 'setPrimary', userId: +d.id }),
+  }),
+  leave: () => confirmSheet({
+    title: `Leave ${ctxNow().h.name}?`, text: 'You will be taken off every bill and give up your share of any furniture.',
+    label: 'Leave household', danger: true, run: () => { call({ type: 'leaveHousehold' }); screen = 'home'; },
+  }),
+};
+const FORMS = {
+  login: fd => {
+    try {
+      viewer = Model.login(state, fd.get('email'), fd.get('password'));
+      logCall('POST', '/api/auth/login', 200);
+      screen = 'home';
+    } catch (err) {
+      if (err instanceof Model.ApiError) logCall('POST', '/api/auth/login', err.status, err.message);
+      throw err;
+    }
+  },
+  register: fd => { viewer = call({ type: 'register', name: fd.get('name'), email: fd.get('email'), password: fd.get('password') }); },
+  createHousehold: fd => { call({ type: 'createHousehold', name: fd.get('name') }); screen = 'household'; prevScreen = 'home'; },
+  joinHousehold: fd => { call({ type: 'joinHousehold', inviteCode: fd.get('inviteCode') }); screen = 'home'; },
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el && !el.disabled) ACTS[el.dataset.act](el.dataset);
+});
+document.addEventListener('change', e => {
+  if (e.target.id !== 'viewer') return;
+  viewer = e.target.value ? +e.target.value : null;
+  closeSheet();
+  render();
+});
+document.addEventListener('submit', e => {
+  const f = e.target;
+  if (!f.dataset.form) return;
+  e.preventDefault();
+  attempt(() => FORMS[f.dataset.form](new FormData(f)));
+});
+
+function reset() {
+  state = Model.sync(seed());
+  viewer = 1;
+  screen = 'home';
+  prevScreen = null;
+  furnFilter = 'owned';
+  authMode = 'login';
+  logEntries = [];
+  closeSheet();
+  render();
+}
+reset();
+</script>
+</body>
+</html>
