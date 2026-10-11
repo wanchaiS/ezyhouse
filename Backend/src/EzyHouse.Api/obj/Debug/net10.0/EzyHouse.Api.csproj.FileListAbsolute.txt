@@ -1,0 +1,9 @@
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.csproj.AssemblyReference.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\rpswa.dswa.cache.json
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.GeneratedMSBuildEditorConfig.editorconfig
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.AssemblyInfoInputs.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.AssemblyInfo.cs
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.csproj.CoreCompileInputs.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.MvcApplicationPartsAssemblyInfo.cs
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.MvcApplicationPartsAssemblyInfo.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Api\obj\Debug\net10.0\EzyHouse.Api.sourcelink.json

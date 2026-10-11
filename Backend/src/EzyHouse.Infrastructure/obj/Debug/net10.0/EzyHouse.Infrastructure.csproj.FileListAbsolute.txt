@@ -1,0 +1,16 @@
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\bin\Debug\net10.0\EzyHouse.Infrastructure.deps.json
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\bin\Debug\net10.0\EzyHouse.Infrastructure.dll
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\bin\Debug\net10.0\EzyHouse.Infrastructure.pdb
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\bin\Debug\net10.0\EzyHouse.Domain.dll
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\bin\Debug\net10.0\EzyHouse.Domain.pdb
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.csproj.AssemblyReference.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.AssemblyInfoInputs.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.AssemblyInfo.cs
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.csproj.CoreCompileInputs.cache
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.sourcelink.json
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.6DE7A98C.Up2Date
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.dll
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\refint\EzyHouse.Infrastructure.dll
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\EzyHouse.Infrastructure.pdb
+D:\UTS_Academics\SEM_4\32998_NET_AD\Assessment_Task_2\AT2_Code\ezyhouse\Backend\src\EzyHouse.Infrastructure\obj\Debug\net10.0\ref\EzyHouse.Infrastructure.dll

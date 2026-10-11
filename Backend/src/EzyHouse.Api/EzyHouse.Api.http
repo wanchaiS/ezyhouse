@@ -1,0 +1,6 @@
+@EzyHouse.Api_HostAddress = http://localhost:5219
+
+GET {{EzyHouse.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

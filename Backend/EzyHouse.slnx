@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EzyHouse.Api/EzyHouse.Api.csproj" />
+    <Project Path="src/EzyHouse.Domain/EzyHouse.Domain.csproj" />
+    <Project Path="src/EzyHouse.Infrastructure/EzyHouse.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EzyHouse.Tests/EzyHouse.Tests.csproj" />
+  </Folder>
+</Solution>
