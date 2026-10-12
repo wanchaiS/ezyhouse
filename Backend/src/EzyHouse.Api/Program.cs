@@ -1,3 +1,17 @@
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Services;
+using EzyHouse.Domain.Balances;
+using EzyHouse.Domain.Interfaces;
+using EzyHouse.Domain.Splitting;
+using EzyHouse.Infrastructure.Data;
+using EzyHouse.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Database: pin the server version so design-time tools don't need a live connection
@@ -34,6 +48,7 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
     .AllowAnyHeader().AllowAnyMethod()));
 
 // Application services (see Section 5)
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<ISplitStrategy, EqualSplitStrategy>();
@@ -41,8 +56,6 @@ builder.Services.AddSingleton<ISplitStrategy, ExactSplitStrategy>();
 builder.Services.AddSingleton<SplitCalculator>();
 builder.Services.AddSingleton<BalanceCalculator>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-builder.Services.AddScoped<IHouseholdService, HouseholdService>();
-// ... one AddScoped line per service interface
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();   // plus a bearer security definition, so Swagger UI can send tokens
@@ -54,7 +67,6 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<EzyHouseDbContext>();
     db.Database.Migrate();          // create or upgrade the schema
-    DemoSeeder.Seed(db);            // insert demo data if the database is empty
     app.UseSwagger();
     app.UseSwaggerUI();
 }

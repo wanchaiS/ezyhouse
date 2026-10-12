@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj": {}
+    "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj": {}
   },
   "projects": {
-    "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj": {
+    "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj",
+        "projectUniqueName": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj",
         "projectName": "EzyHouse.Api",
-        "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj",
-        "packagesPath": "C:\\Users\\Swapnil\\.nuget\\packages\\",
-        "outputPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\obj\\",
+        "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj",
+        "packagesPath": "C:\\Users\\Swapnil\\AppData\\Local\\Temp\\cursor-sandbox-cache\\f248e401f5a32e6abe1195137ab56654\\nuget",
+        "outputPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -34,11 +34,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
-                "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
               },
-              "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj": {
-                "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj"
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj"
               }
             }
           }
@@ -60,6 +60,10 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.12, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.12, )"
@@ -69,6 +73,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[9.0.0, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[10.3.0, )"
             }
           },
           "imports": [
@@ -508,14 +516,14 @@
         }
       }
     },
-    "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
+    "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj",
+        "projectUniqueName": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj",
         "projectName": "EzyHouse.Domain",
-        "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj",
-        "packagesPath": "C:\\Users\\Swapnil\\.nuget\\packages\\",
-        "outputPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\obj\\",
+        "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj",
+        "packagesPath": "C:\\Users\\Swapnil\\AppData\\Local\\Temp\\cursor-sandbox-cache\\f248e401f5a32e6abe1195137ab56654\\nuget",
+        "outputPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -850,14 +858,14 @@
         }
       }
     },
-    "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj": {
+    "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj",
+        "projectUniqueName": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj",
         "projectName": "EzyHouse.Infrastructure",
-        "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\Swapnil\\.nuget\\packages\\",
-        "outputPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\obj\\",
+        "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Swapnil\\AppData\\Local\\Temp\\cursor-sandbox-cache\\f248e401f5a32e6abe1195137ab56654\\nuget",
+        "outputPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -880,8 +888,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
-                "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
               }
             }
           }
@@ -1206,14 +1214,14 @@
         }
       }
     },
-    "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj": {
+    "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj",
+        "projectUniqueName": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj",
         "projectName": "EzyHouse.Tests",
-        "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj",
-        "packagesPath": "C:\\Users\\Swapnil\\.nuget\\packages\\",
-        "outputPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\obj\\",
+        "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\EzyHouse.Tests.csproj",
+        "packagesPath": "C:\\Users\\Swapnil\\AppData\\Local\\Temp\\cursor-sandbox-cache\\f248e401f5a32e6abe1195137ab56654\\nuget",
+        "outputPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\tests\\EzyHouse.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1236,11 +1244,14 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj": {
-                "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj"
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Api\\EzyHouse.Api.csproj"
               },
-              "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
-                "projectPath": "D:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Domain\\EzyHouse.Domain.csproj"
+              },
+              "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj": {
+                "projectPath": "d:\\UTS_Academics\\SEM_4\\32998_NET_AD\\Assessment_Task_2\\AT2_Code\\ezyhouse\\Backend\\src\\EzyHouse.Infrastructure\\EzyHouse.Infrastructure.csproj"
               }
             }
           }

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\EzyHouse.Domain\EzyHouse.Domain.csproj" />
+    <ProjectReference Include="..\..\src\EzyHouse.Infrastructure\EzyHouse.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\EzyHouse.Api\EzyHouse.Api.csproj" />
   </ItemGroup>
 

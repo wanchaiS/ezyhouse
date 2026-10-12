@@ -1,0 +1,23 @@
+using EzyHouse.Domain.Entities;
+using EzyHouse.Domain.Exceptions;
+
+namespace EzyHouse.Api.Services;
+
+/// <summary>
+/// Reads the caller from the JWT <c>sub</c> claim and loads their user and household.
+/// </summary>
+public interface ICurrentUserContext
+{
+    int UserId { get; }
+
+    Task<User> GetUserAsync();
+
+    /// <summary>
+    /// Throws <see cref="ForbiddenException"/> when the caller is not in a household.
+    /// GET /api/household is the exception: it uses <see cref="GetUserAsync"/> and returns 404 instead.
+    /// </summary>
+    Task<Household> RequireHouseholdAsync();
+
+    /// <summary>Throws <see cref="ForbiddenException"/> when the caller is not the primary.</summary>
+    Task<Household> RequirePrimaryAsync();
+}

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EzyHouse.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+50cf877840db46d06a6e98f50f7581e1ea36aca1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e65c4993747c90f36c2737a01d913c00bcfc76fb")]
 [assembly: System.Reflection.AssemblyProductAttribute("EzyHouse.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EzyHouse.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
