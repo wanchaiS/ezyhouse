@@ -1,6 +1,0 @@
-@EzyHouse.Api_HostAddress = http://localhost:
-
-GET {{EzyHouse.Api_HostAddress}}/
-Accept: application/json
-
-###

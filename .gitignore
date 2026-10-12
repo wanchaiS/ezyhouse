@@ -1,0 +1,8 @@
+Backend/tests/EzyHouse.Tests/bin
+Backend/tests/EzyHouse.Tests/obj
+Backend/src/EzyHouse.Api/bin
+Backend/src/EzyHouse.Api/obj
+Backend/src/EzyHouse.Domain/bin
+Backend/src/EzyHouse.Domain/obj
+Backend/src/EzyHouse.Infrastructure/bin
+Backend/src/EzyHouse.Infrastructure/obj
