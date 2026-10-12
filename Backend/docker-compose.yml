@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ezyhouse
+      MYSQL_USER: ezyhouse
+      MYSQL_PASSWORD: admin123
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ezyhouse-mysql:/var/lib/mysql
+
+volumes:
+  ezyhouse-mysql:
