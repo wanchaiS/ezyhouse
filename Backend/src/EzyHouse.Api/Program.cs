@@ -61,6 +61,8 @@ builder.Services.AddSingleton<ISplitStrategy, ExactSplitStrategy>();
 builder.Services.AddSingleton<SplitCalculator>();
 builder.Services.AddSingleton<BalanceCalculator>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+builder.Services.AddScoped<IRecurringChargeGenerator, RecurringChargeGenerator>();
+builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
 
 // Feature slices: each registers its own services
 builder.Services.AddAuthFeature(builder.Configuration);
