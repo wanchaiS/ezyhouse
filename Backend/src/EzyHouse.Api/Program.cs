@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
+using EzyHouse.Api.Features.Balances;
 using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Balances;
@@ -67,6 +68,7 @@ builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
 
 // Feature slices: each registers its own services
 builder.Services.AddAuthFeature(builder.Configuration);
+builder.Services.AddBalancesFeature();
 builder.Services.AddBondsFeature();
 
 builder.Services.AddEndpointsApiExplorer();
