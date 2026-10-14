@@ -6,6 +6,7 @@ using EzyHouse.Api.Features.Auth;
 using EzyHouse.Api.Features.Balances;
 using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Api.Features.Expenses;
+using EzyHouse.Api.Features.Rent;
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
@@ -71,6 +72,7 @@ builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
 builder.Services.AddAuthFeature(builder.Configuration);
 builder.Services.AddExpensesFeature();
 builder.Services.AddBalancesFeature();
+builder.Services.AddRentFeature();
 builder.Services.AddBondsFeature();
 
 builder.Services.AddEndpointsApiExplorer();
