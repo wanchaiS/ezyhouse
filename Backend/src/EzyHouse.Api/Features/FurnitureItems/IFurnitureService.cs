@@ -1,7 +1,6 @@
-using EzyHouse.Api.Dtos;
 using EzyHouse.Domain.Enums;
 
-namespace EzyHouse.Api.Services;
+namespace EzyHouse.Api.Features.FurnitureItems;
 
 public interface IFurnitureService
 {

@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using EzyHouse.Domain.Exceptions;
 
-namespace EzyHouse.Api.Infrastructure;
+namespace EzyHouse.Api.Core;
 
 public static class ClaimsPrincipalExtensions
 {
@@ -9,7 +9,7 @@ public static class ClaimsPrincipalExtensions
     {
         string? sub = principal.FindFirst("sub")?.Value;
         if (!int.TryParse(sub, out int userId))
-            throw new ForbiddenException("You need to be signed in.");
+            throw new UnauthorizedException("You need to be signed in.");
 
         return userId;
     }

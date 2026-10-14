@@ -64,12 +64,13 @@ public class RecurringScheduleTests
         var schedule = new RentSchedule
         {
             Id = 7,
+            Frequency = Frequency.Monthly,
+            StartDate = new DateOnly(2026, 2, 1),
             Amount = 90m,
             Shares = [new Share(1, 30m), new Share(2, 30m), new Share(3, 30m)],
         };
-        var slot = new EzyHouse.Domain.Scheduling.ScheduleSlot(0, new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28));
 
-        RentPeriod period = schedule.CreateOccurrence(slot, primaryUserId: 2);
+        RentPeriod period = schedule.GenerateMissing(null, new DateOnly(2026, 2, 10), primaryUserId: 2).Single();
 
         Assert.That(period.PayeeUserId, Is.EqualTo(2));
         Assert.That(period.Shares.Select(share => (share.UserId, share.Amount, share.Paid, share.PaidDate)), Is.EqualTo(new (int, decimal, bool, DateOnly?)[]
@@ -78,5 +79,45 @@ public class RecurringScheduleTests
             (2, 30m, true, new DateOnly(2026, 2, 1)),
             (3, 30m, false, null),
         }));
+    }
+
+    [Test]
+    public void Generating_only_creates_slots_after_the_last_covered_date()
+    {
+        var schedule = new RentSchedule
+        {
+            Frequency = Frequency.Weekly,
+            StartDate = new DateOnly(2026, 1, 1),
+        };
+
+        var periods = schedule.GenerateMissing(new DateOnly(2026, 1, 8), new DateOnly(2026, 1, 20), primaryUserId: 1);
+
+        Assert.That(periods.Select(period => period.StartDate), Is.EqualTo(new[] { new DateOnly(2026, 1, 15) }));
+    }
+
+    [Test]
+    public void Moving_the_start_date_back_does_not_create_anything_when_already_covered_past_today()
+    {
+        var schedule = new RentSchedule
+        {
+            Frequency = Frequency.Weekly,
+            StartDate = new DateOnly(2025, 11, 1),
+        };
+
+        var periods = schedule.GenerateMissing(new DateOnly(2026, 2, 1), new DateOnly(2026, 1, 20), primaryUserId: 1);
+
+        Assert.That(periods, Is.Empty);
+    }
+
+    [Test]
+    public void Next_due_date_for_a_schedule_starting_more_than_4_months_out_is_its_start_date()
+    {
+        var schedule = new RentSchedule
+        {
+            Frequency = Frequency.Monthly,
+            StartDate = new DateOnly(2026, 12, 1),
+        };
+
+        Assert.That(schedule.GetNextDueDate(new DateOnly(2026, 1, 1)), Is.EqualTo(new DateOnly(2026, 12, 1)));
     }
 }

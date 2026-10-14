@@ -1,15 +1,17 @@
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Exceptions;
 
-namespace EzyHouse.Api.Services;
+namespace EzyHouse.Api.Core;
 
 /// <summary>
 /// Reads the caller from the JWT <c>sub</c> claim and loads their user and household.
 /// </summary>
 public interface ICurrentUserContext
 {
+    /// <summary>Throws <see cref="UnauthorizedException"/> when nobody is signed in.</summary>
     int UserId { get; }
 
+    /// <summary>Throws <see cref="UnauthorizedException"/> when the token's user no longer exists.</summary>
     Task<User> GetUserAsync();
 
     /// <summary>

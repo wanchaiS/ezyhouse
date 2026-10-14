@@ -24,6 +24,9 @@ public sealed class SplitCalculator(IEnumerable<ISplitStrategy> strategies)
         if (shares.Any(share => !memberIds.Contains(share.UserId)))
             throw new ValidationFailedException("Everyone in a split must be a current household member.");
 
-        return byType[type].Split(total, shares);
+        if (!byType.TryGetValue(type, out ISplitStrategy? strategy))
+            throw new ValidationFailedException($"Unknown split type '{type}'.");
+
+        return strategy.Split(total, shares);
     }
 }

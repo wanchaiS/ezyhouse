@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Core;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.Balances;
 
 public sealed record MemberBalanceDto(UserRefDto User, decimal Net);
 
@@ -20,6 +20,6 @@ public sealed record SettlementDto(
     UserRefDto CreatedBy);
 
 public sealed record SettlementInput(
-    [property: Required] int? FromUserId,
-    [property: Required] int? ToUserId,
-    [property: Required, Money] decimal? Amount);
+    [Required] int? FromUserId,
+    [Required] int? ToUserId,
+    [Required, Money] decimal? Amount);

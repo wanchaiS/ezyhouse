@@ -1,5 +1,6 @@
 using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.Exceptions;
+using EzyHouse.Domain.Extensions;
 using EzyHouse.Domain.Interfaces;
 using EzyHouse.Domain.ValueObjects;
 
@@ -14,6 +15,9 @@ public sealed class ExactSplitStrategy : ISplitStrategy
     {
         if (shares.Any(share => share.Amount is null))
             throw new ValidationFailedException("Every share needs an amount when splitType is exact.");
+
+        if (shares.Any(share => share.Amount!.Value < 0 || !share.Amount.Value.HasAtMostTwoDecimals()))
+            throw new ValidationFailedException("Share amounts can't be negative or have more than 2 decimal places.");
 
         decimal sum = shares.Sum(share => share.Amount!.Value);
         if (sum != total)

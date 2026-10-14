@@ -27,4 +27,32 @@ public class ExactSplitStrategyTests
             () => strategy.Split(100m, shares),
             Throws.TypeOf<ValidationFailedException>());
     }
+
+    [Test]
+    public void Rejects_a_negative_share()
+    {
+        var shares = new ShareInput[] { new(1, 110m), new(2, -10m) };
+
+        Assert.That(
+            () => strategy.Split(100m, shares),
+            Throws.TypeOf<ValidationFailedException>());
+    }
+
+    [Test]
+    public void Rejects_a_share_with_more_than_2_decimals()
+    {
+        var shares = new ShareInput[] { new(1, 50.005m), new(2, 49.995m) };
+
+        Assert.That(
+            () => strategy.Split(100m, shares),
+            Throws.TypeOf<ValidationFailedException>());
+    }
+
+    [Test]
+    public void Allows_zero_shares_for_a_free_disposal()
+    {
+        var shares = new ShareInput[] { new(1, 0m), new(2, 0m) };
+
+        Assert.That(strategy.Split(0m, shares).Select(share => share.Amount), Is.EqualTo(new[] { 0m, 0m }));
+    }
 }

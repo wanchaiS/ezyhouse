@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Core;
 using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.ValueObjects;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.Bills;
 
 public sealed record BillTypeRefDto(int? Id, string Name);
 
@@ -17,11 +17,11 @@ public sealed record BillTypeDto(
     DateOnly? NextDueDate);
 
 public sealed record BillTypeInput(
-    [property: Required, StringLength(100, MinimumLength = 1)] string? Name,
-    [property: Required] Frequency? Frequency,
-    [property: Required] DateOnly? StartDate,
+    [Required, StringLength(100, MinimumLength = 1)] string? Name,
+    [Required] Frequency? Frequency,
+    [Required] DateOnly? StartDate,
     DateOnly? EndDate,
-    [property: Required] List<int>? MemberIds);
+    [Required] List<int>? MemberIds);
 
 public sealed record BillDto(
     int Id,
@@ -34,6 +34,6 @@ public sealed record BillDto(
     IReadOnlyList<PaidShareDto> Shares);
 
 public sealed record SubmitBillInput(
-    [property: Required, Money] decimal? Amount,
-    [property: Required] SplitType? SplitType,
+    [Required, Money] decimal? Amount,
+    [Required] SplitType? SplitType,
     List<ShareInput>? Shares);

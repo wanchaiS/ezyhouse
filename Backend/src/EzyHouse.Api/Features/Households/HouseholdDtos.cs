@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using EzyHouse.Api.Core;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.Households;
 
 public sealed record HouseholdDto(
     int Id,
@@ -10,9 +11,9 @@ public sealed record HouseholdDto(
     IReadOnlyList<UserRefDto> Members);
 
 public sealed record CreateHouseholdRequest(
-    [property: Required, StringLength(100, MinimumLength = 1)] string? Name);
+    [Required, StringLength(100, MinimumLength = 1)] string? Name);
 
 public sealed record JoinHouseholdRequest(
-    [property: Required, StringLength(8, MinimumLength = 8)] string? InviteCode);
+    [Required, StringLength(8, MinimumLength = 8)] string? InviteCode);
 
-public sealed record TransferPrimaryRequest([property: Required] int? UserId);
+public sealed record TransferPrimaryRequest([Required] int? UserId);

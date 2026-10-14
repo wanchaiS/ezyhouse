@@ -11,9 +11,9 @@ public class PaidShare
 
     public decimal Amount { get; set; }
 
-    public bool Paid { get; set; }
+    public bool Paid { get; private set; }
 
-    public DateOnly? PaidDate { get; set; }
+    public DateOnly? PaidDate { get; private set; }
 
     public User? User { get; set; }
 
@@ -32,5 +32,11 @@ public class PaidShare
     {
         Paid = paid;
         PaidDate = paidDate;
+    }
+
+    public void SetPaid(bool paid, DateOnly today)
+    {
+        Paid = paid;
+        PaidDate = paid ? today : null;
     }
 }

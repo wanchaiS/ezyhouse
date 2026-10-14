@@ -1,6 +1,4 @@
-using EzyHouse.Api.Dtos;
-
-namespace EzyHouse.Api.Services;
+namespace EzyHouse.Api.Features.Rent;
 
 public interface IRentService
 {

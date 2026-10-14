@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Core;
 using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.ValueObjects;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.FurnitureItems;
 
 public sealed record PurchaseDto(
     DateOnly Date,
@@ -36,26 +36,26 @@ public sealed record FurnitureDto(
     DisposalDto? Disposal);
 
 public sealed record PurchaseInput(
-    [property: Required] DateOnly? Date,
-    [property: Required, Money] decimal? Amount,
-    [property: Required] int? PaidByUserId,
-    [property: Required] SplitType? SplitType,
-    [property: Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required] DateOnly? Date,
+    [Required, Money] decimal? Amount,
+    [Required] int? PaidByUserId,
+    [Required] SplitType? SplitType,
+    [Required, MinLength(1)] List<ShareInput>? Shares);
 
 public sealed record FurnitureInput(
-    [property: Required, StringLength(100, MinimumLength = 1)] string? Name,
-    [property: Required] PurchaseInput? Purchase);
+    [Required, StringLength(100, MinimumLength = 1)] string? Name,
+    [Required] PurchaseInput? Purchase);
 
 public sealed record SaleInput(
-    [property: Required] DateOnly? Date,
-    [property: Required, Money] decimal? Amount,
-    [property: Required] int? ReceivedByUserId,
-    [property: Required] SplitType? SplitType,
-    [property: Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required] DateOnly? Date,
+    [Required, Money] decimal? Amount,
+    [Required] int? ReceivedByUserId,
+    [Required] SplitType? SplitType,
+    [Required, MinLength(1)] List<ShareInput>? Shares);
 
 public sealed record DisposalInput(
-    [property: Required] DateOnly? Date,
-    [property: Required, Money(AllowZero = true)] decimal? Amount,
-    [property: Required] int? PaidByUserId,
-    [property: Required] SplitType? SplitType,
-    [property: Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required] DateOnly? Date,
+    [Required, Money(AllowZero = true)] decimal? Amount,
+    [Required] int? PaidByUserId,
+    [Required] SplitType? SplitType,
+    [Required, MinLength(1)] List<ShareInput>? Shares);

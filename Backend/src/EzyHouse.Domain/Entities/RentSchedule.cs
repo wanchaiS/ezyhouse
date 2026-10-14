@@ -17,17 +17,17 @@ public class RentSchedule : RecurringSchedule<RentPeriod>
     /// <summary>
     /// The payee is whoever is primary now. The payee's own share is ticked automatically.
     /// </summary>
-    public override RentPeriod CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
+    protected override RentPeriod CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
     {
         ScheduleId = Id,
         StartDate = slot.Start,
         EndDate = slot.End,
         Amount = Amount,
         PayeeUserId = primaryUserId,
-        Shares = Shares.Select(share => new PaidShare(share.UserId, share.Amount)
-        {
-            Paid = share.UserId == primaryUserId,
-            PaidDate = share.UserId == primaryUserId ? slot.Start : null,
-        }).ToList(),
+        Shares = Shares.Select(share => new PaidShare(
+            share.UserId,
+            share.Amount,
+            share.UserId == primaryUserId,
+            share.UserId == primaryUserId ? slot.Start : null)).ToList(),
     };
 }

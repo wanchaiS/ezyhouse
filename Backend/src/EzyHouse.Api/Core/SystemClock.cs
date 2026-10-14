@@ -1,6 +1,6 @@
 using EzyHouse.Domain.Interfaces;
 
-namespace EzyHouse.Api.Infrastructure;
+namespace EzyHouse.Api.Core;
 
 public sealed class SystemClock : IClock
 {

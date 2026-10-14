@@ -1,6 +1,6 @@
-using EzyHouse.Api.Dtos;
+using EzyHouse.Api.Core;
 
-namespace EzyHouse.Api.Services;
+namespace EzyHouse.Api.Features.Auth;
 
 public interface IAuthService
 {

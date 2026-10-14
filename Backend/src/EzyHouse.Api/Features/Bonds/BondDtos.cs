@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Core;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.Bonds;
 
 public sealed record ContributionDto(UserRefDto User, decimal Amount, DateOnly Date);
 
@@ -13,11 +13,11 @@ public sealed record BondDto(
     decimal Outstanding);
 
 public sealed record ContributionInput(
-    [property: Required] int? UserId,
-    [property: Required, Money] decimal? Amount,
-    [property: Required] DateOnly? Date);
+    [Required] int? UserId,
+    [Required, Money] decimal? Amount,
+    [Required] DateOnly? Date);
 
 public sealed record BondInput(
-    [property: Required, Money] decimal? Total,
-    [property: Required] DateOnly? PaidDate,
-    [property: Required] List<ContributionInput>? Contributions);
+    [Required, Money] decimal? Total,
+    [Required] DateOnly? PaidDate,
+    [Required] List<ContributionInput>? Contributions);

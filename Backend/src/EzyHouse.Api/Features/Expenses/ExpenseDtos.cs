@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using EzyHouse.Api.Infrastructure;
+using EzyHouse.Api.Core;
 using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.ValueObjects;
 
-namespace EzyHouse.Api.Dtos;
+namespace EzyHouse.Api.Features.Expenses;
 
 public sealed record ExpenseDto(
     int Id,
@@ -16,9 +16,9 @@ public sealed record ExpenseDto(
     IReadOnlyList<ShareDto> Shares);
 
 public sealed record ExpenseInput(
-    [property: Required, StringLength(500, MinimumLength = 1)] string? Description,
-    [property: Required, Money] decimal? Amount,
-    [property: Required] DateOnly? Date,
-    [property: Required] int? PaidByUserId,
-    [property: Required] SplitType? SplitType,
-    [property: Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, StringLength(500, MinimumLength = 1)] string? Description,
+    [Required, Money] decimal? Amount,
+    [Required] DateOnly? Date,
+    [Required] int? PaidByUserId,
+    [Required] SplitType? SplitType,
+    [Required, MinLength(1)] List<ShareInput>? Shares);

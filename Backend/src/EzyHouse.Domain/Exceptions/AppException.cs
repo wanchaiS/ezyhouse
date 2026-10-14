@@ -14,6 +14,13 @@ public sealed class ValidationFailedException(string message) : AppException(mes
     public override string Title => "Validation failed";
 }
 
+public sealed class UnauthorizedException(string message) : AppException(message)
+{
+    public override int StatusCode => 401;
+
+    public override string Title => "Not logged in";
+}
+
 public sealed class ForbiddenException(string message) : AppException(message)
 {
     public override int StatusCode => 403;

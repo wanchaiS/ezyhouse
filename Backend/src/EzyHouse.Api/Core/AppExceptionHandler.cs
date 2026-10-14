@@ -2,7 +2,7 @@ using EzyHouse.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EzyHouse.Api.Infrastructure;
+namespace EzyHouse.Api.Core;
 
 public sealed class AppExceptionHandler(IProblemDetailsService problemDetails) : IExceptionHandler
 {

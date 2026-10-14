@@ -1,9 +1,11 @@
 using EzyHouse.Domain.Enums;
+using EzyHouse.Domain.Exceptions;
+using EzyHouse.Domain.Interfaces;
 using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Domain.Entities;
 
-public class Bill
+public class Bill : IHouseholdOwned
 {
     public int Id { get; set; }
 
@@ -23,15 +25,39 @@ public class Bill
 
     public DateOnly DueDate { get; set; }
 
-    public BillStatus Status { get; set; }
+    public BillStatus Status { get; private set; } = BillStatus.Pending;
 
-    public decimal? Amount { get; set; }
+    public decimal? Amount { get; private set; }
 
-    public int? PayeeUserId { get; set; }
+    public int? PayeeUserId { get; private set; }
 
     public User? Payee { get; set; }
 
-    public DateOnly? SubmittedDate { get; set; }
+    public DateOnly? SubmittedDate { get; private set; }
 
     public List<PaidShare> Shares { get; set; } = [];
+
+    /// <summary>The payee's own share is ticked straight away, since they paid the bill.</summary>
+    public void Submit(decimal amount, IReadOnlyList<Share> shares, int payeeUserId, DateOnly today)
+    {
+        if (Status != BillStatus.Pending)
+            throw new BusinessRuleException("This bill is already submitted; its amount can't be changed.");
+
+        Amount = amount;
+        PayeeUserId = payeeUserId;
+        SubmittedDate = today;
+        Status = BillStatus.Submitted;
+        Shares = shares.Select(share => new PaidShare(share.UserId, share.Amount)).ToList();
+        Shares.SingleOrDefault(share => share.UserId == payeeUserId)?.SetPaid(true, today);
+    }
+
+    public void SetSharePaid(int userId, bool paid, DateOnly today)
+    {
+        if (Status == BillStatus.Pending)
+            throw new BusinessRuleException("A pending bill has no shares to tick; submit it first.");
+
+        PaidShare share = Shares.SingleOrDefault(share => share.UserId == userId)
+            ?? throw new NotFoundException("That person isn't in this bill's split.");
+        share.SetPaid(paid, today);
+    }
 }

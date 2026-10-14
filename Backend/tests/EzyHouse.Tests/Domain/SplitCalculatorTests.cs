@@ -37,4 +37,14 @@ public class SplitCalculatorTests
             () => calculator.Split(10m, SplitType.Equal, shares, members),
             Throws.TypeOf<ValidationFailedException>());
     }
+
+    [Test]
+    public void Rejects_an_unknown_split_type()
+    {
+        var shares = new ShareInput[] { new(1, null) };
+
+        Assert.That(
+            () => calculator.Split(10m, (SplitType)99, shares, members),
+            Throws.TypeOf<ValidationFailedException>());
+    }
 }

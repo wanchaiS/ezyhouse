@@ -1,16 +1,16 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using EzyHouse.Api.Infrastructure;
-using EzyHouse.Api.Services;
+using EzyHouse.Api.Core;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
 using EzyHouse.Domain.Splitting;
 using EzyHouse.Infrastructure.Data;
-using EzyHouse.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +21,7 @@ builder.Services.AddDbContext<EzyHouseDbContext>(options =>
 
 // JSON: camelCase (the default) and lowercase camelCase enum strings, as API.md requires
 builder.Services.AddControllers().AddJsonOptions(o =>
-    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)));
+    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
 
 // Errors: AppException subclasses become ProblemDetails responses
 builder.Services.AddProblemDetails();
@@ -40,7 +40,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
         };
     });
-builder.Services.AddAuthorization();
+// Every endpoint needs a signed-in user unless it opts out with [AllowAnonymous]
+builder.Services.AddAuthorization(o => o.FallbackPolicy = new AuthorizationPolicyBuilder()
+    .RequireAuthenticatedUser()
+    .Build());
 
 // CORS for the React dev server
 builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
@@ -49,7 +52,6 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
 
 // Application services (see Section 5)
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<ISplitStrategy, EqualSplitStrategy>();
 builder.Services.AddSingleton<ISplitStrategy, ExactSplitStrategy>();
@@ -58,7 +60,22 @@ builder.Services.AddSingleton<BalanceCalculator>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();   // plus a bearer security definition, so Swagger UI can send tokens
+// Bearer security definition, so Swagger UI's Authorize button can send tokens
+builder.Services.AddSwaggerGen(o =>
+{
+    o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the JWT returned when signing in.",
+    });
+    o.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = [],
+    });
+});
 
 var app = builder.Build();
 

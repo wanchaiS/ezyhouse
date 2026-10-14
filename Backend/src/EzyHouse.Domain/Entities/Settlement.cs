@@ -3,7 +3,7 @@ using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Domain.Entities;
 
-public class Settlement : IBalanceContributor
+public class Settlement : IBalanceContributor, IHouseholdOwned
 {
     public int Id { get; set; }
 

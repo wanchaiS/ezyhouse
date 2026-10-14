@@ -4,7 +4,7 @@ using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Domain.Entities;
 
-public class Expense : IBalanceContributor
+public class Expense : IBalanceContributor, IHouseholdOwned
 {
     public int Id { get; set; }
 

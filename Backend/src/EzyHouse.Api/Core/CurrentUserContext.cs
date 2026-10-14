@@ -1,29 +1,27 @@
-using EzyHouse.Api.Infrastructure;
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Exceptions;
-using EzyHouse.Domain.Interfaces;
+using EzyHouse.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace EzyHouse.Api.Services;
+namespace EzyHouse.Api.Core;
 
 public sealed class CurrentUserContext(
     IHttpContextAccessor http,
-    IRepository<User> users,
-    IRepository<Household> households) : ICurrentUserContext
+    EzyHouseDbContext db) : ICurrentUserContext
 {
     private User? caller;
 
     public int UserId =>
         http.HttpContext?.User.GetUserId()
-        ?? throw new ForbiddenException("You need to be signed in.");
+        ?? throw new UnauthorizedException("You need to be signed in.");
 
     public async Task<User> GetUserAsync()
     {
         if (caller is not null)
             return caller;
 
-        caller = await users.GetByIdAsync(UserId)
-            ?? throw new NotFoundException("User was not found.");
+        caller = await db.Users.FindAsync(UserId)
+            ?? throw new UnauthorizedException("Your account no longer exists. Please sign in again.");
         return caller;
     }
 
@@ -33,7 +31,7 @@ public sealed class CurrentUserContext(
         if (user.HouseholdId is not int householdId)
             throw new ForbiddenException("You need to be in a household to do that.");
 
-        Household? household = await households.Query()
+        Household? household = await db.Households
             .Include(item => item.Members)
             .Include(item => item.PrimaryUser)
             .FirstOrDefaultAsync(item => item.Id == householdId);

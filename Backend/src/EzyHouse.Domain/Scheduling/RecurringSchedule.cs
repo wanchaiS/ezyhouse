@@ -1,9 +1,10 @@
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Enums;
+using EzyHouse.Domain.Interfaces;
 
 namespace EzyHouse.Domain.Scheduling;
 
-public abstract class RecurringSchedule<TOccurrence>
+public abstract class RecurringSchedule<TOccurrence> : IHouseholdOwned
 {
     public int Id { get; set; }
 
@@ -39,11 +40,28 @@ public abstract class RecurringSchedule<TOccurrence>
         }
     }
 
-    public DateOnly? GetNextDueDate(DateOnly today) =>
-        GetSlots(today.AddMonths(4))
+    /// <summary>
+    /// Looks ahead from the start date when the schedule hasn't begun yet, so a schedule
+    /// starting far in the future still reports its first due date.
+    /// </summary>
+    public DateOnly? GetNextDueDate(DateOnly today)
+    {
+        DateOnly from = StartDate > today ? StartDate : today;
+        return GetSlots(from.AddMonths(4))
             .Where(slot => slot.Start > today)
             .Select(slot => (DateOnly?)slot.Start)
             .FirstOrDefault();
+    }
 
-    public abstract TOccurrence CreateOccurrence(ScheduleSlot slot, int primaryUserId);
+    /// <summary>
+    /// Creates occurrences only for slots after <paramref name="lastCoveredDate"/>, so editing the
+    /// start date never back-fills periods before what already exists.
+    /// </summary>
+    public List<TOccurrence> GenerateMissing(DateOnly? lastCoveredDate, DateOnly today, int primaryUserId) =>
+        GetSlots(today)
+            .Where(slot => lastCoveredDate is null || slot.Start > lastCoveredDate)
+            .Select(slot => CreateOccurrence(slot, primaryUserId))
+            .ToList();
+
+    protected abstract TOccurrence CreateOccurrence(ScheduleSlot slot, int primaryUserId);
 }
