@@ -5,6 +5,7 @@ using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
 using EzyHouse.Api.Features.Balances;
 using EzyHouse.Api.Features.Bonds;
+using EzyHouse.Api.Features.Expenses;
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
 
 // Feature slices: each registers its own services
 builder.Services.AddAuthFeature(builder.Configuration);
+builder.Services.AddExpensesFeature();
 builder.Services.AddBalancesFeature();
 builder.Services.AddBondsFeature();
 
