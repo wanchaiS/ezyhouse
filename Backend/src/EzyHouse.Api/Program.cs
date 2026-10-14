@@ -3,12 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
+using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
 using EzyHouse.Domain.Splitting;
 using EzyHouse.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -88,6 +90,10 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<EzyHouseDbContext>();
     db.Database.Migrate();          // create or upgrade the schema
+    await DemoSeeder.SeedAsync(     // demo users and data, only when the database is empty
+        db,
+        scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>(),
+        scope.ServiceProvider.GetRequiredService<IClock>().Today);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
