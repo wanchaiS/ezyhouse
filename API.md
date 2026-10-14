@@ -95,9 +95,12 @@ Household { id, name, inviteCode, primary: UserRef, members: UserRef[] }
 - any bill share owed by you or to you is unpaid
 - you are primary and other members remain ⚠ (hand over primary first)
 
+When leaving is blocked, the 409's `detail` lists every reason that applies, not just the first.
+
 On leaving:
 - you are removed from every bill type's members ⚠
 - you give up your stake in furniture, and the items stay with the household
+- if you were the last member, the household is kept as history and its invite code stops working (joining with it returns 404)
 
 ---
 
@@ -161,8 +164,8 @@ RentPeriod        { id, scheduleId, startDate, endDate, amount, payee: UserRef, 
 
 Rules:
 - There is no background timer. Periods up to today are created when the list is read. A unique index on `(scheduleId, startDate)` prevents duplicates.
-- Edits only affect periods created later. Deleting a schedule deletes its periods.
-- The payee is whoever is primary when the period is created. The payee's own share is ticked automatically ⚠.
+- Edits only affect periods created later. Changing a schedule's start date or frequency never re-creates past periods: new periods start after the last existing one ends. Deleting a schedule deletes its periods.
+- The payee is whoever is primary when the period is created. The payee's own share is ticked automatically ⚠, with `paidDate` = the period's start date.
 - Ticks can be undone (`paid: false`).
 - New members are added to a schedule manually by the primary.
 
@@ -195,7 +198,7 @@ SubmitBillInput { amount, splitType, shares?: ShareInput[] }
 Rules:
 - Placeholders are created when the list is read, the same way as rent periods. A unique index on `(billTypeId, dueDate)` prevents duplicates.
 - Edits to a bill type only affect placeholders created later.
-- The payee is the primary who submitted. Their own share is ticked automatically ⚠.
+- The payee is the primary who submitted. Their own share is ticked automatically ⚠, with `paidDate` = the submitted date.
 - A submitted amount can't be changed ⚠ (409).
 - Deleting a bill type removes its pending placeholders and **keeps submitted bills** as history ⚠.
 - New members are added to bill types manually by the primary.
@@ -253,7 +256,7 @@ BondInput         { total, paidDate, contributions: { userId, amount, date }[] }
 | PUT | `/api/bonds/{id}` | `BondInput` | `Bond` | primary |
 | DELETE | `/api/bonds/{id}` | — | 204 | primary |
 
-Rule: contributions can't add up to more than `total` (400).
+Rule: contributions can't add up to more than `total` (400). The primary can always edit a bond; it never locks.
 
 ---
 
@@ -277,4 +280,4 @@ There is no dedicated endpoint. The frontend builds the dashboard from existing 
 
 ## Open questions
 
-- Bond "lock": should a bond become read-only once it's entered?
+None open. (The bond "lock" question is settled: no lock, see Bond.)
