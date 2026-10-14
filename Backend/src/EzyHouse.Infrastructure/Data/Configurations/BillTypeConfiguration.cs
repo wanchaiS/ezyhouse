@@ -18,9 +18,13 @@ public sealed class BillTypeConfiguration : IEntityTypeConfiguration<BillType>
             .HasForeignKey(billType => billType.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Users are never deleted, so a member link must block a user delete rather than vanish with it.
         builder.HasMany(billType => billType.Members)
             .WithMany()
-            .UsingEntity(join => join.ToTable("BillTypeMembers"));
+            .UsingEntity<Dictionary<string, object>>(
+                "BillTypeMembers",
+                member => member.HasOne<User>().WithMany().HasForeignKey("MembersId").OnDelete(DeleteBehavior.Restrict),
+                billType => billType.HasOne<BillType>().WithMany().HasForeignKey("BillTypeId").OnDelete(DeleteBehavior.Cascade));
 
         builder.HasMany(billType => billType.Bills)
             .WithOne(bill => bill.BillType)
