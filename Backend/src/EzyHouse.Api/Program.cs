@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
+using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
@@ -66,6 +67,7 @@ builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
 
 // Feature slices: each registers its own services
 builder.Services.AddAuthFeature(builder.Configuration);
+builder.Services.AddBondsFeature();
 
 builder.Services.AddEndpointsApiExplorer();
 // Bearer security definition, so Swagger UI's Authorize button can send tokens
