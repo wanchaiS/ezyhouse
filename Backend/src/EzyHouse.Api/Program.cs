@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
 using EzyHouse.Api.Features.Balances;
+using EzyHouse.Api.Features.Bills;
 using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Api.Features.Expenses;
 using EzyHouse.Api.Features.FurnitureItems;
@@ -74,6 +75,7 @@ builder.Services.AddAuthFeature(builder.Configuration);
 builder.Services.AddExpensesFeature();
 builder.Services.AddBalancesFeature();
 builder.Services.AddRentFeature();
+builder.Services.AddBillsFeature();
 builder.Services.AddFurnitureFeature();
 builder.Services.AddBondsFeature();
 
