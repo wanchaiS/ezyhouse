@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
+using EzyHouse.Api.Features.Auth;
 using EzyHouse.Domain.Balances;
 using EzyHouse.Domain.Interfaces;
 using EzyHouse.Domain.Splitting;
@@ -58,6 +59,9 @@ builder.Services.AddSingleton<ISplitStrategy, ExactSplitStrategy>();
 builder.Services.AddSingleton<SplitCalculator>();
 builder.Services.AddSingleton<BalanceCalculator>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
+// Feature slices: each registers its own services
+builder.Services.AddAuthFeature(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 // Bearer security definition, so Swagger UI's Authorize button can send tokens
