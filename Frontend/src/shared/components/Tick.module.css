@@ -1,0 +1,5 @@
+.tick { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1.5px solid #c4c4cc; background: #fff; color: transparent; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.tick svg { width: 16px; height: 16px; }
+.on { background: var(--pos); border-color: var(--pos); color: #fff; }
+.tick:disabled { cursor: default; }
+.tick:disabled:not(.on) { border-style: dashed; }

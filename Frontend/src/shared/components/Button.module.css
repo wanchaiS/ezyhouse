@@ -1,0 +1,12 @@
+.btn { height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-weight: 600; cursor: pointer; }
+.btn:disabled { opacity: .6; cursor: default; }
+.primary { background: var(--accent); color: #fff; }
+.danger { background: var(--neg-soft); color: var(--neg); }
+.plain { background: transparent; color: var(--muted); }
+.quietDanger { background: transparent; color: var(--neg); }
+.block { display: block; width: 100%; }
+.small { height: 34px; padding: 0 14px; border-radius: 10px; font-size: 14px; flex: none; }
+.iconBtn { width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+.iconBtn svg { width: 20px; height: 20px; }
+.accent { background: var(--accent); color: #fff; }
+.link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; }

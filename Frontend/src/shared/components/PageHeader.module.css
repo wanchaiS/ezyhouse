@@ -1,0 +1,4 @@
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 20px 4px 14px; }
+.eyebrow { font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+.back { display: flex; align-items: center; gap: 2px; margin: 0 0 8px -6px; color: var(--accent); font-size: 16px; }
+.back svg { width: 22px; height: 22px; }

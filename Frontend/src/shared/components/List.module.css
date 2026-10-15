@@ -1,0 +1,15 @@
+.list { background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+.head { padding: 16px 14px 10px; }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 14px; border: 0; background: none; text-align: left; color: inherit; }
+button.row, a.row { cursor: pointer; }
+button.row:active, a.row:active { background: #f6f6f9; }
+.row + .row, .head + .row, .row + .fact, .fact + .row, .fact + .fact { border-top: 1px solid var(--line); }
+.main { flex: 1; min-width: 0; }
+.title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sub { font-size: 13px; color: var(--muted); }
+.end { text-align: right; white-space: nowrap; }
+.chev { width: 18px; height: 18px; color: #c4c4cc; flex: none; display: grid; }
+.chev svg { width: 18px; height: 18px; }
+.fact { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; }
+.fact > span:first-child { color: var(--muted); }
+.fact > span:last-child { text-align: right; }

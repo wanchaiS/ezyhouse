@@ -1,0 +1,14 @@
+/* Phone: a bottom sheet, as in the mockup. */
+.sheet { border: 0; padding: 0; margin: auto 0 0; width: 100%; max-width: 100%; max-height: 92dvh; overflow-y: auto; background: var(--bg); color: var(--ink); border-radius: 22px 22px 0 0; }
+.sheet::backdrop { background: rgba(10,10,20,.35); }
+.inner { padding: 8px 16px 30px; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: #c7c7cf; margin: 0 auto 12px; }
+.title { font-size: 21px; margin: 2px 4px 12px; letter-spacing: -.01em; }
+.actions { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+
+/* Desktop: a centred dialog. */
+@media (min-width: 820px) {
+  .sheet { margin: auto; width: min(480px, calc(100% - 48px)); max-height: 85dvh; border-radius: 22px; box-shadow: 0 30px 60px rgba(0,0,0,.18); }
+  .inner { padding: 22px 24px 24px; }
+  .grabber { display: none; }
+}

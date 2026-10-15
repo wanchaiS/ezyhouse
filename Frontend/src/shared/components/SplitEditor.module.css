@@ -1,0 +1,14 @@
+.label { display: block; font-size: 13px; color: var(--muted); margin: 0 4px 5px; }
+.editor { margin-bottom: 12px; }
+.people { background: #fff; border-radius: 12px; margin-top: 8px; }
+.person { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; }
+.person + .person { border-top: 1px solid var(--line); }
+.person label { flex: 1; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.person input[type=checkbox] { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin: 0; flex: none; border: 1.5px solid #c4c4cc; border-radius: 50%; display: grid; place-items: center; }
+.person input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+.person input[type=checkbox]:checked::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.person input[type=checkbox]:disabled { opacity: .55; }
+.amountInput { width: 100px; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; text-align: right; }
+.each { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.total { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); margin: 8px 4px 0; font-variant-numeric: tabular-nums; }
+.warn { color: var(--warn); font-weight: 600; }

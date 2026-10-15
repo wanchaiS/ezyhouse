@@ -1,0 +1,7 @@
+.field { display: block; margin-bottom: 12px; }
+.label { display: block; font-size: 13px; color: var(--muted); margin: 0 4px 5px; }
+.error { display: block; font-size: 13px; color: var(--neg); margin: 5px 4px 0; }
+.input { width: 100%; height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.input[aria-invalid="true"] { border-color: var(--neg); }
+.big { height: 58px; font-size: 26px; font-weight: 700; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }

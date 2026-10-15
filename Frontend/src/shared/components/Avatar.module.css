@@ -1,0 +1,2 @@
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; color: #fff; font-weight: 600; font-size: 14px; }
+.sm { width: 28px; height: 28px; font-size: 12px; }

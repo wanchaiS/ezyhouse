@@ -1,0 +1,4 @@
+.toast { position: fixed; left: 16px; right: 16px; top: 16px; z-index: 30; background: #1c1c21; color: #fff; border-radius: 14px; padding: 12px 14px; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+@media (min-width: 820px) {
+  .toast { left: 50%; right: auto; top: 20px; width: 420px; transform: translateX(-50%); }
+}
