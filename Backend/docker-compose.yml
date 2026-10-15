@@ -13,6 +13,13 @@ services:
       - --collation-server=utf8mb4_unicode_ci
     volumes:
       - ezyhouse-mysql:/var/lib/mysql
+    # Lets `docker compose up -d --wait` return only once MySQL accepts connections. Checking over
+    # TCP matters: on first start MySQL runs a temporary setup server that doesn't listen on TCP.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
 
 volumes:
   ezyhouse-mysql:
