@@ -85,6 +85,14 @@ docker compose up -d --wait
 
 Then run the API again: it recreates the tables and the demo data.
 
+To start with **no** demo data instead, as a brand-new user would see it, run the API with the
+demo data switched off. Demo data is only added at start-up, so later restarts must keep the switch
+off too:
+
+```bash
+DemoData__Seed=false dotnet run --project src/EzyHouse.Api --launch-profile http
+```
+
 ## Change the database schema
 
 Edit an entity or its configuration in `src/EzyHouse.Infrastructure/Data/Configurations/`, then add

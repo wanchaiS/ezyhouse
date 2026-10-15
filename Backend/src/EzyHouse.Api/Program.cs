@@ -113,10 +113,12 @@ if (app.Environment.IsDevelopment())
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<EzyHouseDbContext>();
     db.Database.Migrate();          // create or upgrade the schema
-    await DemoSeeder.SeedAsync(     // demo users and data, only when the database is empty
-        db,
-        scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>(),
-        scope.ServiceProvider.GetRequiredService<IClock>().Today);
+    // DemoData:Seed=false starts with an empty database, to try the app as a brand-new user would
+    if (app.Configuration.GetValue("DemoData:Seed", true))
+        await DemoSeeder.SeedAsync(     // demo users and data, only when the database is empty
+            db,
+            scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>(),
+            scope.ServiceProvider.GetRequiredService<IClock>().Today);
     app.UseSwagger();
     app.UseSwaggerUI();
 }
