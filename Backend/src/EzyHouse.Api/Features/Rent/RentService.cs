@@ -10,7 +10,7 @@ namespace EzyHouse.Api.Features.Rent;
 public sealed class RentService(
     IRentRepository rent,
     ICurrentUserContext currentUser,
-    IRecurringChargeGenerator generator,
+    IScheduleRunner runner,
     SplitCalculator splitCalculator,
     IClock clock) : IRentService
 {
@@ -18,7 +18,7 @@ public sealed class RentService(
     {
         Household household = await currentUser.RequireHouseholdAsync();
         List<RentSchedule> schedules = await rent.ListSchedulesAsync(household.Id);
-        return schedules.Select(schedule => schedule.ToDto(clock.Today)).ToList();
+        return schedules.Select(schedule => schedule.ToDto()).ToList();
     }
 
     public async Task<RentScheduleDto> CreateScheduleAsync(RentScheduleInput request)
@@ -26,9 +26,15 @@ public sealed class RentService(
         Household household = await currentUser.RequirePrimaryAsync();
         var schedule = new RentSchedule { HouseholdId = household.Id };
         Apply(schedule, request, household);
+
+        // Starts at the first date on or after today; earlier dates are never created.
+        schedule.Begin(clock.Today);
         rent.AddSchedule(schedule);
         await rent.SaveChangesAsync();
-        return schedule.ToDto(clock.Today);
+
+        // If that first date is today, its rent is created straight away rather than on the next hourly run.
+        await runner.RunDueAsync(schedule, household.PrimaryUserId);
+        return schedule.ToDto();
     }
 
     public async Task<RentScheduleDto> UpdateScheduleAsync(int id, RentScheduleInput request)
@@ -37,10 +43,16 @@ public sealed class RentService(
         RentSchedule schedule = await rent.FindScheduleAsync(household.Id, id)
             ?? throw new NotFoundException("Rent schedule not found.");
 
-        // Existing periods keep their own copies of amount and shares; only later periods change.
+        // Anything already due is created under the old settings first, so the edit only shapes what comes after.
+        await runner.RunDueAsync(schedule, household.PrimaryUserId);
+
+        // Rent already created keeps its own copies of amount and shares; only later rent changes.
         Apply(schedule, request, household);
+        schedule.Reschedule(clock.Today);
         await rent.SaveChangesAsync();
-        return schedule.ToDto(clock.Today);
+
+        await runner.RunDueAsync(schedule, household.PrimaryUserId);
+        return schedule.ToDto();
     }
 
     public async Task DeleteScheduleAsync(int id)
@@ -52,31 +64,14 @@ public sealed class RentService(
         await rent.SaveChangesAsync();
     }
 
-    public async Task<IReadOnlyList<RentPeriodDto>> ListPeriodsAsync()
-    {
-        Household household = await currentUser.RequireHouseholdAsync();
-        await generator.GenerateRentPeriodsAsync(household, clock.Today);
-        List<RentPeriod> periods = await rent.ListPeriodsAsync(household.Id);
-        return periods.Select(period => period.ToDto()).ToList();
-    }
-
-    public async Task<RentPeriodDto> SetSharePaidAsync(int periodId, int userId, bool paid)
-    {
-        Household household = await currentUser.RequireHouseholdAsync();
-        if (currentUser.UserId != userId && currentUser.UserId != household.PrimaryUserId)
-            throw new ForbiddenException("Only that housemate or the primary can change this share.");
-
-        RentPeriod period = await rent.FindPeriodAsync(household.Id, periodId)
-            ?? throw new NotFoundException("Rent period not found.");
-        period.SetSharePaid(userId, paid, clock.Today);
-        await rent.SaveChangesAsync();
-        return period.ToDto();
-    }
-
     private void Apply(RentSchedule schedule, RentScheduleInput request, Household household)
     {
         if (request.EndDate is { } end && end < request.StartDate!.Value)
             throw new ValidationFailedException("The end date can't be before the start date.");
+
+        // Rent split among nobody couldn't be created, so the schedule would never produce anything.
+        if (request.Shares!.Count == 0)
+            throw new ValidationFailedException("Pick at least one person to share the rent.");
 
         HashSet<int> memberIds = household.Members.Select(member => member.Id).ToHashSet();
         IReadOnlyList<Share> shares = splitCalculator.Split(

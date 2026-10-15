@@ -16,51 +16,6 @@ namespace EzyHouse.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Bills",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    HouseholdId = table.Column<int>(type: "int", nullable: false),
-                    BillTypeId = table.Column<int>(type: "int", nullable: true),
-                    BillTypeName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DueDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: true),
-                    PayeeUserId = table.Column<int>(type: "int", nullable: true),
-                    SubmittedDate = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bills", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "BillShares",
-                columns: table => new
-                {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    BillId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Paid = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    PaidDate = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BillShares", x => new { x.BillId, x.UserId });
-                    table.ForeignKey(
-                        name: "FK_BillShares_Bills_BillId",
-                        column: x => x.BillId,
-                        principalTable: "Bills",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "BillTypeMembers",
                 columns: table => new
                 {
@@ -85,7 +40,9 @@ namespace EzyHouse.Infrastructure.Migrations
                     Frequency = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    EndDate = table.Column<DateOnly>(type: "date", nullable: true)
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    NextDueDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    LastCreatedDate = table.Column<DateOnly>(type: "date", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -133,6 +90,8 @@ namespace EzyHouse.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     HouseholdId = table.Column<int>(type: "int", nullable: false),
+                    Tag = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
@@ -140,11 +99,20 @@ namespace EzyHouse.Infrastructure.Migrations
                     PaidByUserId = table.Column<int>(type: "int", nullable: false),
                     CreatedByUserId = table.Column<int>(type: "int", nullable: false),
                     SplitType = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BillTypeId = table.Column<int>(type: "int", nullable: true),
+                    RentScheduleId = table.Column<int>(type: "int", nullable: true),
+                    PeriodEnd = table.Column<DateOnly>(type: "date", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Expenses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Expenses_BillTypes_BillTypeId",
+                        column: x => x.BillTypeId,
+                        principalTable: "BillTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -163,72 +131,6 @@ namespace EzyHouse.Infrastructure.Migrations
                         name: "FK_ExpenseShares_Expenses_ExpenseId",
                         column: x => x.ExpenseId,
                         principalTable: "Expenses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Furniture",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    HouseholdId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Furniture", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "FurnitureTransactions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FurnitureId = table.Column<int>(type: "int", nullable: false),
-                    Date = table.Column<DateOnly>(type: "date", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    CounterpartyUserId = table.Column<int>(type: "int", nullable: false),
-                    SplitType = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Kind = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FurnitureTransactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FurnitureTransactions_Furniture_FurnitureId",
-                        column: x => x.FurnitureId,
-                        principalTable: "Furniture",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "FurnitureTransactionShares",
-                columns: table => new
-                {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    FurnitureTransactionId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FurnitureTransactionShares", x => new { x.FurnitureTransactionId, x.UserId });
-                    table.ForeignKey(
-                        name: "FK_FurnitureTransactionShares_FurnitureTransactions_FurnitureTr~",
-                        column: x => x.FurnitureTransactionId,
-                        principalTable: "FurnitureTransactions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -265,7 +167,9 @@ namespace EzyHouse.Infrastructure.Migrations
                     Frequency = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    EndDate = table.Column<DateOnly>(type: "date", nullable: true)
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    NextDueDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    LastCreatedDate = table.Column<DateOnly>(type: "date", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -302,36 +206,6 @@ namespace EzyHouse.Infrastructure.Migrations
                         principalTable: "Households",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "RentPeriods",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ScheduleId = table.Column<int>(type: "int", nullable: false),
-                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    EndDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    PayeeUserId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RentPeriods", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RentPeriods_RentSchedules_ScheduleId",
-                        column: x => x.ScheduleId,
-                        principalTable: "RentSchedules",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RentPeriods_Users_PayeeUserId",
-                        column: x => x.PayeeUserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -404,55 +278,6 @@ namespace EzyHouse.Infrastructure.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
-                name: "RentPeriodShares",
-                columns: table => new
-                {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    RentPeriodId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Paid = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    PaidDate = table.Column<DateOnly>(type: "date", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RentPeriodShares", x => new { x.RentPeriodId, x.UserId });
-                    table.ForeignKey(
-                        name: "FK_RentPeriodShares_RentPeriods_RentPeriodId",
-                        column: x => x.RentPeriodId,
-                        principalTable: "RentPeriods",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RentPeriodShares_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bills_BillTypeId_DueDate",
-                table: "Bills",
-                columns: new[] { "BillTypeId", "DueDate" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bills_HouseholdId",
-                table: "Bills",
-                column: "HouseholdId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Bills_PayeeUserId",
-                table: "Bills",
-                column: "PayeeUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BillShares_UserId",
-                table: "BillShares",
-                column: "UserId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_BillTypeMembers_MembersId",
                 table: "BillTypeMembers",
@@ -462,6 +287,11 @@ namespace EzyHouse.Infrastructure.Migrations
                 name: "IX_BillTypes_HouseholdId",
                 table: "BillTypes",
                 column: "HouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BillTypes_NextDueDate",
+                table: "BillTypes",
+                column: "NextDueDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BondContributions_BondId",
@@ -479,14 +309,20 @@ namespace EzyHouse.Infrastructure.Migrations
                 column: "HouseholdId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Expenses_BillTypeId_Date",
+                table: "Expenses",
+                columns: new[] { "BillTypeId", "Date" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Expenses_CreatedByUserId",
                 table: "Expenses",
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Expenses_HouseholdId",
+                name: "IX_Expenses_HouseholdId_Tag",
                 table: "Expenses",
-                column: "HouseholdId");
+                columns: new[] { "HouseholdId", "Tag" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Expenses_PaidByUserId",
@@ -494,34 +330,14 @@ namespace EzyHouse.Infrastructure.Migrations
                 column: "PaidByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExpenseShares_UserId",
-                table: "ExpenseShares",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Furniture_CreatedByUserId",
-                table: "Furniture",
-                column: "CreatedByUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Furniture_HouseholdId",
-                table: "Furniture",
-                column: "HouseholdId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FurnitureTransactions_CounterpartyUserId",
-                table: "FurnitureTransactions",
-                column: "CounterpartyUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FurnitureTransactions_FurnitureId_Kind",
-                table: "FurnitureTransactions",
-                columns: new[] { "FurnitureId", "Kind" },
+                name: "IX_Expenses_RentScheduleId_Date",
+                table: "Expenses",
+                columns: new[] { "RentScheduleId", "Date" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_FurnitureTransactionShares_UserId",
-                table: "FurnitureTransactionShares",
+                name: "IX_ExpenseShares_UserId",
+                table: "ExpenseShares",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -536,25 +352,14 @@ namespace EzyHouse.Infrastructure.Migrations
                 column: "PrimaryUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RentPeriods_PayeeUserId",
-                table: "RentPeriods",
-                column: "PayeeUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RentPeriods_ScheduleId_StartDate",
-                table: "RentPeriods",
-                columns: new[] { "ScheduleId", "StartDate" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RentPeriodShares_UserId",
-                table: "RentPeriodShares",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_RentSchedules_HouseholdId",
                 table: "RentSchedules",
                 column: "HouseholdId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RentSchedules_NextDueDate",
+                table: "RentSchedules",
+                column: "NextDueDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RentScheduleShares_UserId",
@@ -591,38 +396,6 @@ namespace EzyHouse.Infrastructure.Migrations
                 name: "IX_Users_HouseholdId",
                 table: "Users",
                 column: "HouseholdId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Bills_BillTypes_BillTypeId",
-                table: "Bills",
-                column: "BillTypeId",
-                principalTable: "BillTypes",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Bills_Households_HouseholdId",
-                table: "Bills",
-                column: "HouseholdId",
-                principalTable: "Households",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Bills_Users_PayeeUserId",
-                table: "Bills",
-                column: "PayeeUserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_BillShares_Users_UserId",
-                table: "BillShares",
-                column: "UserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_BillTypeMembers_BillTypes_BillTypeId",
@@ -681,6 +454,14 @@ namespace EzyHouse.Infrastructure.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Expenses_RentSchedules_RentScheduleId",
+                table: "Expenses",
+                column: "RentScheduleId",
+                principalTable: "RentSchedules",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Expenses_Users_CreatedByUserId",
                 table: "Expenses",
                 column: "CreatedByUserId",
@@ -705,38 +486,6 @@ namespace EzyHouse.Infrastructure.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Furniture_Households_HouseholdId",
-                table: "Furniture",
-                column: "HouseholdId",
-                principalTable: "Households",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Furniture_Users_CreatedByUserId",
-                table: "Furniture",
-                column: "CreatedByUserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_FurnitureTransactions_Users_CounterpartyUserId",
-                table: "FurnitureTransactions",
-                column: "CounterpartyUserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_FurnitureTransactionShares_Users_UserId",
-                table: "FurnitureTransactionShares",
-                column: "UserId",
-                principalTable: "Users",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_Households_Users_PrimaryUserId",
                 table: "Households",
                 column: "PrimaryUserId",
@@ -749,11 +498,8 @@ namespace EzyHouse.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Users_Households_HouseholdId",
-                table: "Users");
-
-            migrationBuilder.DropTable(
-                name: "BillShares");
+                name: "FK_Households_Users_PrimaryUserId",
+                table: "Households");
 
             migrationBuilder.DropTable(
                 name: "BillTypeMembers");
@@ -765,19 +511,10 @@ namespace EzyHouse.Infrastructure.Migrations
                 name: "ExpenseShares");
 
             migrationBuilder.DropTable(
-                name: "FurnitureTransactionShares");
-
-            migrationBuilder.DropTable(
-                name: "RentPeriodShares");
-
-            migrationBuilder.DropTable(
                 name: "RentScheduleShares");
 
             migrationBuilder.DropTable(
                 name: "Settlements");
-
-            migrationBuilder.DropTable(
-                name: "Bills");
 
             migrationBuilder.DropTable(
                 name: "Bonds");
@@ -786,25 +523,16 @@ namespace EzyHouse.Infrastructure.Migrations
                 name: "Expenses");
 
             migrationBuilder.DropTable(
-                name: "FurnitureTransactions");
-
-            migrationBuilder.DropTable(
-                name: "RentPeriods");
-
-            migrationBuilder.DropTable(
                 name: "BillTypes");
-
-            migrationBuilder.DropTable(
-                name: "Furniture");
 
             migrationBuilder.DropTable(
                 name: "RentSchedules");
 
             migrationBuilder.DropTable(
-                name: "Households");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Households");
         }
     }
 }

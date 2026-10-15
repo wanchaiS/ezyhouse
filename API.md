@@ -1,17 +1,17 @@
-# Household Expenses — API Contract (v4)
+# Household Expenses — API Contract (v5)
 
 Frontend ↔ backend contract. Endpoint shapes and top-level schemas only.
 ⚠ = judgement call, open to veto.
 
-## What changed from v3
+## What changed from v4
 
-- **Bills are their own model and tab.** They work like rent: the primary submits the amount, then members tick their share as paid. Bills are no longer expenses.
-- **Expenses are groceries and other day-to-day shared costs only.** `category` and `?category=` were removed because only one category was left ⚠.
-- **`RentShare` was renamed `PaidShare`.** Rent and bills now use the same shape.
-- **`Frequency` gained `quarterly`** (rent and bills) ⚠.
-- **Leaving the household is also blocked by unpaid bill shares.**
-- **Leaving now checks debts, not your net balance.** It is blocked while you appear in any entry of `debts` from `GET /api/balances`. A net of $0 could hide two debts that cancel out (you owe Alice $10, Bob owes you $10), and once you leave nobody could settle them.
-- **Added a Dashboard section** explaining which endpoints build the dashboard. There is no new endpoint.
+- **Everything that costs money is an expense with a tag:** `rent`, `bills`, `groceries` or `furniture`. The tag only decides which tab shows it. Rent periods, bills and furniture items are no longer separate models.
+- **One balance per pair of people.** Every expense, whatever its tag, and every settlement count in it. A settlement of any amount pays down the whole balance between two people.
+- **No paid ticks.** `PaidShare`, the rent and bill share ticks, bill placeholders with `status`, and bill submit are gone. An expense is a record of what was spent and how it was split.
+- **Schedules create expenses in the background.** Rent schedules and bill types now have a stored `nextDueDate`. A background job creates each expense when it falls due. Nothing is created when a list is read.
+- **Furniture is a plain expense** tagged `furniture`, added by the primary. There is no owned/sold/disposed status, sale or disposal.
+- **Leaving checks the balance only.** A leaving primary names the next primary in the request. The person leaving is taken off every rent schedule and bill type.
+- **Removed endpoints:** `/api/rent-periods`, `/api/rent-periods/{id}/shares/{userId}`, `/api/bills`, `/api/bills/{id}/submit`, `/api/bills/{id}/shares/{userId}`, and every `/api/furniture` endpoint.
 
 ---
 
@@ -41,9 +41,9 @@ Frontend ↔ backend contract. Endpoint shapes and top-level schemas only.
 UserRef      { id, name }
 Share        { user: UserRef, amount }
 ShareInput   { userId, amount? }          // amount only when splitType = exact
-PaidShare    { user: UserRef, amount, paid: bool, paidDate: date | null }
 SplitType    = "equal" | "exact"
 Frequency    = "weekly" | "fortnightly" | "monthly" | "quarterly"
+ExpenseTag   = "rent" | "bills" | "groceries" | "furniture"
 ```
 
 ### Splitting rules (used everywhere)
@@ -75,12 +75,13 @@ AuthResult { token, user: User }
 
 Each user belongs to at most one household. The creator becomes **primary** and can hand the role to another member.
 
-Handing over primary doesn't move existing debts. Unpaid rent and bill shares stay owed to whoever was primary when they were created. Only new rent periods and bills go to the new primary.
+Handing over primary doesn't move existing debts: expenses already created keep their payer. Rent and bill expenses created from then on are paid by the new primary.
 
 A member who joins isn't added to anything automatically. The primary adds them to each rent schedule and bill type.
 
 ```ts
-Household { id, name, inviteCode, primary: UserRef, members: UserRef[] }
+Household  { id, name, inviteCode, primary: UserRef, members: UserRef[] }
+LeaveInput { nextPrimaryUserId?: int }   // required when you are primary and other members remain
 ```
 
 | Method | Path | Body | Returns | Who | Errors |
@@ -88,47 +89,101 @@ Household { id, name, inviteCode, primary: UserRef, members: UserRef[] }
 | POST | `/api/household` | `{ name }` | `Household` | anyone | 409 already in a household |
 | GET | `/api/household` | — | `Household` | member | 404 not in one |
 | POST | `/api/household/join` | `{ inviteCode }` | `Household` | anyone | 404 bad code, 409 already in a household |
-| POST | `/api/household/leave` | — | 204 | member | 409 (see Leaving) |
+| POST | `/api/household/leave` | `LeaveInput` | 204 | member | 400 next primary missing or not another member (checked before 409); 409 (see Leaving) |
 | PUT | `/api/household/primary` | `{ userId }` | `Household` | primary | 403, 400 not a member |
 
 ### Leaving is blocked (409) while
 
-- you owe anyone, or anyone owes you, in groceries and furniture (you appear in any entry of `debts` from `GET /api/balances`)
-- any rent share owed by you or to you is unpaid
-- you are in the split of a rent schedule that hasn't ended
-- any bill share owed by you or to you is unpaid
-- you are primary and other members remain ⚠ (hand over primary first)
+- you owe anyone, or anyone owes you (you appear in any entry of `debts` from `GET /api/balances`)
 
-When leaving is blocked, the 409's `detail` lists every reason that applies, not just the first, one per line.
+The 409's `detail` lists every reason that applies, one per line.
 
 On leaving:
-- you are removed from every bill type's members ⚠
-- you give up your stake in furniture, and the items stay with the household
+- if you are primary and others remain, `nextPrimaryUserId` becomes primary first
+- you are taken off every rent schedule's split and every bill type's members ⚠. A rent schedule with an exact split becomes an equal split among those left. A schedule left with nobody ends that day (`endDate` = today).
 - if you were the last member, the household is kept as history and its invite code stops working (joining with it returns 404)
 
 ---
 
-## Expenses (Groceries tab)
+## Expenses (Rent, Bills, Groceries and Furniture tabs)
 
-Day-to-day shared costs. They count in **balances**.
+Every cost is an expense with a tag. The tag decides which tab shows it and who may change it; it never changes how the money counts. Every expense counts in **balances**.
 
 ```ts
-Expense      { id, description, amount, date, paidBy: UserRef, createdBy: UserRef, splitType, shares: Share[] }
-ExpenseInput { description, amount, date, paidByUserId, splitType, shares: ShareInput[] }
+Expense         { id, tag: ExpenseTag, description, amount, date,
+                  paidBy: UserRef, createdBy: UserRef, splitType, shares: Share[],
+                  canChange: bool,                 // whether the caller may edit or delete it
+                  rentScheduleId: int | null,      // rent created by a schedule
+                  periodEnd: date | null,          // rent created by a schedule: the last day it covers
+                  billTypeId: int | null }         // bills created by a bill type
+ExpenseInput    { description, amount, date, paidByUserId, splitType, shares: ShareInput[] }
+NewExpenseInput { tag: ExpenseTag, ...ExpenseInput }
 ```
 
 | Method | Path | Body | Returns | Who |
 |---|---|---|---|---|
-| GET | `/api/expenses` | — | `Expense[]` | member |
+| GET | `/api/expenses?tag=` | — | `Expense[]`, newest first; every tag when `tag` is omitted; 400 unknown tag | member |
 | GET | `/api/expenses/{id}` | — | `Expense` | member |
-| POST | `/api/expenses` | `ExpenseInput` | `Expense` | member |
-| PUT | `/api/expenses/{id}` | `ExpenseInput` | `Expense` | creator only (403) |
-| DELETE | `/api/expenses/{id}` | — | 204 | creator only (403) |
+| POST | `/api/expenses` | `NewExpenseInput` | `Expense` | `groceries`: any member. `rent`, `bills`, `furniture`: primary (403) |
+| PUT | `/api/expenses/{id}` | `ExpenseInput` | `Expense` | `groceries`: whoever added it. Others: the current primary (403) |
+| DELETE | `/api/expenses/{id}` | — | 204 | same as PUT |
+
+Rules:
+- `amount` may be 0. A $0 expense counts for nothing. Bills start at $0 until the primary enters the amount ⚠.
+- An expense's tag never changes.
+- `paidBy` must be a current member.
+- Deleting an expense created by a schedule is permanent: the schedule never creates that date again.
+
+## Schedules
+
+Rent schedules and bill types create expenses on their dates. They hold no money of their own.
+
+A background job runs when the API starts and then every hour. For every schedule whose `nextDueDate` is today or earlier, it creates that date's expense, moves `nextDueDate` one step on, and repeats until `nextDueDate` is in the future. So due dates passed while the API was off are still created, each with its own date. A unique index on (schedule, date) stops the same expense being created twice.
+
+- **Creating a schedule:** `nextDueDate` becomes the first date of the schedule on or after today. Earlier dates are never created ⚠. If that date is today, the expense is created straight away.
+- **Editing a schedule:** expenses already created don't change. `nextDueDate` is recalculated from the new settings: never earlier than today, and never on or before a date the schedule has already created (even if that expense was deleted).
+- **Ending:** once the next date would fall after `endDate`, `nextDueDate` is `null`.
+- **Deleting a schedule** keeps its expenses, which stay in balances and on their tab. They lose the link to the schedule.
+- **Who pays a created expense:** whoever is primary on that date.
+- **Nobody to split with:** a rent schedule needs at least one share and a bill type at least one member (400). The job skips a schedule with nobody in it rather than failing.
+
+### Rent schedules (Rent tab)
+
+The primary manages schedules. Each created expense is tagged `rent`, described "Rent", dated the period's first day, with `periodEnd` its last day, split as the schedule says.
+
+```ts
+RentSchedule      { id, amount, frequency, startDate, endDate: date | null, splitType, shares: Share[], nextDueDate: date | null }
+RentScheduleInput { amount, frequency, startDate, endDate?, splitType, shares: ShareInput[] }
+```
+
+| Method | Path | Body | Returns | Who |
+|---|---|---|---|---|
+| GET | `/api/rent-schedules` | — | `RentSchedule[]` | member |
+| POST | `/api/rent-schedules` | `RentScheduleInput` | `RentSchedule` | primary |
+| PUT | `/api/rent-schedules/{id}` | `RentScheduleInput` | `RentSchedule` | primary |
+| DELETE | `/api/rent-schedules/{id}` | — | 204 | primary |
+
+### Bill types (Bills tab)
+
+The primary sets up bill types (e.g. Electricity, Gas, Internet) with a frequency and members. Each created expense is tagged `bills`, described with the bill type's name, dated the due date, **$0**, and split equally among the members. When the real bill arrives, the primary edits the expense to its amount and split.
+
+```ts
+BillType      { id, name, frequency, startDate, endDate: date | null, members: UserRef[], nextDueDate: date | null }
+BillTypeInput { name, frequency, startDate, endDate?, memberIds: int[] }
+```
+
+| Method | Path | Body | Returns | Who |
+|---|---|---|---|---|
+| GET | `/api/bill-types` | — | `BillType[]` | member |
+| POST | `/api/bill-types` | `BillTypeInput` | `BillType` | primary |
+| PUT | `/api/bill-types/{id}` | `BillTypeInput` | `BillType` | primary |
+| DELETE | `/api/bill-types/{id}` | — | 204 | primary |
+
+---
 
 ## Balances & settle-up
 
-Splitwise style. You can settle any positive amount between two people. There are no per-expense paid flags and no debt simplification.
-Balances include **expenses and furniture only**. Rent, bills and bond are excluded.
+Splitwise style: one balance per pair of people, worked out on every read from every expense and every settlement. You can settle any positive amount between two people; it pays down the whole balance between them, never a particular expense. There is no debt simplification.
 
 ```ts
 Balances        { members: { user: UserRef, net }[], debts: { from: UserRef, to: UserRef, amount }[] }
@@ -145,106 +200,9 @@ SettlementInput { fromUserId, toUserId, amount }   // date = today
 
 Settlements can't be undone. To fix a mistake, record a settlement the other way.
 
----
-
-## Rent (Rent tab)
-
-The primary manages schedules. Each schedule generates periods, and members tick their share as paid. Rent is **not** in balances.
-
-```ts
-RentSchedule      { id, amount, frequency, startDate, endDate: date | null, splitType, shares: Share[], nextDueDate: date | null }
-RentScheduleInput { amount, frequency, startDate, endDate?, splitType, shares: ShareInput[] }
-RentPeriod        { id, scheduleId, startDate, endDate, amount, payee: UserRef, shares: PaidShare[] }
-```
-
-| Method | Path | Body | Returns | Who |
-|---|---|---|---|---|
-| GET | `/api/rent-schedules` | — | `RentSchedule[]` | member |
-| POST | `/api/rent-schedules` | `RentScheduleInput` | `RentSchedule` | primary |
-| PUT | `/api/rent-schedules/{id}` | `RentScheduleInput` | `RentSchedule` | primary |
-| DELETE | `/api/rent-schedules/{id}` | — | 204 | primary |
-| GET | `/api/rent-periods` | — | `RentPeriod[]` | member |
-| PUT | `/api/rent-periods/{id}/shares/{userId}` | `{ paid }` | `RentPeriod` | that user, or primary (403) |
-
-Rules:
-- There is no background timer. Periods up to today are created when the list is read. A unique index on `(scheduleId, startDate)` prevents duplicates.
-- Edits only affect periods created later. Changing a schedule's start date or frequency never re-creates past periods: new periods start after the last existing one ends. Deleting a schedule deletes its periods.
-- The payee is whoever is primary when the period is created. The payee's own share is ticked automatically ⚠, with `paidDate` = the period's start date.
-- Ticks can be undone (`paid: false`).
-- New members are added to a schedule manually by the primary.
-
-## Bills (Bills tab)
-
-The primary sets up bill types (e.g. Electricity, Gas, Internet) with a frequency. When a bill is due, a **placeholder** appears with no amount. The primary enters the amount and submits it, which means "I paid the provider". The server then works out what each member owes the primary, and members tick their share as paid. Bills are **not** in balances. Everyone can see all bills, past and pending.
-
-```ts
-BillType      { id, name, frequency, startDate, endDate: date | null, members: UserRef[], nextDueDate: date | null }
-BillTypeInput { name, frequency, startDate, endDate?, memberIds: int[] }
-BillStatus    = "pending" | "submitted"
-Bill          { id, billType: { id, name }, dueDate, status: BillStatus,
-                amount: decimal | null, payee: UserRef | null, submittedDate: date | null,
-                shares: PaidShare[] }          // empty while pending
-SubmitBillInput { amount, splitType, shares?: ShareInput[] }
-                // equal → split across the bill type's members (shares omitted)
-                // exact → shares required, must sum to amount
-```
-
-| Method | Path | Body | Returns | Who |
-|---|---|---|---|---|
-| GET | `/api/bill-types` | — | `BillType[]` | member |
-| POST | `/api/bill-types` | `BillTypeInput` | `BillType` | primary |
-| PUT | `/api/bill-types/{id}` | `BillTypeInput` | `BillType` | primary |
-| DELETE | `/api/bill-types/{id}` | — | 204 | primary |
-| GET | `/api/bills?status=` | — | `Bill[]` | member |
-| POST | `/api/bills/{id}/submit` | `SubmitBillInput` | `Bill` | primary; 409 if already submitted |
-| PUT | `/api/bills/{id}/shares/{userId}` | `{ paid }` | `Bill` | that user, or primary (403); 409 if pending |
-
-Rules:
-- Placeholders are created when the list is read, the same way as rent periods. A unique index on `(billTypeId, dueDate)` prevents duplicates.
-- Edits to a bill type only affect placeholders created later.
-- The payee is the primary who submitted. Their own share is ticked automatically ⚠, with `paidDate` = the submitted date.
-- A submitted amount can't be changed ⚠ (409).
-- Deleting a bill type removes its pending placeholders and **keeps submitted bills** as history ⚠.
-- New members are added to bill types manually by the primary.
-
----
-
-## Furniture (Furniture tab)
-
-Shared purchases that can later be sold or disposed of. All money moves count in **balances**.
-
-```ts
-FurnitureStatus = "owned" | "sold" | "disposed"
-Purchase  { date, amount, paidBy: UserRef,     splitType, shares: Share[] }
-Sale      { date, amount, receivedBy: UserRef, splitType, shares: Share[] }
-Disposal  { date, amount, paidBy: UserRef,     splitType, shares: Share[] }   // amount may be 0
-Furniture { id, name, status: FurnitureStatus, createdBy: UserRef,
-            purchase: Purchase, sale: Sale | null, disposal: Disposal | null }
-
-FurnitureInput { name, purchase: { date, amount, paidByUserId, splitType, shares: ShareInput[] } }
-SaleInput      { date, amount, receivedByUserId, splitType, shares: ShareInput[] }
-DisposalInput  { date, amount, paidByUserId, splitType, shares: ShareInput[] }
-```
-
-| Method | Path | Body | Returns | Who |
-|---|---|---|---|---|
-| GET | `/api/furniture?status=` | — | `Furniture[]` | member |
-| GET | `/api/furniture/{id}` | — | `Furniture` | member |
-| POST | `/api/furniture` | `FurnitureInput` | `Furniture` | member |
-| PUT | `/api/furniture/{id}` | `FurnitureInput` | `Furniture` | creator or primary |
-| DELETE | `/api/furniture/{id}` | — | 204 | creator or primary |
-| POST | `/api/furniture/{id}/sell` | `SaleInput` | `Furniture` | creator or primary |
-| POST | `/api/furniture/{id}/dispose` | `DisposalInput` | `Furniture` | creator or primary |
-
-Rules:
-- Status only moves forward: `owned → sold` or `owned → disposed`. Editing, selling or disposing an item that isn't `owned` → 409.
-- On a sale, the person who receives the cash owes the others their shares.
-
-  Example: Alice, Bob and Cara buy a couch for $600 and later sell it for $300. Cara receives the $300, so she owes Alice and Bob $100 each.
-
 ## Bond (Bond tab)
 
-Record only. The primary manages it. Bond never affects balances.
+Record only. The primary manages it. Bond is not an expense and never affects balances or leaving.
 
 ```ts
 Contribution      { user: UserRef, amount, date }
@@ -266,22 +224,22 @@ Rule: contributions can't add up to more than `total` (400). The primary can alw
 
 ## Dashboard
 
-There is no dedicated endpoint. The frontend builds the dashboard from existing endpoints:
+There is no dedicated endpoint. The frontend builds Home from existing endpoints:
 
 | Section | Source | Shows |
 |---|---|---|
-| Groceries | `GET /api/balances` | Your net balance, who owes whom, settle-up button |
-| Rent | `GET /api/rent-periods` | Current period, what you owe or are owed |
-| Bills | `GET /api/bills` | Placeholders waiting for an amount, unpaid shares you owe the primary |
-| Furniture | `GET /api/furniture?status=owned` | One line, e.g. "4 items owned" |
+| Settle up | `GET /api/balances` | One amount per person you owe or who owes you, with the payment button |
+| Bills to enter (primary) | `GET /api/expenses?tag=bills` | Bills still at $0 |
+| Recent | `GET /api/expenses`, `GET /api/settlements` | The latest expenses and payments |
+| What's in use | `GET /api/rent-schedules`, `GET /api/bill-types`, `GET /api/expenses` | Which tags to offer to start |
 
 ## Left out on purpose
 
-- Payments: per-expense paid status, undoing a settlement (record the reverse instead).
+- Payments: per-expense paid status or ticks, undoing a settlement (record the reverse instead).
 - Splits and money: percentage or weighted splits, multiple currencies.
 - Users and households: profile edits, removing members.
-- Features: receipts or file uploads, pagination, furniture buyouts, one-off rent changes, bond refunds, editing a submitted bill amount.
+- Features: receipts or file uploads, pagination, furniture sale or disposal, back-filling a schedule's past dates, bond refunds.
 
 ## Open questions
 
-None open. (The bond "lock" question is settled: no lock, see Bond.)
+None open.

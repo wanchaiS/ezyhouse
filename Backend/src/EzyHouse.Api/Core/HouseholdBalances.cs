@@ -13,12 +13,10 @@ public sealed class HouseholdBalances(EzyHouseDbContext db, BalanceCalculator ca
         int householdId,
         IEnumerable<int> memberIds)
     {
-        // Balances are never stored: they are worked out from the records every time.
+        // Balances are never stored: they are worked out from every expense, whatever its tag,
+        // and every settlement, every time.
         List<IBalanceContributor> contributors = [];
         contributors.AddRange(await db.Expenses.AsNoTracking().ForHousehold(householdId).ToListAsync());
-        contributors.AddRange(await db.FurnitureTransactions.AsNoTracking()
-            .Where(transaction => transaction.Furniture!.HouseholdId == householdId)
-            .ToListAsync());
         contributors.AddRange(await db.Settlements.AsNoTracking().ForHousehold(householdId).ToListAsync());
 
         return calculator.Calculate(contributors, memberIds);

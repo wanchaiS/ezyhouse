@@ -12,8 +12,4 @@ public interface IRentRepository : IRepository
     void AddSchedule(RentSchedule schedule);
 
     void RemoveSchedule(RentSchedule schedule);
-
-    Task<List<RentPeriod>> ListPeriodsAsync(int householdId);
-
-    Task<RentPeriod?> FindPeriodAsync(int householdId, int id);
 }

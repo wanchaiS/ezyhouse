@@ -37,55 +37,6 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.ToTable("BillTypeMembers");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.Bill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("Amount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int?>("BillTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("BillTypeName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateOnly>("DueDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("HouseholdId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PayeeUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<DateOnly?>("SubmittedDate")
-                        .HasColumnType("date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HouseholdId");
-
-                    b.HasIndex("PayeeUserId");
-
-                    b.HasIndex("BillTypeId", "DueDate")
-                        .IsUnique();
-
-                    b.ToTable("Bills", (string)null);
-                });
-
             modelBuilder.Entity("EzyHouse.Domain.Entities.BillType", b =>
                 {
                     b.Property<int>("Id")
@@ -105,10 +56,16 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.Property<int>("HouseholdId")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly?>("LastCreatedDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<DateOnly?>("NextDueDate")
+                        .HasColumnType("date");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
@@ -116,6 +73,8 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HouseholdId");
+
+                    b.HasIndex("NextDueDate");
 
                     b.ToTable("BillTypes", (string)null);
                 });
@@ -209,91 +168,22 @@ namespace EzyHouse.Infrastructure.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)");
 
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("HouseholdId");
 
                     b.HasIndex("PaidByUserId");
 
+                    b.HasIndex("HouseholdId", "Tag");
+
                     b.ToTable("Expenses", (string)null);
-                });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.Furniture", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("HouseholdId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("HouseholdId");
-
-                    b.ToTable("Furniture", (string)null);
-                });
-
-            modelBuilder.Entity("EzyHouse.Domain.Entities.FurnitureTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("CounterpartyUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<int>("FurnitureId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Kind")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<string>("SplitType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CounterpartyUserId");
-
-                    b.HasIndex("FurnitureId", "Kind")
-                        .IsUnique();
-
-                    b.ToTable("FurnitureTransactions", (string)null);
-
-                    b.HasDiscriminator<string>("Kind").HasValue("FurnitureTransaction");
+                    b.HasDiscriminator<string>("Tag");
 
                     b.UseTphMappingStrategy();
                 });
@@ -329,40 +219,6 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.ToTable("Households", (string)null);
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.RentPeriod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("PayeeUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PayeeUserId");
-
-                    b.HasIndex("ScheduleId", "StartDate")
-                        .IsUnique();
-
-                    b.ToTable("RentPeriods", (string)null);
-                });
-
             modelBuilder.Entity("EzyHouse.Domain.Entities.RentSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -386,6 +242,12 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.Property<int>("HouseholdId")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly?>("LastCreatedDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("NextDueDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("SplitType")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -397,6 +259,8 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("HouseholdId");
+
+                    b.HasIndex("NextDueDate");
 
                     b.ToTable("RentSchedules", (string)null);
                 });
@@ -477,25 +341,47 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.FurnitureDisposal", b =>
+            modelBuilder.Entity("EzyHouse.Domain.Entities.BillExpense", b =>
                 {
-                    b.HasBaseType("EzyHouse.Domain.Entities.FurnitureTransaction");
+                    b.HasBaseType("EzyHouse.Domain.Entities.Expense");
 
-                    b.HasDiscriminator().HasValue("Disposal");
+                    b.Property<int?>("BillTypeId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("BillTypeId", "Date")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("Bills");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.FurniturePurchase", b =>
+            modelBuilder.Entity("EzyHouse.Domain.Entities.FurnitureExpense", b =>
                 {
-                    b.HasBaseType("EzyHouse.Domain.Entities.FurnitureTransaction");
+                    b.HasBaseType("EzyHouse.Domain.Entities.Expense");
 
-                    b.HasDiscriminator().HasValue("Purchase");
+                    b.HasDiscriminator().HasValue("Furniture");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.FurnitureSale", b =>
+            modelBuilder.Entity("EzyHouse.Domain.Entities.GroceryExpense", b =>
                 {
-                    b.HasBaseType("EzyHouse.Domain.Entities.FurnitureTransaction");
+                    b.HasBaseType("EzyHouse.Domain.Entities.Expense");
 
-                    b.HasDiscriminator().HasValue("Sale");
+                    b.HasDiscriminator().HasValue("Groceries");
+                });
+
+            modelBuilder.Entity("EzyHouse.Domain.Entities.RentExpense", b =>
+                {
+                    b.HasBaseType("EzyHouse.Domain.Entities.Expense");
+
+                    b.Property<DateOnly?>("PeriodEnd")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("RentScheduleId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("RentScheduleId", "Date")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("Rent");
                 });
 
             modelBuilder.Entity("BillTypeMembers", b =>
@@ -511,69 +397,6 @@ namespace EzyHouse.Infrastructure.Migrations
                         .HasForeignKey("MembersId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("EzyHouse.Domain.Entities.Bill", b =>
-                {
-                    b.HasOne("EzyHouse.Domain.Entities.BillType", "BillType")
-                        .WithMany("Bills")
-                        .HasForeignKey("BillTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EzyHouse.Domain.Entities.Household", "Household")
-                        .WithMany()
-                        .HasForeignKey("HouseholdId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EzyHouse.Domain.Entities.User", "Payee")
-                        .WithMany()
-                        .HasForeignKey("PayeeUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.OwnsMany("EzyHouse.Domain.ValueObjects.PaidShare", "Shares", b1 =>
-                        {
-                            b1.Property<int>("BillId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("UserId")
-                                .HasColumnType("int");
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(10, 2)
-                                .HasColumnType("decimal(10,2)");
-
-                            b1.Property<bool>("Paid")
-                                .HasColumnType("tinyint(1)");
-
-                            b1.Property<DateOnly?>("PaidDate")
-                                .HasColumnType("date");
-
-                            b1.HasKey("BillId", "UserId");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("BillShares", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("BillId");
-
-                            b1.HasOne("EzyHouse.Domain.Entities.User", "User")
-                                .WithMany()
-                                .HasForeignKey("UserId")
-                                .OnDelete(DeleteBehavior.Restrict)
-                                .IsRequired();
-
-                            b1.Navigation("User");
-                        });
-
-                    b.Navigation("BillType");
-
-                    b.Navigation("Household");
-
-                    b.Navigation("Payee");
-
-                    b.Navigation("Shares");
                 });
 
             modelBuilder.Entity("EzyHouse.Domain.Entities.BillType", b =>
@@ -676,76 +499,6 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.Navigation("Shares");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.Furniture", b =>
-                {
-                    b.HasOne("EzyHouse.Domain.Entities.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EzyHouse.Domain.Entities.Household", "Household")
-                        .WithMany()
-                        .HasForeignKey("HouseholdId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Household");
-                });
-
-            modelBuilder.Entity("EzyHouse.Domain.Entities.FurnitureTransaction", b =>
-                {
-                    b.HasOne("EzyHouse.Domain.Entities.User", "Counterparty")
-                        .WithMany()
-                        .HasForeignKey("CounterpartyUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EzyHouse.Domain.Entities.Furniture", "Furniture")
-                        .WithMany("Transactions")
-                        .HasForeignKey("FurnitureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("EzyHouse.Domain.ValueObjects.Share", "Shares", b1 =>
-                        {
-                            b1.Property<int>("FurnitureTransactionId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("UserId")
-                                .HasColumnType("int");
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(10, 2)
-                                .HasColumnType("decimal(10,2)");
-
-                            b1.HasKey("FurnitureTransactionId", "UserId");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("FurnitureTransactionShares", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("FurnitureTransactionId");
-
-                            b1.HasOne("EzyHouse.Domain.Entities.User", "User")
-                                .WithMany()
-                                .HasForeignKey("UserId")
-                                .OnDelete(DeleteBehavior.Restrict)
-                                .IsRequired();
-
-                            b1.Navigation("User");
-                        });
-
-                    b.Navigation("Counterparty");
-
-                    b.Navigation("Furniture");
-
-                    b.Navigation("Shares");
-                });
-
             modelBuilder.Entity("EzyHouse.Domain.Entities.Household", b =>
                 {
                     b.HasOne("EzyHouse.Domain.Entities.User", "PrimaryUser")
@@ -755,63 +508,6 @@ namespace EzyHouse.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("PrimaryUser");
-                });
-
-            modelBuilder.Entity("EzyHouse.Domain.Entities.RentPeriod", b =>
-                {
-                    b.HasOne("EzyHouse.Domain.Entities.User", "Payee")
-                        .WithMany()
-                        .HasForeignKey("PayeeUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EzyHouse.Domain.Entities.RentSchedule", "Schedule")
-                        .WithMany("Periods")
-                        .HasForeignKey("ScheduleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsMany("EzyHouse.Domain.ValueObjects.PaidShare", "Shares", b1 =>
-                        {
-                            b1.Property<int>("RentPeriodId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("UserId")
-                                .HasColumnType("int");
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(10, 2)
-                                .HasColumnType("decimal(10,2)");
-
-                            b1.Property<bool>("Paid")
-                                .HasColumnType("tinyint(1)");
-
-                            b1.Property<DateOnly?>("PaidDate")
-                                .HasColumnType("date");
-
-                            b1.HasKey("RentPeriodId", "UserId");
-
-                            b1.HasIndex("UserId");
-
-                            b1.ToTable("RentPeriodShares", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("RentPeriodId");
-
-                            b1.HasOne("EzyHouse.Domain.Entities.User", "User")
-                                .WithMany()
-                                .HasForeignKey("UserId")
-                                .OnDelete(DeleteBehavior.Restrict)
-                                .IsRequired();
-
-                            b1.Navigation("User");
-                        });
-
-                    b.Navigation("Payee");
-
-                    b.Navigation("Schedule");
-
-                    b.Navigation("Shares");
                 });
 
             modelBuilder.Entity("EzyHouse.Domain.Entities.RentSchedule", b =>
@@ -902,9 +598,20 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.Navigation("Household");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.BillType", b =>
+            modelBuilder.Entity("EzyHouse.Domain.Entities.BillExpense", b =>
                 {
-                    b.Navigation("Bills");
+                    b.HasOne("EzyHouse.Domain.Entities.BillType", null)
+                        .WithMany()
+                        .HasForeignKey("BillTypeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("EzyHouse.Domain.Entities.RentExpense", b =>
+                {
+                    b.HasOne("EzyHouse.Domain.Entities.RentSchedule", null)
+                        .WithMany()
+                        .HasForeignKey("RentScheduleId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("EzyHouse.Domain.Entities.Bond", b =>
@@ -912,19 +619,9 @@ namespace EzyHouse.Infrastructure.Migrations
                     b.Navigation("Contributions");
                 });
 
-            modelBuilder.Entity("EzyHouse.Domain.Entities.Furniture", b =>
-                {
-                    b.Navigation("Transactions");
-                });
-
             modelBuilder.Entity("EzyHouse.Domain.Entities.Household", b =>
                 {
                     b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("EzyHouse.Domain.Entities.RentSchedule", b =>
-                {
-                    b.Navigation("Periods");
                 });
 #pragma warning restore 612, 618
         }

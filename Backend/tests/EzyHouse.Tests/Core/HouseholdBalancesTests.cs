@@ -11,46 +11,51 @@ namespace EzyHouse.Tests.Core;
 public class HouseholdBalancesTests
 {
     [Test]
-    public async Task The_couch_bought_and_sold_gives_the_API_md_debts_when_read_from_the_database()
+    public async Task Rent_bills_groceries_furniture_and_settlements_all_count_when_read_from_the_database()
     {
         await using TestDb testDb = await TestDb.CreateAsync();
         await using EzyHouseDbContext db = testDb.NewContext();
         TestHousehold house = await TestHousehold.CreateAsync(db);
         int alice = house.Alice.Id, bob = house.Bob.Id, cara = house.Cara.Id;
+        int householdId = house.Household.Id;
 
-        var couch = new Furniture
+        T Paid<T>(T expense, int payer, params Share[] shares) where T : Expense
         {
-            HouseholdId = house.Household.Id,
-            Name = "Couch",
-            CreatedByUserId = alice,
-            Transactions =
-            [
-                new FurniturePurchase
-                {
-                    Date = new DateOnly(2026, 6, 1), Amount = 600m, CounterpartyUserId = alice, SplitType = SplitType.Equal,
-                    Shares = [new Share(alice, 200m), new Share(bob, 200m), new Share(cara, 200m)],
-                },
-            ],
-        };
-        couch.RecordSale(new FurnitureSale
+            expense.HouseholdId = householdId;
+            expense.Description = expense.Tag.ToString();
+            expense.Amount = shares.Sum(share => share.Amount);
+            expense.Date = new DateOnly(2026, 10, 1);
+            expense.PaidByUserId = payer;
+            expense.CreatedByUserId = payer;
+            expense.SplitType = SplitType.Exact;
+            expense.Shares = shares.ToList();
+            return expense;
+        }
+
+        db.Expenses.AddRange(
+            Paid(new RentExpense(), alice, new Share(alice, 100m), new Share(bob, 100m), new Share(cara, 100m)),
+            Paid(new BillExpense(), alice, new Share(alice, 30m), new Share(bob, 30m), new Share(cara, 30m)),
+            Paid(new FurnitureExpense(), bob, new Share(alice, 20m), new Share(bob, 20m), new Share(cara, 20m)),
+            Paid(new GroceryExpense(), cara, new Share(bob, 15m), new Share(cara, 15m)));
+        db.Settlements.Add(new Settlement
         {
-            Date = new DateOnly(2026, 10, 1), Amount = 300m, CounterpartyUserId = cara, SplitType = SplitType.Equal,
-            Shares = [new Share(alice, 100m), new Share(bob, 100m), new Share(cara, 100m)],
+            HouseholdId = householdId, FromUserId = bob, ToUserId = alice, Amount = 50m,
+            Date = new DateOnly(2026, 10, 2), CreatedByUserId = bob,
         });
-        db.Furniture.Add(couch);
         await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
 
         var (nets, debts) = await new HouseholdBalances(db, new BalanceCalculator())
-            .CalculateAsync(house.Household.Id, house.MemberIds);
+            .CalculateAsync(householdId, house.MemberIds);
 
+        // Bob → Alice: 100 rent + 30 bill − 20 furniture − 50 settled. Cara → Alice: 100 + 30.
+        // Cara → Bob: 20 furniture − 15 groceries.
         Assert.That(debts, Is.EquivalentTo(new[]
         {
-            new Debt(bob, alice, 200m),
-            new Debt(cara, alice, 300m),
-            new Debt(cara, bob, 100m),
+            new Debt(bob, alice, 60m),
+            new Debt(cara, alice, 130m),
+            new Debt(cara, bob, 5m),
         }));
-        Assert.That(nets[alice], Is.EqualTo(500m));
-        Assert.That(nets[bob], Is.EqualTo(-100m));
-        Assert.That(nets[cara], Is.EqualTo(-400m));
+        Assert.That((nets[alice], nets[bob], nets[cara]), Is.EqualTo((190m, -55m, -135m)));
     }
 }

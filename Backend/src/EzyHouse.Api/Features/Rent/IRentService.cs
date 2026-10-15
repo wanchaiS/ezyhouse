@@ -9,8 +9,4 @@ public interface IRentService
     Task<RentScheduleDto> UpdateScheduleAsync(int id, RentScheduleInput request);
 
     Task DeleteScheduleAsync(int id);
-
-    Task<IReadOnlyList<RentPeriodDto>> ListPeriodsAsync();
-
-    Task<RentPeriodDto> SetSharePaidAsync(int periodId, int userId, bool paid);
 }

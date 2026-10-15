@@ -1,4 +1,5 @@
 using EzyHouse.Domain.Entities;
+using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.Extensions;
 using EzyHouse.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +8,17 @@ namespace EzyHouse.Api.Features.Expenses;
 
 public sealed class ExpenseRepository(EzyHouseDbContext db) : IExpenseRepository
 {
-    public async Task<IReadOnlyList<Expense>> ListAsync(int householdId) =>
-        await WithPeople(householdId)
+    public async Task<IReadOnlyList<Expense>> ListAsync(int householdId, ExpenseTag? tag)
+    {
+        IQueryable<Expense> query = WithPeople(householdId);
+        if (tag is ExpenseTag wanted)
+            query = query.Where(expense => expense.Tag == wanted);
+
+        return await query
             .OrderByDescending(expense => expense.Date)
             .ThenByDescending(expense => expense.Id)
             .ToListAsync();
+    }
 
     public Task<Expense?> FindAsync(int householdId, int id) =>
         WithPeople(householdId).FirstOrDefaultAsync(expense => expense.Id == id);

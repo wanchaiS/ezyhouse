@@ -11,9 +11,6 @@ public static class CoreMappings
 
     public static ShareDto ToDto(this Share share) => new(Ref(share.User, share.UserId), share.Amount);
 
-    public static PaidShareDto ToDto(this PaidShare share) =>
-        new(Ref(share.User, share.UserId), share.Amount, share.Paid, share.PaidDate);
-
     internal static UserRefDto Ref(User? user, int id) =>
         user?.ToRef() ?? throw new InvalidOperationException($"User {id} was not loaded.");
 }

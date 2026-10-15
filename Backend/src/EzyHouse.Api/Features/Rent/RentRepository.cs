@@ -21,23 +21,8 @@ public sealed class RentRepository(EzyHouseDbContext db) : IRentRepository
 
     public void AddSchedule(RentSchedule schedule) => db.RentSchedules.Add(schedule);
 
+    // The rent it created stays: the database clears each expense's link to the schedule.
     public void RemoveSchedule(RentSchedule schedule) => db.RentSchedules.Remove(schedule);
-
-    public Task<List<RentPeriod>> ListPeriodsAsync(int householdId) =>
-        PeriodsOf(householdId)
-            .OrderByDescending(period => period.StartDate)
-            .ThenByDescending(period => period.Id)
-            .ToListAsync();
-
-    public Task<RentPeriod?> FindPeriodAsync(int householdId, int id) =>
-        PeriodsOf(householdId).FirstOrDefaultAsync(period => period.Id == id);
-
-    // A period belongs to the household that owns its schedule.
-    private IQueryable<RentPeriod> PeriodsOf(int householdId) =>
-        db.RentPeriods
-            .Where(period => db.RentSchedules.ForHousehold(householdId).Any(schedule => schedule.Id == period.ScheduleId))
-            .Include(period => period.Payee)
-            .Include(period => period.Shares).ThenInclude(share => share.User);
 
     public Task SaveChangesAsync() => db.SaveChangesAsync();
 }

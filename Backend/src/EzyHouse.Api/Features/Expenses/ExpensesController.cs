@@ -1,3 +1,4 @@
+using EzyHouse.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EzyHouse.Api.Features.Expenses;
@@ -7,13 +8,13 @@ namespace EzyHouse.Api.Features.Expenses;
 public sealed class ExpensesController(IExpenseService expenses) : ControllerBase
 {
     [HttpGet]
-    public Task<IReadOnlyList<ExpenseDto>> List() => expenses.ListAsync();
+    public Task<IReadOnlyList<ExpenseDto>> List([FromQuery] ExpenseTag? tag) => expenses.ListAsync(tag);
 
     [HttpGet("{id:int}")]
     public Task<ExpenseDto> Get(int id) => expenses.GetAsync(id);
 
     [HttpPost]
-    public Task<ExpenseDto> Create(ExpenseInput request) => expenses.CreateAsync(request);
+    public Task<ExpenseDto> Create(NewExpenseInput request) => expenses.CreateAsync(request);
 
     [HttpPut("{id:int}")]
     public Task<ExpenseDto> Update(int id, ExpenseInput request) => expenses.UpdateAsync(id, request);

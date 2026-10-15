@@ -4,7 +4,7 @@ using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Domain.Entities;
 
-public class RentSchedule : RecurringSchedule<RentPeriod>
+public class RentSchedule : RecurringSchedule<RentExpense>
 {
     public decimal Amount { get; set; }
 
@@ -12,22 +12,23 @@ public class RentSchedule : RecurringSchedule<RentPeriod>
 
     public List<Share> Shares { get; set; } = [];
 
-    public List<RentPeriod> Periods { get; set; } = [];
+    public override bool HasAnyoneToShare => Shares.Count > 0;
 
     /// <summary>
-    /// The payee is whoever is primary now. The payee's own share is ticked automatically.
+    /// One rent expense per period, dated its first day, split as the schedule says. The shares are
+    /// copied, so editing the schedule later never changes rent already created.
     /// </summary>
-    protected override RentPeriod CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
+    protected override RentExpense CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
     {
-        ScheduleId = Id,
-        StartDate = slot.Start,
-        EndDate = slot.End,
+        HouseholdId = HouseholdId,
+        RentScheduleId = Id,
+        Description = "Rent",
         Amount = Amount,
-        PayeeUserId = primaryUserId,
-        Shares = Shares.Select(share => new PaidShare(
-            share.UserId,
-            share.Amount,
-            share.UserId == primaryUserId,
-            share.UserId == primaryUserId ? slot.Start : null)).ToList(),
+        Date = slot.Start,
+        PeriodEnd = slot.End,
+        PaidByUserId = primaryUserId,
+        CreatedByUserId = primaryUserId,
+        SplitType = SplitType,
+        Shares = Shares.Select(share => new Share(share.UserId, share.Amount)).ToList(),
     };
 }

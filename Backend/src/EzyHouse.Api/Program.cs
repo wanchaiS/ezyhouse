@@ -5,7 +5,6 @@ using EzyHouse.Api.Features.Balances;
 using EzyHouse.Api.Features.Bills;
 using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Api.Features.Expenses;
-using EzyHouse.Api.Features.FurnitureItems;
 using EzyHouse.Api.Features.Households;
 using EzyHouse.Api.Features.Rent;
 using EzyHouse.Domain.Entities;
@@ -75,8 +74,10 @@ builder.Services.AddSingleton<ISplitStrategy, ExactSplitStrategy>();
 builder.Services.AddSingleton<SplitCalculator>();
 builder.Services.AddSingleton<BalanceCalculator>();
 builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
-builder.Services.AddScoped<IRecurringChargeGenerator, RecurringChargeGenerator>();
+builder.Services.AddScoped<IScheduleRunner, ScheduleRunner>();
 builder.Services.AddScoped<IHouseholdBalances, HouseholdBalances>();
+// Creates due rent and bill expenses at start-up and then hourly; it runs after the migration below
+builder.Services.AddHostedService<ScheduleBackgroundService>();
 
 // Feature slices: each registers its own services
 builder.Services.AddAuthFeature(builder.Configuration);
@@ -85,7 +86,6 @@ builder.Services.AddExpensesFeature();
 builder.Services.AddBalancesFeature();
 builder.Services.AddRentFeature();
 builder.Services.AddBillsFeature();
-builder.Services.AddFurnitureFeature();
 builder.Services.AddBondsFeature();
 
 builder.Services.AddEndpointsApiExplorer();

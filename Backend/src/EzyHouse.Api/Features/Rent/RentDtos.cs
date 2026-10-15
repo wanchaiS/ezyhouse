@@ -15,19 +15,11 @@ public sealed record RentScheduleDto(
     IReadOnlyList<ShareDto> Shares,
     DateOnly? NextDueDate);
 
+/// <summary>An empty share list is checked by the service, so the message is the same however it is called.</summary>
 public sealed record RentScheduleInput(
     [Required, Money] decimal? Amount,
     [Required] Frequency? Frequency,
     [Required] DateOnly? StartDate,
     DateOnly? EndDate,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);
-
-public sealed record RentPeriodDto(
-    int Id,
-    int ScheduleId,
-    DateOnly StartDate,
-    DateOnly EndDate,
-    decimal Amount,
-    UserRefDto Payee,
-    IReadOnlyList<PaidShareDto> Shares);
+    [Required] List<ShareInput>? Shares);

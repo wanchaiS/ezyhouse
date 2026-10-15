@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace EzyHouse.Api.Features.Households;
 
@@ -15,10 +16,11 @@ public sealed class HouseholdController(IHouseholdService households) : Controll
     [HttpPost("join")]
     public Task<HouseholdDto> Join(JoinHouseholdRequest request) => households.JoinAsync(request);
 
+    // The body may be left out: only a primary leaving with others still there has to send one.
     [HttpPost("leave")]
-    public async Task<IActionResult> Leave()
+    public async Task<IActionResult> Leave([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] LeaveInput? request)
     {
-        await households.LeaveAsync();
+        await households.LeaveAsync(request ?? new LeaveInput(null));
         return NoContent();
     }
 

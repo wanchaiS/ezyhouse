@@ -31,20 +31,4 @@ internal static class ConfigurationExtensions
             .HasForeignKey(share => share.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
-
-    public static void ConfigurePaidShares<TOwner>(
-        this OwnedNavigationBuilder<TOwner, PaidShare> shares,
-        string table,
-        string ownerId)
-        where TOwner : class
-    {
-        shares.ToTable(table);
-        shares.WithOwner().HasForeignKey(ownerId);
-        shares.HasKey(ownerId, nameof(PaidShare.UserId));
-        shares.Property(share => share.Amount).HasMoneyPrecision();
-        shares.HasOne(share => share.User)
-            .WithMany()
-            .HasForeignKey(share => share.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-    }
 }

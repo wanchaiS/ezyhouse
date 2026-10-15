@@ -10,5 +10,5 @@ public interface IHouseholdService
 
     Task<HouseholdDto> TransferPrimaryAsync(TransferPrimaryRequest request);
 
-    Task LeaveAsync();
+    Task LeaveAsync(LeaveInput request);
 }

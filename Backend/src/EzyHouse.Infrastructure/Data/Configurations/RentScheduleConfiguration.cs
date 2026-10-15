@@ -13,16 +13,13 @@ public sealed class RentScheduleConfiguration : IEntityTypeConfiguration<RentSch
         builder.Property(schedule => schedule.Frequency).HasEnumString();
         builder.Property(schedule => schedule.SplitType).HasEnumString();
         builder.HasIndex(schedule => schedule.HouseholdId);
+        builder.HasIndex(schedule => schedule.NextDueDate);
+        builder.Ignore(schedule => schedule.HasAnyoneToShare);
 
         builder.HasOne(schedule => schedule.Household)
             .WithMany()
             .HasForeignKey(schedule => schedule.HouseholdId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasMany(schedule => schedule.Periods)
-            .WithOne(period => period.Schedule)
-            .HasForeignKey(period => period.ScheduleId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         builder.OwnsMany(schedule => schedule.Shares, shares =>
             shares.ConfigureShares("RentScheduleShares", "RentScheduleId"));

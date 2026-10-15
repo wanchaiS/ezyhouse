@@ -4,6 +4,8 @@ using EzyHouse.Domain.Entities;
 using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.Exceptions;
 using EzyHouse.Domain.Interfaces;
+using EzyHouse.Domain.Scheduling;
+using EzyHouse.Domain.Splitting;
 using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Api.Features.Households;
@@ -11,7 +13,9 @@ namespace EzyHouse.Api.Features.Households;
 public sealed class HouseholdService(
     IHouseholdRepository households,
     ICurrentUserContext currentUser,
-    IRecurringChargeGenerator charges,
+    IScheduleRunner runner,
+    IHouseholdBalances balances,
+    SplitCalculator splitCalculator,
     IClock clock) : IHouseholdService
 {
     // Uppercase letters and digits without the look-alikes 0/O and 1/I, so a code read aloud
@@ -21,6 +25,7 @@ public sealed class HouseholdService(
 
     private const string AlreadyInHousehold = "You're already in a household. Leave it first.";
     private const string InviteCodeNotFound = "Invite code not found.";
+    private const string OpenDebts = "You still owe money, or are owed money. Settle up first.";
 
     public async Task<HouseholdDto> CreateAsync(CreateHouseholdRequest request)
     {
@@ -80,86 +85,112 @@ public sealed class HouseholdService(
         User newPrimary = household.Members.SingleOrDefault(member => member.Id == request.UserId)
             ?? throw new ValidationFailedException("That person isn't a member of this household.");
 
-        // Rent periods are only created when someone reads them, so create every period already due
-        // before switching: those belong to the outgoing primary. Existing rent periods and bills keep
-        // their payee, so unpaid shares stay owed to the old primary (API.md).
-        await charges.GenerateRentPeriodsAsync(household, clock.Today);
-        household.PrimaryUserId = newPrimary.Id;
-        household.PrimaryUser = newPrimary;
+        await HandOverAsync(household, newPrimary);
         await households.SaveChangesAsync();
 
         return household.ToDto();
     }
 
-    public async Task LeaveAsync()
+    public async Task LeaveAsync(LeaveInput request)
     {
         Household household = await currentUser.RequireHouseholdAsync();
         int userId = currentUser.UserId;
+        User? nextPrimary = ChooseNextPrimary(household, userId, request.NextPrimaryUserId);
 
-        // Without this, rent for a period nobody has opened the Rent tab for yet would be missed.
-        await charges.GenerateRentPeriodsAsync(household, clock.Today);
+        // Rent or a bill due today but not yet created by the hourly job still counts in the debts below.
+        await runner.RunDueForHouseholdAsync(household.Id);
 
-        LeaveSituation situation = await households.GetLeaveSituationAsync(household, userId, clock.Today);
-        List<string> problems = new[]
+        var (_, debts) = await balances.CalculateAsync(household.Id, household.Members.Select(member => member.Id));
+
+        // Debts, not the net balance: two debts that cancel out still leave the user owing someone
+        // and owed by someone else, and nobody could settle them once the user has gone.
+        Func<Debt, bool> involvesLeaver = delegate (Debt debt)
         {
-            OpenDebtsProblem(situation),
-            UnpaidRentProblem(situation),
-            ActiveRentScheduleProblem(situation),
-            UnpaidBillsProblem(situation),
-            PrimaryWithOthersProblem(situation),
-        }.OfType<string>().ToList();
+            return debt.FromUserId == userId || debt.ToUserId == userId;
+        };
+        if (debts.Any(involvesLeaver))
+            throw new BusinessRuleException(OpenDebts);
 
-        if (problems.Count > 0)
-            throw new BusinessRuleException(string.Join("\n", problems));
+        if (nextPrimary is not null)
+            await HandOverAsync(household, nextPrimary);
 
-        foreach (BillType billType in await households.GetBillTypesWithMemberAsync(household.Id, userId))
-            billType.Members.RemoveAll(member => member.Id == userId);
+        await TakeOffSchedulesAsync(household, userId);
 
-        // Furniture shares stay as history; if this was the last member, the household stays as an archive.
+        // Expense shares stay as history; if this was the last member, the household stays as an archive.
         User user = await currentUser.GetUserAsync();
         user.HouseholdId = null;
         await households.SaveChangesAsync();
     }
 
-    // Debts, not the net balance: two debts that cancel out still leave the user owing someone
-    // and owed by someone else, and nobody could settle them once the user has gone.
-    private static string? OpenDebtsProblem(LeaveSituation situation) =>
-        situation.Debts.Any(debt => debt.FromUserId == situation.UserId || debt.ToUserId == situation.UserId)
-            ? "You still owe money, or are owed money, for groceries or furniture. Settle up first."
-            : null;
-
-    private static string? UnpaidRentProblem(LeaveSituation situation)
+    /// <summary>
+    /// Null when nobody has to take over: the leaver isn't primary, or is the last member.
+    /// A primary leaving others behind must name one of them (400).
+    /// </summary>
+    private static User? ChooseNextPrimary(Household household, int userId, int? nextPrimaryUserId)
     {
-        Func<PaidShare, bool> isUnpaid = delegate (PaidShare share) { return !share.Paid; };
+        if (household.PrimaryUserId != userId || household.Members.Count <= 1)
+            return null;
 
-        bool blocked = situation.UnpaidRentPeriods.Any(period =>
-            period.Shares.Any(share => share.UserId == situation.UserId && isUnpaid(share)) ||
-            (period.PayeeUserId == situation.UserId && period.Shares.Any(isUnpaid)));
+        if (nextPrimaryUserId is null)
+            throw new ValidationFailedException("You're the primary, so choose who becomes primary before you leave.");
 
-        return blocked ? "A rent share owed by you or to you is unpaid." : null;
+        return household.Members.SingleOrDefault(member => member.Id == nextPrimaryUserId && member.Id != userId)
+            ?? throw new ValidationFailedException("The next primary must be another member of this household.");
     }
 
-    private static string? ActiveRentScheduleProblem(LeaveSituation situation) =>
-        situation.RentSchedules.Any(schedule =>
-            (schedule.EndDate is null || schedule.EndDate >= situation.Today) &&
-            schedule.Shares.Any(share => share.UserId == situation.UserId))
-            ? "You're in the split of a rent schedule that hasn't ended. Ask the primary to end it or take you off it."
-            : null;
-
-    private static string? UnpaidBillsProblem(LeaveSituation situation)
+    // Everything that fell due before the handover is created first, so it stays paid by the outgoing
+    // primary; rent and bills created from now on are paid by the new one.
+    private async Task HandOverAsync(Household household, User newPrimary)
     {
-        bool blocked = situation.UnpaidBills.Any(bill =>
-            bill.Status == BillStatus.Submitted &&
-            (bill.Shares.Any(share => share.UserId == situation.UserId && !share.Paid) ||
-             (bill.PayeeUserId == situation.UserId && bill.Shares.Any(share => !share.Paid))));
-
-        return blocked ? "A bill share owed by you or to you is unpaid." : null;
+        await runner.RunDueForHouseholdAsync(household.Id);
+        household.PrimaryUserId = newPrimary.Id;
+        household.PrimaryUser = newPrimary;
     }
 
-    private static string? PrimaryWithOthersProblem(LeaveSituation situation) =>
-        situation.IsPrimary && situation.MemberCount > 1
-            ? "You're the primary and others are still in the household. Hand over primary first."
-            : null;
+    // The leaver stops sharing future rent and bills. Everyone left shares the rent equally, since an
+    // exact split no longer adds up; a schedule left with nobody ends today.
+    private async Task TakeOffSchedulesAsync(Household household, int userId)
+    {
+        DateOnly today = clock.Today;
+        HashSet<int> remainingMemberIds = household.Members
+            .Where(member => member.Id != userId)
+            .Select(member => member.Id)
+            .ToHashSet();
+
+        foreach (RentSchedule schedule in await households.GetRentSchedulesWithShareAsync(household.Id, userId))
+        {
+            List<ShareInput> others = schedule.Shares
+                .Where(share => share.UserId != userId)
+                .Select(share => new ShareInput(share.UserId, null))
+                .ToList();
+            if (others.Count == 0)
+            {
+                EndToday(schedule, today);
+                schedule.Shares = [];
+                continue;
+            }
+
+            schedule.SplitType = SplitType.Equal;
+            schedule.Shares = splitCalculator
+                .Split(schedule.Amount, SplitType.Equal, others, remainingMemberIds)
+                .ToList();
+        }
+
+        foreach (BillType billType in await households.GetBillTypesWithMemberAsync(household.Id, userId))
+        {
+            billType.Members.RemoveAll(member => member.Id == userId);
+            if (billType.Members.Count == 0)
+                EndToday(billType, today);
+        }
+    }
+
+    private static void EndToday<TOccurrence>(RecurringSchedule<TOccurrence> schedule, DateOnly today)
+        where TOccurrence : Expense
+    {
+        if (schedule.EndDate is null || schedule.EndDate > today)
+            schedule.EndDate = today;
+        schedule.NextDueDate = null;
+    }
 
     private async Task<string> NewInviteCodeAsync()
     {

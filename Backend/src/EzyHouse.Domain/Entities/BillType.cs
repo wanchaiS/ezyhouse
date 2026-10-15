@@ -1,21 +1,32 @@
+using EzyHouse.Domain.Enums;
 using EzyHouse.Domain.Scheduling;
+using EzyHouse.Domain.ValueObjects;
 
 namespace EzyHouse.Domain.Entities;
 
-public class BillType : RecurringSchedule<Bill>
+public class BillType : RecurringSchedule<BillExpense>
 {
     public string Name { get; set; } = "";
 
     public List<User> Members { get; set; } = [];
 
-    public List<Bill> Bills { get; set; } = [];
+    public override bool HasAnyoneToShare => Members.Count > 0;
 
-    /// <summary>A placeholder has no amount, payee or shares until the primary submits it.</summary>
-    protected override Bill CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
+    /// <summary>
+    /// The real amount isn't known until the bill arrives, so each bill starts at $0, split equally
+    /// among the members (ordered by id, so the split is the same every time). The primary then
+    /// edits it to the real amount.
+    /// </summary>
+    protected override BillExpense CreateOccurrence(ScheduleSlot slot, int primaryUserId) => new()
     {
         HouseholdId = HouseholdId,
         BillTypeId = Id,
-        BillTypeName = Name,
-        DueDate = slot.Start,
+        Description = Name,
+        Amount = 0m,
+        Date = slot.Start,
+        PaidByUserId = primaryUserId,
+        CreatedByUserId = primaryUserId,
+        SplitType = SplitType.Equal,
+        Shares = Members.OrderBy(member => member.Id).Select(member => new Share(member.Id, 0m)).ToList(),
     };
 }

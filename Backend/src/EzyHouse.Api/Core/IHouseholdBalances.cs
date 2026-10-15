@@ -3,8 +3,8 @@ using EzyHouse.Domain.ValueObjects;
 namespace EzyHouse.Api.Core;
 
 /// <summary>
-/// Nets and pairwise debts for one household, from its expenses, furniture and settlements.
-/// Rent, bills and bond are excluded (API.md). Used by Balances and by the leave check.
+/// Nets and pairwise debts for one household, from all its expenses (rent, bills, groceries and
+/// furniture alike) and settlements. The bond is never included (API.md). Used by Balances and by the leave check.
 /// </summary>
 public interface IHouseholdBalances
 {

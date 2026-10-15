@@ -11,58 +11,32 @@ public class BalanceCalculatorTests
     private static readonly int[] Members = [1, 2, 3];
 
     [Test]
-    public void Couch_sale_makes_the_receiver_owe_the_other_share_holders()
+    public void Expenses_of_every_tag_count_the_same_way()
     {
-        var sale = new FurnitureSale
-        {
-            Amount = 300m,
-            CounterpartyUserId = 3,
-            Shares = [new Share(1, 100m), new Share(2, 100m), new Share(3, 100m)],
-        };
+        var rent = new RentExpense { Amount = 300m, PaidByUserId = 1, Shares = [new Share(1, 100m), new Share(2, 100m), new Share(3, 100m)] };
+        var furniture = new FurnitureExpense { Amount = 60m, PaidByUserId = 2, Shares = [new Share(1, 30m), new Share(2, 30m)] };
 
-        var (_, debts) = calculator.Calculate([sale], Members);
+        var (nets, debts) = calculator.Calculate([rent, furniture], Members);
 
-        Assert.That(debts, Is.EquivalentTo(new Debt[]
-        {
-            new(3, 1, 100m),
-            new(3, 2, 100m),
-        }));
+        Assert.That(debts, Is.EquivalentTo(new Debt[] { new(2, 1, 70m), new(3, 1, 100m) }));
+        Assert.That(nets.Values.Sum(), Is.EqualTo(0m));
     }
 
     [Test]
-    public void Couch_purchase_and_sale_match_the_worked_example()
+    public void A_settlement_of_any_amount_pays_down_the_balance_between_that_pair_only()
     {
-        var purchase = new FurniturePurchase
-        {
-            Amount = 600m,
-            CounterpartyUserId = 1,
-            Shares = [new Share(1, 200m), new Share(2, 200m), new Share(3, 200m)],
-        };
-        var sale = new FurnitureSale
-        {
-            Amount = 300m,
-            CounterpartyUserId = 3,
-            Shares = [new Share(1, 100m), new Share(2, 100m), new Share(3, 100m)],
-        };
+        var groceries = new GroceryExpense { Amount = 90m, PaidByUserId = 1, Shares = [new Share(1, 30m), new Share(2, 30m), new Share(3, 30m)] };
+        var settlement = new Settlement { FromUserId = 2, ToUserId = 1, Amount = 12.5m };
 
-        var (nets, debts) = calculator.Calculate([purchase, sale], Members);
+        var (_, debts) = calculator.Calculate([groceries, settlement], Members);
 
-        Assert.That(debts, Is.EquivalentTo(new Debt[]
-        {
-            new(2, 1, 200m),
-            new(3, 1, 300m),
-            new(3, 2, 100m),
-        }));
-        Assert.That(nets[1], Is.EqualTo(500m));
-        Assert.That(nets[2], Is.EqualTo(-100m));
-        Assert.That(nets[3], Is.EqualTo(-400m));
-        Assert.That(nets.Values.Sum(), Is.EqualTo(0m));
+        Assert.That(debts, Is.EquivalentTo(new Debt[] { new(2, 1, 17.5m), new(3, 1, 30m) }));
     }
 
     [Test]
     public void Settlement_cancels_the_payer_debt_and_leaves_the_other_share()
     {
-        var expense = new Expense
+        var expense = new GroceryExpense
         {
             Amount = 90m,
             PaidByUserId = 1,

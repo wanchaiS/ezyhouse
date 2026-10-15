@@ -1,7 +1,7 @@
 # EzyHouse backend
 
 The REST API behind the EzyHouse React app: ASP.NET Core Web API on .NET 10, MySQL 8 through
-Entity Framework Core (Code First), tested with NUnit. Every endpoint in [API.md](../API.md) is
+Entity Framework Core (Code First), tested with NUnit. Every endpoint in [API.md](../API.md) (v5) is
 built. The design, and the reasons behind it, are in [backend.md](backend.md).
 
 ## What you need
@@ -26,7 +26,14 @@ dotnet run --project src/EzyHouse.Api --launch-profile http   # the API on local
 image downloads and MySQL sets itself up.
 
 On start-up in Development, the API creates or upgrades the tables (EF Core migrations) and, if the
-database is empty, adds the demo data below. No `dotnet ef` command is needed.
+database is empty, adds the demo data below. No `dotnet ef` command is needed. Once running, a
+background job creates rent and bill expenses as they fall due: at start-up, then every hour.
+
+> **Schema rebuilt for API.md v5.** The tables were redesigned (one `Expenses` table for rent, bills,
+> groceries and furniture) and the migration history starts again. A database created by an earlier
+> version can't be upgraded: if you ran the API before, drop the old `ezyhouse` database first, with
+> `docker compose down -v` (see [Start again](#start-again-with-fresh-demo-data)) or
+> `DROP DATABASE ezyhouse;` in your own MySQL.
 
 In Visual Studio or Rider: open `EzyHouse.slnx`, set **EzyHouse.Api** as the start-up project and
 choose the **http** profile. MySQL still needs `docker compose up -d --wait` first.
@@ -38,7 +45,7 @@ Open **<http://localhost:5219/swagger>**.
 1. `POST /api/auth/login` with `{ "email": "alice@example.com", "password": "Password1!" }`, then
    copy the `token` from the response.
 2. Click **Authorize** and paste the token on its own, without "Bearer".
-3. Try `GET /api/household`, `GET /api/balances` and `GET /api/rent-periods`.
+3. Try `GET /api/household`, `GET /api/balances` and `GET /api/expenses?tag=rent`.
 
 Without a token every endpoint except register, login and logout returns 401. Login and register
 also set an HttpOnly cookie, `ezyhouse_token`, which the API accepts instead of the header;
@@ -51,9 +58,10 @@ also set an HttpOnly cookie, `ezyhouse_token`, which the API accepts instead of 
 | Users | **Alice** `alice@example.com` (primary), **Bob** `bob@example.com`, **Cara** `cara@example.com` |
 | Password | `Password1!` for all three |
 | Household | "Demo House", invite code `DEMH7KQ2` |
-| Records | 3 grocery expenses and a settlement; weekly rent from 6 weeks ago; Electricity (quarterly) and Internet (monthly) bills; a couch bought for $600 and sold for $300, plus a TV; a $2,400 bond with one contribution |
+| Records | 3 grocery expenses and a settlement; a weekly $750 rent schedule from 6 weeks ago with its 7 rent expenses; Electricity (quarterly) and Internet (monthly) bill types whose past bills have amounts and whose latest bill is still $0; a couch ($600) and a TV ($450) as furniture expenses; a $2,400 bond with one contribution |
 
-Dates are relative to the day the database was seeded, so rent periods and bills are always due.
+Dates are relative to the day the database was seeded. From then on the background job adds each new
+week's rent and each new bill.
 
 ## Run the React frontend
 
@@ -73,7 +81,7 @@ app must always go through the proxy, never to `http://localhost:5219` directly.
 dotnet test EzyHouse.slnx
 ```
 
-114 NUnit tests. They use an in-memory SQLite database, so MySQL doesn't need to be running. In
+124 NUnit tests. They use an in-memory SQLite database, so MySQL doesn't need to be running. In
 Visual Studio or Rider, use the Test Explorer.
 
 ## Start again with fresh demo data
@@ -122,28 +130,28 @@ Paths are relative to `src/` (or `tests/` for the tests). Each technique does re
 
 | Technique | Where | What it does |
 |---|---|---|
-| **Polymorphism** (overriding) | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs`, `EzyHouse.Domain/Entities/RentSchedule.cs`, `BillType.cs` | `CreateOccurrence` is overridden: a rent schedule creates a rent period, a bill type creates a bill placeholder |
-| | `EzyHouse.Domain/Entities/FurnitureTransaction.cs` | `GetLedgerEntries` is overridden: a purchase means the sharers owe the payer; a sale reverses it |
-| | `EzyHouse.Domain/Exceptions/AppException.cs` | each exception overrides its HTTP status code |
+| **Polymorphism** (overriding) | `EzyHouse.Domain/Entities/Expense.cs` | `CanBeChangedBy` is abstract on `Expense` and overridden per tag: groceries by whoever added them; rent, bills and furniture by the current primary |
+| | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs`, `EzyHouse.Domain/Entities/RentSchedule.cs`, `BillType.cs` | `CreateOccurrence` is overridden: a rent schedule creates a rent expense for the period, a bill type creates a $0 bill expense |
+| | `EzyHouse.Domain/Exceptions/AppException.cs` | each exception overrides its HTTP status code and title |
 | **Polymorphism** (through an interface) | `EzyHouse.Domain/Splitting/EqualSplitStrategy.cs`, `ExactSplitStrategy.cs` | two `ISplitStrategy` implementations, picked by `splitType` |
-| **Polymorphism** (overloading) | `EzyHouse.Domain/ValueObjects/PaidShare.cs` | three constructors |
+| **Polymorphism** (overloading) | `EzyHouse.Domain/ValueObjects/Share.cs`, `EzyHouse.Infrastructure/Data/Configurations/ConfigurationExtensions.cs` | two `Share` constructors; `HasMoneyPrecision` for `decimal` and `decimal?` properties |
 | **Interfaces** (at least two) | `EzyHouse.Domain/Interfaces/` | `ISplitStrategy`, `IBalanceContributor`, `IHouseholdOwned`, `IRepository`, `IClock` |
 | | `EzyHouse.Api/Core/ICurrentUserContext.cs`, `EzyHouse.Api/Features/*/I*Service.cs`, `I*Repository.cs` | the current user; one service and one repository interface per feature |
-| **Generics** | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs` | `RecurringSchedule<TOccurrence>`, shared by rent and bills |
+| **Generics** | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs` | `RecurringSchedule<TOccurrence> where TOccurrence : Expense`, shared by rent and bills |
 | | `EzyHouse.Domain/Extensions/QueryableExtensions.cs` | `ForHousehold<T>() where T : IHouseholdOwned` keeps every query inside one household |
 | | `EzyHouse.Domain/Splitting/SplitCalculator.cs`, `EzyHouse.Api/Features/Auth/AuthFeature.cs` | `Dictionary<SplitType, ISplitStrategy>`; ASP.NET's `PasswordHasher<User>` hashes passwords |
-| **Anonymous method with LINQ and lambdas** | `EzyHouse.Api/Features/Households/HouseholdService.cs` (`UnpaidRentProblem`) | an explicit `delegate (PaidShare share) { … }` used inside a LINQ query |
+| **Anonymous method with LINQ and lambdas** | `EzyHouse.Api/Features/Households/HouseholdService.cs` (`LeaveAsync`) | an explicit `delegate (Debt debt) { … }` used in LINQ's `Any` to find the leaver's debts |
 | | `EzyHouse.Domain/Balances/BalanceCalculator.cs` | LINQ with lambdas: `GroupBy` per pair of people, then net each pair |
 | **Delegates** | `EzyHouse.Domain/Scheduling/FrequencyExtensions.cs` | `Dictionary<Frequency, Func<DateOnly, int, DateOnly>>`: one date step per frequency |
-| **Enumerators** | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs` | `GetSlots()` uses `yield return` to produce each rent or bill slot |
-| **Properties** | `EzyHouse.Domain/Entities/Bond.cs`, `Furniture.cs`, `Bill.cs` | computed `Outstanding`, `Purchase`, `Sale`; private setters on lifecycle fields such as `Status` |
+| **Enumerators** | `EzyHouse.Domain/Scheduling/RecurringSchedule.cs` | `GetSlots()` uses `yield return` to produce each rent or bill date, without end when there is no end date |
+| **Properties** | `EzyHouse.Domain/Entities/Bond.cs`, `Expense.cs`, `RentSchedule.cs`, `BillType.cs` | computed `Outstanding` and `HasAnyoneToShare`; private setters on `Bond.Total` and on `Expense.Tag`, which can't change |
 | **Extension methods** | `EzyHouse.Domain/Scheduling/FrequencyExtensions.cs`, `EzyHouse.Domain/Extensions/MoneyExtensions.cs`, `EzyHouse.Api/Core/ClaimsPrincipalExtensions.cs` | `AddFrequency`, `HasAtMostTwoDecimals`, `GetUserId` |
 | | `EzyHouse.Api/Core/CoreMappings.cs`, `EzyHouse.Api/Features/*/*Mappings.cs`, `*Feature.cs` | `ToDto()` mappers; `Add<Feature>Feature()` service registration |
-| **Enums** | `EzyHouse.Domain/Enums/` | `SplitType`, `Frequency`, `BillStatus`, `FurnitureStatus`, sent as lowercase strings |
+| **Enums** | `EzyHouse.Domain/Enums/` | `SplitType`, `Frequency`, `ExpenseTag` (also the database discriminator), sent as lowercase strings |
 | **Error handling** | `EzyHouse.Domain/Exceptions/AppException.cs`, `EzyHouse.Api/Core/AppExceptionHandler.cs` | one exception type per status (400, 401, 403, 404, 409), turned into ProblemDetails in one place |
 | **Validation** | `EzyHouse.Api/Core/MoneyAttribute.cs`, `EzyHouse.Api/Features/*/*Dtos.cs` | `[Required]`, `[EmailAddress]`, `[StringLength]` and a custom `[Money]` on request fields |
-| | `EzyHouse.Domain/Entities/Furniture.cs`, `Bill.cs`, `Bond.cs` | lifecycle rules: e.g. a sold item can't be sold again (409) |
-| **NUnit** | `EzyHouse.Tests/` | 114 tests: `Domain/` (pure rules), `Features/` (each service against a real database, plus the login cookie), `Core/`, `Infrastructure/` |
+| | `EzyHouse.Domain/Entities/Bond.cs`, `EzyHouse.Api/Features/Rent/RentService.cs`, `Bills/BillService.cs` | rules checked in code rather than by an attribute: contributions can't exceed the bond total; a rent schedule or bill type needs at least one person (400) |
+| **NUnit** | `EzyHouse.Tests/` | 124 tests: `Domain/` (pure rules), `Features/` (each service against a real database, plus the login cookie), `Core/`, `Infrastructure/` |
 | **Database + EF + LINQ** (bonus) | `EzyHouse.Infrastructure/Data/EzyHouseDbContext.cs`, `Data/Configurations/`, `Migrations/` | MySQL through Pomelo EF Core, Code First; LINQ to Entities in every `*Repository.cs` |
 | **Non-Windows-Forms UI** (bonus) | `../API.md` | the React frontend calls this Web API |
 | **High cohesion, low coupling** | `EzyHouse.Api/Features/` | one folder per feature; features never reference each other; dependencies injected through interfaces |

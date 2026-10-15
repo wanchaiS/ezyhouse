@@ -1,7 +1,6 @@
 using System.Text.Json;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Balances;
-using EzyHouse.Api.Features.Bills;
 using EzyHouse.Api.Features.Bonds;
 using EzyHouse.Api.Features.Expenses;
 using EzyHouse.Domain.Enums;
@@ -30,13 +29,21 @@ public class ApiJsonOptionsTests
     }
 
     [Test]
-    public void A_pending_bill_has_no_amount_and_a_submitted_one_has_two_decimal_places()
+    public void The_tag_is_read_and_written_as_a_lowercase_string()
     {
-        var pending = new BillDto(1, new BillTypeRefDto(1, "Internet"), new DateOnly(2026, 10, 1), BillStatus.Pending, null, null, null, []);
-        var submitted = pending with { Status = BillStatus.Submitted, Amount = 33.3m };
+        var input = JsonSerializer.Deserialize<NewExpenseInput>(
+            """{"tag":"groceries","description":"Milk","amount":0,"date":"2026-10-15","paidByUserId":1,"splitType":"equal","shares":[]}""",
+            Options);
+        var bill = new ExpenseDto(1, ExpenseTag.Bills, "Internet", 0m, new DateOnly(2026, 10, 1), Alice, Alice,
+            SplitType.Equal, [], true, null, null, 4);
 
-        Assert.That(JsonSerializer.Serialize(pending, Options), Does.Contain("\"amount\":null"));
-        Assert.That(JsonSerializer.Serialize(submitted, Options), Does.Contain("\"amount\":33.30"));
+        string json = JsonSerializer.Serialize(bill, Options);
+
+        Assert.That(input!.Tag, Is.EqualTo(ExpenseTag.Groceries));
+        Assert.That(json, Does.Contain("\"tag\":\"bills\""));
+        Assert.That(json, Does.Contain("\"amount\":0.00"));
+        Assert.That(json, Does.Contain("\"rentScheduleId\":null"));
+        Assert.That(json, Does.Contain("\"billTypeId\":4"));
     }
 
     [Test]

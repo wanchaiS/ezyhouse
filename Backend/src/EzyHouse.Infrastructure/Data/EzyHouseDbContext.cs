@@ -9,21 +9,14 @@ public class EzyHouseDbContext(DbContextOptions<EzyHouseDbContext> options) : Db
 
     public DbSet<Household> Households => Set<Household>();
 
+    /// <summary>Every kind of expense, in one table; use <c>OfType&lt;RentExpense&gt;()</c> and so on for one kind.</summary>
     public DbSet<Expense> Expenses => Set<Expense>();
 
     public DbSet<Settlement> Settlements => Set<Settlement>();
 
     public DbSet<RentSchedule> RentSchedules => Set<RentSchedule>();
 
-    public DbSet<RentPeriod> RentPeriods => Set<RentPeriod>();
-
     public DbSet<BillType> BillTypes => Set<BillType>();
-
-    public DbSet<Bill> Bills => Set<Bill>();
-
-    public DbSet<Furniture> Furniture => Set<Furniture>();
-
-    public DbSet<FurnitureTransaction> FurnitureTransactions => Set<FurnitureTransaction>();
 
     public DbSet<Bond> Bonds => Set<Bond>();
 

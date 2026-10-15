@@ -12,6 +12,8 @@ public sealed class BillTypeConfiguration : IEntityTypeConfiguration<BillType>
         builder.Property(billType => billType.Name).HasMaxLength(100).IsRequired();
         builder.Property(billType => billType.Frequency).HasEnumString();
         builder.HasIndex(billType => billType.HouseholdId);
+        builder.HasIndex(billType => billType.NextDueDate);
+        builder.Ignore(billType => billType.HasAnyoneToShare);
 
         builder.HasOne(billType => billType.Household)
             .WithMany()
@@ -25,10 +27,5 @@ public sealed class BillTypeConfiguration : IEntityTypeConfiguration<BillType>
                 "BillTypeMembers",
                 member => member.HasOne<User>().WithMany().HasForeignKey("MembersId").OnDelete(DeleteBehavior.Restrict),
                 billType => billType.HasOne<BillType>().WithMany().HasForeignKey("BillTypeId").OnDelete(DeleteBehavior.Cascade));
-
-        builder.HasMany(billType => billType.Bills)
-            .WithOne(bill => bill.BillType)
-            .HasForeignKey(bill => bill.BillTypeId)
-            .OnDelete(DeleteBehavior.SetNull);
     }
 }
