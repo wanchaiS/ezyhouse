@@ -40,10 +40,10 @@ public sealed record PurchaseInput(
     [Required, Money] decimal? Amount,
     [Required] int? PaidByUserId,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);
 
 public sealed record FurnitureInput(
-    [Required, StringLength(100, MinimumLength = 1)] string? Name,
+    [Required, StringLength(100, MinimumLength = 1, ErrorMessage = "Name must be at most 100 characters.")] string? Name,
     [Required] PurchaseInput? Purchase);
 
 public sealed record SaleInput(
@@ -51,11 +51,11 @@ public sealed record SaleInput(
     [Required, Money] decimal? Amount,
     [Required] int? ReceivedByUserId,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);
 
 public sealed record DisposalInput(
     [Required] DateOnly? Date,
     [Required, Money(AllowZero = true)] decimal? Amount,
     [Required] int? PaidByUserId,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);

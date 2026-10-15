@@ -63,7 +63,7 @@ AuthResult { token, user: User }
 
 | Method | Path | Body | Returns | Errors |
 |---|---|---|---|---|
-| POST | `/api/auth/register` | `{ name, email, password }` | `AuthResult` | 409 email already used |
+| POST | `/api/auth/register` | `{ name, email, password }` | `AuthResult` | 400 invalid email or password under 8 characters; 409 email already used |
 | POST | `/api/auth/login` | `{ email, password }` | `AuthResult` | 401 |
 | POST | `/api/auth/logout` | — | 204, no body | |
 | GET | `/api/me` | — | `User` | |

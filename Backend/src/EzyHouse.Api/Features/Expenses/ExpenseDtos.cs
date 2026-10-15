@@ -16,9 +16,9 @@ public sealed record ExpenseDto(
     IReadOnlyList<ShareDto> Shares);
 
 public sealed record ExpenseInput(
-    [Required, StringLength(500, MinimumLength = 1)] string? Description,
+    [Required, StringLength(500, MinimumLength = 1, ErrorMessage = "Description must be at most 500 characters.")] string? Description,
     [Required, Money] decimal? Amount,
     [Required] DateOnly? Date,
     [Required] int? PaidByUserId,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);

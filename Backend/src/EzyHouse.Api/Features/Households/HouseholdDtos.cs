@@ -11,9 +11,9 @@ public sealed record HouseholdDto(
     IReadOnlyList<UserRefDto> Members);
 
 public sealed record CreateHouseholdRequest(
-    [Required, StringLength(100, MinimumLength = 1)] string? Name);
+    [Required, StringLength(100, MinimumLength = 1, ErrorMessage = "Name must be at most 100 characters.")] string? Name);
 
 public sealed record JoinHouseholdRequest(
-    [Required, StringLength(8, MinimumLength = 8)] string? InviteCode);
+    [Required, StringLength(8, MinimumLength = 8, ErrorMessage = "An invite code has 8 characters.")] string? InviteCode);
 
 public sealed record TransferPrimaryRequest([Required] int? UserId);

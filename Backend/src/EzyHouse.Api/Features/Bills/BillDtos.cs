@@ -17,7 +17,7 @@ public sealed record BillTypeDto(
     DateOnly? NextDueDate);
 
 public sealed record BillTypeInput(
-    [Required, StringLength(100, MinimumLength = 1)] string? Name,
+    [Required, StringLength(100, MinimumLength = 1, ErrorMessage = "Name must be at most 100 characters.")] string? Name,
     [Required] Frequency? Frequency,
     [Required] DateOnly? StartDate,
     DateOnly? EndDate,

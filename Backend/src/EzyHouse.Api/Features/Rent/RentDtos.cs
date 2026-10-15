@@ -21,7 +21,7 @@ public sealed record RentScheduleInput(
     [Required] DateOnly? StartDate,
     DateOnly? EndDate,
     [Required] SplitType? SplitType,
-    [Required, MinLength(1)] List<ShareInput>? Shares);
+    [Required, MinLength(1, ErrorMessage = "Choose at least one person for the split.")] List<ShareInput>? Shares);
 
 public sealed record RentPeriodDto(
     int Id,
