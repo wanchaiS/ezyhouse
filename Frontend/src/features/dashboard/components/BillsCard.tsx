@@ -3,7 +3,7 @@ import { Card } from '../../../shared/components/Card'
 import { Money } from '../../../shared/components/Money'
 import { formatShortDate } from '../../../shared/format/date'
 import styles from '../Dashboard.module.css'
-import { OpenLink } from './OpenLink'
+import { ButtonLink } from '../../../shared/components/Button'
 
 interface BillsCardProps {
   meId: number
@@ -20,7 +20,7 @@ export function BillsCard({ meId, bills }: BillsCardProps) {
     <Card
       title="Bills"
       actions={
-        <OpenLink to="/bills">Open bills</OpenLink>
+        <ButtonLink to="/bills">Open bills</ButtonLink>
       }
     >
       <h4 className={styles.h4}>Waiting for an amount</h4>

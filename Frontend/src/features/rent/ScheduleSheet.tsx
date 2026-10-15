@@ -23,18 +23,16 @@ interface ScheduleSheetProps {
 
 /** A schedule's details; Edit and Delete only for the primary. */
 export function ScheduleSheet({ schedule, onClose, isPrimary, primary, onEdit, onDelete }: ScheduleSheetProps) {
-  const title = schedule ? (
-    <span className={styles.sheetHead}>
-      <span>
-        {formatMoney(schedule.amount)} {FREQUENCY_LABELS[schedule.frequency].toLowerCase()}
-      </span>
-      {isPrimary && <TextButton onClick={() => onEdit(schedule)}>Edit</TextButton>}
-    </span>
-  ) : (
-    ''
-  )
+  const title = schedule
+    ? `${formatMoney(schedule.amount)} ${FREQUENCY_LABELS[schedule.frequency].toLowerCase()}`
+    : ''
   return (
-    <Sheet open={schedule !== null} onClose={onClose} title={title}>
+    <Sheet
+      open={schedule !== null}
+      onClose={onClose}
+      title={title}
+      titleAction={schedule && isPrimary ? <TextButton onClick={() => onEdit(schedule)}>Edit</TextButton> : undefined}
+    >
       {schedule && (
         <>
           <List>

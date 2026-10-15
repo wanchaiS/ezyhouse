@@ -3,7 +3,7 @@ import { Card } from '../../../shared/components/Card'
 import { Money } from '../../../shared/components/Money'
 import { formatShortDate } from '../../../shared/format/date'
 import styles from '../Dashboard.module.css'
-import { OpenLink } from './OpenLink'
+import { ButtonLink } from '../../../shared/components/Button'
 
 interface RentCardProps {
   meId: number
@@ -19,7 +19,7 @@ export function RentCard({ meId, periods }: RentCardProps) {
     <Card
       title="Rent"
       actions={
-        <OpenLink to="/rent">Open rent</OpenLink>
+        <ButtonLink to="/rent">Open rent</ButtonLink>
       }
     >
       {next && share ? (

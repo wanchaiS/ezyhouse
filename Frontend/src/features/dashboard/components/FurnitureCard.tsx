@@ -1,13 +1,13 @@
 import { Card } from '../../../shared/components/Card'
 import styles from '../Dashboard.module.css'
-import { OpenLink } from './OpenLink'
+import { ButtonLink } from '../../../shared/components/Button'
 
 export function FurnitureCard({ ownedCount }: { ownedCount: number }) {
   return (
     <Card
       title="Furniture"
       actions={
-        <OpenLink to="/furniture">Open furniture</OpenLink>
+        <ButtonLink to="/furniture">Open furniture</ButtonLink>
       }
     >
       <p className={styles.big}>

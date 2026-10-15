@@ -5,6 +5,8 @@
 .sheet::backdrop { background: rgba(10,10,20,.35); }
 .inner { padding: 8px 16px 30px; }
 .grabber { width: 36px; height: 5px; border-radius: 3px; background: #c7c7cf; margin: 0 auto 12px; }
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.head > button { margin-right: 4px; font-size: 16px; }
 .title { font-size: 21px; margin: 2px 4px 12px; letter-spacing: -.01em; }
 .actions { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
 

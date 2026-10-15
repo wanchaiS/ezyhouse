@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react'
+import { Link } from 'react-router'
 import styles from './Button.module.css'
 
 type Variant = 'default' | 'primary' | 'danger' | 'plain' | 'quietDanger'
@@ -34,4 +35,23 @@ export function IconButton({ label, accent, className, type = 'button', ...rest 
 /** A button that looks like a link (e.g. "Create an account"). */
 export function TextButton({ className, type = 'button', ...rest }: ComponentProps<'button'>) {
   return <button type={type} className={[styles.link, className].filter(Boolean).join(' ')} {...rest} />
+}
+
+type ButtonLinkProps = ComponentProps<typeof Link> & {
+  variant?: Variant
+  block?: boolean
+  small?: boolean
+}
+
+/** A link to another screen that looks like a button (e.g. "Open rent" on the dashboard). */
+export function ButtonLink({ variant = 'default', block, small, className, ...rest }: ButtonLinkProps) {
+  const classes = [
+    styles.btn,
+    styles.linkBtn,
+    variant !== 'default' && styles[variant],
+    block && styles.block,
+    small && styles.small,
+    className,
+  ]
+  return <Link className={classes.filter(Boolean).join(' ')} {...rest} />
 }

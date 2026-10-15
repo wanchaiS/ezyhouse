@@ -10,3 +10,5 @@
 .iconBtn svg { width: 20px; height: 20px; }
 .accent { background: var(--accent); color: #fff; }
 .link { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+/* A <Link> styled as a button: links aren't flex-centred or underline-free by default. */
+.linkBtn { display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 15px; }

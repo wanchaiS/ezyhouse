@@ -6,8 +6,6 @@
 .muted { color: var(--muted); font-weight: 400; }
 .center { text-align: center; }
 
-.titleRow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.titleRow button { font-size: 16px; }
 .bigAmount { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 0 4px; font-variant-numeric: tabular-nums; }
 
 /* "Shared by" checkboxes, as in the mockup's bill type form. */

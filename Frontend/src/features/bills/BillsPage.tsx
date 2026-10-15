@@ -127,12 +127,7 @@ export function BillsPage() {
       case 'bill':
         return viewedBill?.billType.name ?? 'Bill'
       case 'type':
-        return (
-          <span className={styles.titleRow}>
-            <span>{viewedType?.name}</span>
-            {isPrimary && <TextButton onClick={() => open({ kind: 'typeForm', typeId: sheet.typeId })}>Edit</TextButton>}
-          </span>
-        )
+        return viewedType?.name
       case 'typeForm':
         return sheet.typeId === undefined ? 'New bill type' : 'Edit bill type'
       case 'deleteType':
@@ -251,7 +246,16 @@ export function BillsPage() {
         onView={(billType) => open({ kind: 'type', typeId: billType.id })}
       />
       <Note>Bills aren't part of balances. Everyone owes the primary who paid the provider.</Note>
-      <Sheet open={sheet !== null} onClose={() => setSheet(null)} title={sheetTitle()}>
+      <Sheet
+        open={sheet !== null}
+        onClose={() => setSheet(null)}
+        title={sheetTitle()}
+        titleAction={
+          sheet?.kind === 'type' && isPrimary ? (
+            <TextButton onClick={() => open({ kind: 'typeForm', typeId: sheet.typeId })}>Edit</TextButton>
+          ) : undefined
+        }
+      >
         {sheetBody()}
       </Sheet>
     </>

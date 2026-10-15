@@ -1,10 +1,9 @@
 import type { Debt, UserRef } from '../../../shared/api/types'
-import { Button } from '../../../shared/components/Button'
+import { Button, ButtonLink } from '../../../shared/components/Button'
 import { Card } from '../../../shared/components/Card'
 import { Money } from '../../../shared/components/Money'
 import { formatMoney } from '../../../shared/format/money'
 import styles from '../Dashboard.module.css'
-import { OpenLink } from './OpenLink'
 
 interface NetCardProps {
   me: UserRef
@@ -23,7 +22,7 @@ export function NetCard({ me, net, debts, onSettle }: NetCardProps) {
           <Button variant="primary" onClick={onSettle}>
             Settle up
           </Button>
-          <OpenLink to="/groceries">Open groceries</OpenLink>
+          <ButtonLink to="/groceries">Open groceries</ButtonLink>
         </>
       }
     >

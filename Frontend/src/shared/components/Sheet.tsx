@@ -6,6 +6,8 @@ interface SheetProps {
   /** Called when the user closes the sheet: Escape or a click on the backdrop. */
   onClose: () => void
   title: ReactNode
+  /** Shown beside the title, outside the heading (e.g. an Edit link). */
+  titleAction?: ReactNode
   children: ReactNode
 }
 
@@ -13,7 +15,7 @@ interface SheetProps {
  * A modal on the native <dialog>: a bottom sheet below 820px, a centred dialog from 820px.
  * The body mounts only while open, so a form inside starts fresh every time.
  */
-export function Sheet({ open, onClose, title, children }: SheetProps) {
+export function Sheet({ open, onClose, title, titleAction, children }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null)
   // The native 'close' event also fires, a moment later, when we close the dialog ourselves. By
   // then the page may already have opened the next sheet, so that close must not reach onClose.
@@ -45,7 +47,10 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
       {open && (
         <div className={styles.inner}>
           <div className={styles.grabber} />
-          <h2 className={styles.title}>{title}</h2>
+          <div className={styles.head}>
+            <h2 className={styles.title}>{title}</h2>
+            {titleAction}
+          </div>
           {children}
         </div>
       )}
