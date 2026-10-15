@@ -1,0 +1,21 @@
+/* The mockup's bondDetail and bondForm styles not covered by shared components. */
+.label { font-size: 13px; color: var(--muted); }
+.big { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.headRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+
+/* Desktop: bonds side by side. */
+.grid { display: grid; gap: 12px; align-items: start; }
+@media (min-width: 820px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+}
+
+/* "Who put in what": one white block of repeating rows, as in the mockup's people list. */
+.fieldLabel { display: block; font-size: 13px; color: var(--muted); margin: 0 4px 5px; }
+.rows { background: #fff; border-radius: 12px; margin-bottom: 8px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px; }
+.row + .row { border-top: 1px solid var(--line); }
+.who { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; }
+.who > select { flex: 1; }
+.rowError { grid-column: 1 / -1; font-size: 13px; color: var(--neg); margin: 0 4px; }
+.total { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); margin: 8px 4px 12px; font-variant-numeric: tabular-nums; }
+.warn { color: var(--warn); font-weight: 600; }
