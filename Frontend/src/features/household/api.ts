@@ -5,6 +5,7 @@ export async function setPrimary(userId: number) {
   return (await api.put<Household>('/household/primary', { userId })).data
 }
 
-export async function leaveHousehold() {
-  await api.post('/household/leave')
+/** `nextPrimaryUserId` is required when the primary leaves and others remain. */
+export async function leaveHousehold(input: { nextPrimaryUserId?: number }) {
+  await api.post('/household/leave', input)
 }

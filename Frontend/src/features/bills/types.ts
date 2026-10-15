@@ -1,14 +1,4 @@
-import type { Frequency, ShareInput, SplitType, UserRef } from '../../shared/api/types'
-
-export interface BillType {
-  id: number
-  name: string
-  frequency: Frequency
-  startDate: string
-  endDate: string | null
-  members: UserRef[]
-  nextDueDate: string | null
-}
+import type { Frequency } from '../../shared/api/types'
 
 export interface BillTypeInput {
   name: string
@@ -16,13 +6,6 @@ export interface BillTypeInput {
   startDate: string
   endDate?: string | null
   memberIds: number[]
-}
-
-/** equal → the server splits across the bill type's members, so shares are omitted. */
-export interface SubmitBillInput {
-  amount: number
-  splitType: SplitType
-  shares?: ShareInput[]
 }
 
 export const FREQUENCY_LABELS: Record<Frequency, string> = {

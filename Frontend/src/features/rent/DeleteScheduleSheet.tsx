@@ -1,10 +1,10 @@
+import type { RentSchedule } from '../../shared/api/types'
 import { Button } from '../../shared/components/Button'
 import { ErrorMessage } from '../../shared/components/ErrorMessage'
 import { Sheet, SheetActions } from '../../shared/components/Sheet'
 import { Note } from '../../shared/components/Text'
 import { formatMoney } from '../../shared/format/money'
 import { FREQUENCY_LABELS } from './format'
-import type { RentSchedule } from './types'
 
 interface DeleteScheduleSheetProps {
   /** null keeps the sheet closed. */
@@ -21,8 +21,8 @@ export function DeleteScheduleSheet({ schedule, onClose, onConfirm, deleting, er
       {schedule && (
         <>
           <Note>
-            {formatMoney(schedule.amount)} {FREQUENCY_LABELS[schedule.frequency].toLowerCase()}. Deleting it also
-            deletes all of its periods and their paid ticks.
+            {formatMoney(schedule.amount)} {FREQUENCY_LABELS[schedule.frequency].toLowerCase()}. Rent already created
+            stays. Nothing new is created.
           </Note>
           <ErrorMessage error={error} />
           <SheetActions>

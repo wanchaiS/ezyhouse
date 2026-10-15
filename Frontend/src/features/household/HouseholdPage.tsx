@@ -8,7 +8,9 @@ import { problemMessage, toProblem } from '../../shared/api/problem'
 import type { User, UserRef } from '../../shared/api/types'
 import { Button } from '../../shared/components/Button'
 import { ErrorMessage } from '../../shared/components/ErrorMessage'
+import { Field } from '../../shared/components/Field'
 import { List } from '../../shared/components/List'
+import { MemberSelect } from '../../shared/components/MemberSelect'
 import { PageHeader } from '../../shared/components/PageHeader'
 import { Sheet, SheetActions } from '../../shared/components/Sheet'
 import { Spinner } from '../../shared/components/Spinner'
@@ -22,7 +24,8 @@ import { MemberList } from './MemberList'
 
 type SheetState =
   | { kind: 'handOver'; member: UserRef }
-  | { kind: 'leave' }
+  /** `nextPrimaryId`: who takes over when the primary leaves and others stay. */
+  | { kind: 'leave'; nextPrimaryId: number | null }
   | { kind: 'blocked'; reasons: string[] }
   | null
 
@@ -39,10 +42,9 @@ export function HouseholdPage() {
     mutationFn: (member: UserRef) => setPrimary(member.id),
     onSuccess: (updated, member) => {
       queryClient.setQueryData(keys.household, updated)
-      // Who is primary decides who may manage things, and who new rent and bills are paid to.
+      // Who is primary decides who may change rent, bills and furniture, and who pays new rent and bills.
       queryClient.invalidateQueries({ queryKey: keys.household })
-      queryClient.invalidateQueries({ queryKey: keys.rentPeriods })
-      queryClient.invalidateQueries({ queryKey: keys.bills })
+      queryClient.invalidateQueries({ queryKey: keys.expenses })
       setSheet(null)
       showToast(`${member.name} is now the primary`)
     },
@@ -80,6 +82,9 @@ export function HouseholdPage() {
   const meId = me.data.id
   const { name, inviteCode, primary, members } = household.data
   const isPrimary = primary.id === meId
+  const others = members.filter((member) => member.id !== meId)
+  // A primary who leaves others behind names who takes over (the API answers 400 otherwise).
+  const needsNextPrimary = isPrimary && others.length > 0
 
   const copyCode = async () => {
     try {
@@ -123,7 +128,7 @@ export function HouseholdPage() {
               block
               onClick={() => {
                 leave.reset()
-                setSheet({ kind: 'leave' })
+                setSheet({ kind: 'leave', nextPrimaryId: null })
               }}
             >
               Leave household
@@ -142,7 +147,8 @@ export function HouseholdPage() {
         title={sheet?.kind === 'handOver' ? `Make ${sheet.member.name} the primary?` : ''}
       >
         <Note>
-          They will manage rent, bills and bond, and get paid back for new rent and bills. You become a normal member.
+          They will manage rent, bills, furniture and bond. Rent and bills created from now on are paid by them. You
+          become a normal member.
         </Note>
         <ErrorMessage error={handOver.error} />
         <SheetActions>
@@ -161,10 +167,27 @@ export function HouseholdPage() {
       </Sheet>
 
       <Sheet open={sheet?.kind === 'leave'} onClose={closeSheet} title={`Leave ${name}?`}>
-        <Note>You will be taken off every bill and give up your share of any furniture.</Note>
+        <Note>You will be taken off the rent and every bill.</Note>
+        {sheet?.kind === 'leave' && needsNextPrimary && (
+          <Field label="Who becomes the primary?">
+            <MemberSelect
+              members={others}
+              value={sheet.nextPrimaryId}
+              onChange={(userId) => setSheet({ kind: 'leave', nextPrimaryId: userId })}
+            />
+          </Field>
+        )}
         {toProblem(leave.error).status !== 409 && <ErrorMessage error={leave.error} />}
         <SheetActions>
-          <Button variant="danger" block disabled={leave.isPending} onClick={() => leave.mutate()}>
+          <Button
+            variant="danger"
+            block
+            disabled={leave.isPending || (needsNextPrimary && sheet?.kind === 'leave' && sheet.nextPrimaryId === null)}
+            onClick={() =>
+              sheet?.kind === 'leave' &&
+              leave.mutate(sheet.nextPrimaryId === null ? {} : { nextPrimaryUserId: sheet.nextPrimaryId })
+            }
+          >
             Leave household
           </Button>
           <Button variant="plain" block onClick={closeSheet}>

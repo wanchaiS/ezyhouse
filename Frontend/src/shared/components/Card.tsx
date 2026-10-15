@@ -17,8 +17,3 @@ export function Card({ title, actions, children }: CardProps) {
     </section>
   )
 }
-
-/** One column on a phone, two from 820px. */
-export function CardGrid({ children }: { children: ReactNode }) {
-  return <div className={styles.grid}>{children}</div>
-}

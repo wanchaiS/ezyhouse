@@ -1,39 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { getExpenses } from '../../shared/api/expenses'
 import { useHousehold } from '../../shared/api/household'
 import { keys } from '../../shared/api/keys'
 import { useMe } from '../../shared/api/me'
-import { getRentPeriods } from '../../shared/api/rent'
-import { IconButton } from '../../shared/components/Button'
+import { getRentSchedules } from '../../shared/api/rent'
+import type { RentSchedule } from '../../shared/api/types'
+import { Button, IconButton } from '../../shared/components/Button'
 import { EmptyState } from '../../shared/components/EmptyState'
 import { ErrorMessage } from '../../shared/components/ErrorMessage'
-import { PlusIcon } from '../../shared/components/icons'
+import { ExpenseLog } from '../../shared/components/ExpenseLog'
+import { ExpenseSheet, type ExpenseSheetState } from '../../shared/components/ExpenseSheet'
+import { FirstRun } from '../../shared/components/FirstRun'
+import { KeyIcon, PlusIcon } from '../../shared/components/icons'
 import { PageHeader } from '../../shared/components/PageHeader'
 import { Spinner } from '../../shared/components/Spinner'
-import { Note, SectionTitle } from '../../shared/components/Text'
+import { Lead, SectionTitle } from '../../shared/components/Text'
 import { useToast } from '../../shared/components/toastContext'
-import { today } from '../../shared/format/date'
-import {
-  createRentSchedule,
-  deleteRentSchedule,
-  getRentSchedules,
-  rentScheduleKey,
-  setRentSharePaid,
-  updateRentSchedule,
-} from './api'
-import { CurrentPeriod } from './CurrentPeriod'
+import { formatShortDate } from '../../shared/format/date'
+import { createRentSchedule, deleteRentSchedule, updateRentSchedule } from './api'
 import { DeleteScheduleSheet } from './DeleteScheduleSheet'
-import { EarlierPeriods } from './EarlierPeriods'
-import { PeriodSheet } from './PeriodSheet'
 import { ScheduleFormSheet } from './ScheduleFormSheet'
 import { ScheduleList } from './ScheduleList'
 import { ScheduleSheet } from './ScheduleSheet'
-import type { RentSchedule, RentScheduleInput } from './types'
+import type { RentScheduleInput } from './types'
 import styles from './Rent.module.css'
 
-// Which sheet is open; ids rather than objects, so a sheet shows the latest data after a refetch.
+// Which schedule sheet is open; ids rather than objects, so a sheet shows the latest data after a refetch.
 type OpenSheet =
-  | { kind: 'period'; id: number }
   | { kind: 'schedule'; id: number }
   | { kind: 'form'; id: number | null }
   | { kind: 'delete'; id: number }
@@ -44,22 +38,19 @@ export function RentPage() {
   const showToast = useToast()
   const me = useMe()
   const household = useHousehold()
-  const periods = useQuery({ queryKey: keys.rentPeriods, queryFn: getRentPeriods })
-  const schedules = useQuery({ queryKey: rentScheduleKey, queryFn: getRentSchedules })
+  const schedules = useQuery({ queryKey: keys.rentSchedules, queryFn: getRentSchedules })
+  const rent = useQuery({ queryKey: keys.expenseList('rent'), queryFn: () => getExpenses('rent') })
   const [sheet, setSheet] = useState<OpenSheet>(null)
+  const [expenseSheet, setExpenseSheet] = useState<ExpenseSheetState>(null)
 
-  // Creating, editing or deleting a schedule can add or remove periods too.
+  // A new schedule due today creates its rent straight away, and a deleted one unlinks its rent,
+  // so the rent and the balances refresh with the schedules.
   const refreshRent = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: rentScheduleKey }),
-      queryClient.invalidateQueries({ queryKey: keys.rentPeriods }),
+      queryClient.invalidateQueries({ queryKey: keys.rentSchedules }),
+      queryClient.invalidateQueries({ queryKey: keys.expenses }),
+      queryClient.invalidateQueries({ queryKey: keys.balances }),
     ])
-
-  const tick = useMutation({
-    mutationFn: ({ periodId, userId, paid }: { periodId: number; userId: number; paid: boolean }) =>
-      setRentSharePaid(periodId, userId, paid),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.rentPeriods }),
-  })
 
   const save = useMutation({
     mutationFn: ({ id, input }: { id: number | null; input: RentScheduleInput }) =>
@@ -80,9 +71,9 @@ export function RentPage() {
     },
   })
 
-  if (me.isPending || household.isPending || periods.isPending || schedules.isPending) return <Spinner />
-  const loadError = me.error ?? household.error ?? periods.error ?? schedules.error
-  if (loadError || !me.data || !household.data || !periods.data || !schedules.data) {
+  if (me.isPending || household.isPending || schedules.isPending || rent.isPending) return <Spinner />
+  const loadError = me.error ?? household.error ?? schedules.error ?? rent.error
+  if (loadError || !me.data || !household.data || !schedules.data || !rent.data) {
     return (
       <>
         <PageHeader title="Rent" />
@@ -94,22 +85,13 @@ export function RentPage() {
   const meId = me.data.id
   const { primary, members } = household.data
   const isPrimary = primary.id === meId
-  const now = today()
-  const sorted = [...periods.data].sort((a, b) => b.startDate.localeCompare(a.startDate))
-  const current = sorted.filter((period) => period.startDate <= now && now <= period.endDate)
-  const earlier = sorted.filter((period) => !current.includes(period))
-
-  const findPeriod = (id: number) => periods.data.find((period) => period.id === id) ?? null
   const findSchedule = (id: number | null) => schedules.data.find((schedule) => schedule.id === id) ?? null
-  const shareProps = { meId, isPrimary, busy: tick.isPending }
-  const tickIn = (periodId: number) => (userId: number, paid: boolean) => tick.mutate({ periodId, userId, paid })
   const closeSheet = () => setSheet(null)
-
-  const emptyText = schedules.data.length
-    ? 'No rent due right now.'
-    : isPrimary
-      ? 'No rent set up yet. Tap + to set it up.'
-      : 'No rent set up yet.'
+  const setUp = () => setSheet({ kind: 'form', id: null })
+  const nextDue = schedules.data
+    .map((schedule) => schedule.nextDueDate)
+    .filter((date) => date !== null)
+    .sort()[0]
 
   return (
     <>
@@ -117,61 +99,60 @@ export function RentPage() {
         title="Rent"
         action={
           isPrimary && (
-            <IconButton label="Set up rent" accent onClick={() => setSheet({ kind: 'form', id: null })}>
+            <IconButton label="Set up rent" accent onClick={setUp}>
               <PlusIcon />
             </IconButton>
           )
         }
       />
-      {sheet === null && <ErrorMessage error={tick.error} />}
-      <div className={styles.columns}>
-        <div>
-          <SectionTitle>This period</SectionTitle>
-          {current.length ? (
-            <div className={styles.stack}>
-              {current.map((period) => (
-                <CurrentPeriod key={period.id} period={period} {...shareProps} onTick={tickIn(period.id)} />
-              ))}
-            </div>
-          ) : (
-            <EmptyState>{emptyText}</EmptyState>
-          )}
-          {earlier.length > 0 && (
-            <>
-              <SectionTitle>Earlier</SectionTitle>
-              <EarlierPeriods
-                periods={earlier}
+      <div className={styles.page}>
+        {!schedules.data.length && !rent.data.length ? (
+          <FirstRun
+            icon={<KeyIcon />}
+            title="No rent yet"
+            action={
+              isPrimary && (
+                <Button variant="primary" onClick={setUp}>
+                  Set up rent
+                </Button>
+              )
+            }
+          >
+            {isPrimary
+              ? 'Set up the rent once: the amount, how often and who pays what. Each period’s rent then appears here when it’s due, paid by you.'
+              : `${primary.name} sets up the rent. Each period shows here once it’s due.`}
+          </FirstRun>
+        ) : (
+          <>
+            <Lead>
+              {isPrimary
+                ? 'Each period’s rent appears here when it’s due, paid by you. Settle up on Home.'
+                : `${primary.name} pays the rent. Your share counts in what you owe on Home.`}
+            </Lead>
+            <SectionTitle>Schedule</SectionTitle>
+            {schedules.data.length ? (
+              <ScheduleList schedules={schedules.data} onOpen={(schedule) => setSheet({ kind: 'schedule', id: schedule.id })} />
+            ) : (
+              <EmptyState>No rent schedule. No new rent is created.</EmptyState>
+            )}
+            {rent.data.length ? (
+              <ExpenseLog
+                expenses={rent.data}
                 meId={meId}
-                onOpen={(period) => {
-                  tick.reset()
-                  setSheet({ kind: 'period', id: period.id })
-                }}
+                onOpen={(expense) => setExpenseSheet({ kind: 'view', expense })}
               />
-            </>
-          )}
-        </div>
-        <div>
-          <SectionTitle>Schedule</SectionTitle>
-          {schedules.data.length ? (
-            <ScheduleList schedules={schedules.data} onOpen={(schedule) => setSheet({ kind: 'schedule', id: schedule.id })} />
-          ) : (
-            <EmptyState>No rent schedule yet.</EmptyState>
-          )}
-          <Note>
-            A new period appears each time rent is due. Pay the person shown on the period (whoever was primary when
-            it was created), then tick your share. Editing a schedule only changes periods created after the edit. Rent
-            is not part of balances.
-          </Note>
-        </div>
+            ) : (
+              <>
+                <SectionTitle>Rent so far</SectionTitle>
+                <EmptyState>
+                  {nextDue ? `The first rent appears on ${formatShortDate(nextDue)}.` : 'No rent has been created.'}
+                </EmptyState>
+              </>
+            )}
+          </>
+        )}
       </div>
 
-      <PeriodSheet
-        period={sheet?.kind === 'period' ? findPeriod(sheet.id) : null}
-        onClose={closeSheet}
-        {...shareProps}
-        tickError={tick.error}
-        onTick={tickIn(sheet?.kind === 'period' ? sheet.id : 0)}
-      />
       <ScheduleSheet
         schedule={sheet?.kind === 'schedule' ? findSchedule(sheet.id) : null}
         onClose={closeSheet}
@@ -196,6 +177,14 @@ export function RentPage() {
         onConfirm={(schedule) => remove.mutate(schedule)}
         deleting={remove.isPending}
         error={remove.error}
+      />
+      <ExpenseSheet
+        state={expenseSheet}
+        onChange={setExpenseSheet}
+        tag="rent"
+        members={members}
+        meId={meId}
+        primaryName={primary.name}
       />
     </>
   )

@@ -10,3 +10,8 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 export function Note({ children }: { children: ReactNode }) {
   return <p className={styles.note}>{children}</p>
 }
+
+/** The short line under a page title saying what the tab is for. */
+export function Lead({ children }: { children: ReactNode }) {
+  return <p className={styles.lead}>{children}</p>
+}

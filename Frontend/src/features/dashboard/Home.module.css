@@ -1,0 +1,52 @@
+.pos { color: var(--pos); }
+.neg { color: var(--neg); }
+
+/* One column at every width, capped so amounts and buttons stay near their text. */
+.home { display: grid; gap: 14px; max-width: 760px; }
+@media (min-width: 820px) { .home { gap: 16px; } }
+.home > div > h2:first-child { margin-top: 8px; }
+
+.iconCircle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.iconCircle svg { width: 18px; height: 18px; }
+.quietIcon { background: var(--line); color: var(--pos); }
+
+.alone { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--accent-soft); color: var(--ink); text-decoration: none; font-size: 14px; }
+.alone span { flex: 1; }
+.alone svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+
+/* Settle up: one row per person; the button sits under the amount on a phone, beside it when there's room. */
+.card { background: var(--surface); border-radius: 20px; padding: 14px 18px; }
+.cardTitle { margin: 0 0 4px; font-size: 18px; font-weight: 700; color: var(--ink); }
+.square { display: flex; align-items: center; gap: 6px; margin: 6px 0 2px; color: var(--pos); font-size: 15px; }
+.square svg { width: 16px; height: 16px; flex: none; }
+.debts { list-style: none; margin: 0; padding: 0; }
+.debt { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; grid-template-areas: "avatar text amount" ". . action"; align-items: center; gap: 6px 10px; padding: 10px 0; }
+.debt + .debt { border-top: 1px solid var(--line); }
+.debt > :first-child { grid-area: avatar; }
+.debtText { grid-area: text; font-weight: 550; }
+.debtAmount { grid-area: amount; font-size: 17px; font-variant-numeric: tabular-nums; text-align: right; }
+.debtAction { grid-area: action; justify-self: end; }
+.debtAction button { white-space: nowrap; }
+@media (min-width: 600px) {
+  .debt { grid-template-columns: 28px minmax(0, 1fr) auto auto; grid-template-areas: "avatar text amount action"; column-gap: 14px; }
+}
+
+/* Balances between other people: quiet, under your own. */
+.othersHead { margin: 10px 0 2px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--muted); }
+.others { list-style: none; margin: 0; padding: 0; }
+.others li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: 14px; color: var(--muted); }
+.others b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Recent: payments step back so what was spent stands out. */
+.payment { color: var(--muted); font-weight: 600; }
+
+/* Tags not in use: quiet tiles you can tap to start one. */
+.addGrid { display: grid; gap: 8px; }
+@media (min-width: 820px) { .addGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+.add { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); background: transparent; border: 1px dashed #cfcfd8; color: inherit; text-decoration: none; }
+.add:hover { border-color: var(--accent); background: var(--surface); }
+.addText { flex: 1; min-width: 0; display: grid; }
+.addTitle { font-weight: 600; }
+.addPitch { font-size: 13px; color: var(--muted); }
+.plus { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none; color: var(--accent); background: var(--accent-soft); }
+.plus svg { width: 16px; height: 16px; }

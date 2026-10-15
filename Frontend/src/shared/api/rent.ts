@@ -1,6 +1,6 @@
 import { api } from './client'
-import type { RentPeriod } from './types'
+import type { RentSchedule } from './types'
 
-export async function getRentPeriods() {
-  return (await api.get<RentPeriod[]>('/rent-periods')).data
+export async function getRentSchedules() {
+  return (await api.get<RentSchedule[]>('/rent-schedules')).data
 }

@@ -8,9 +8,5 @@
 .reason { padding: 14px; line-height: 1.4; }
 .reason + .reason { border-top: 1px solid var(--line); }
 
-/* Desktop: the code and members on the left, bond and leaving on the right. */
-.columns { display: grid; gap: 0; align-items: start; }
-@media (min-width: 820px) {
-  .columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
-  .columns > div > :first-child { margin-top: 0; }
-}
+/* One column at every width: the code and members, then bond and leaving. Capped on wide screens. */
+.columns { max-width: 760px; }

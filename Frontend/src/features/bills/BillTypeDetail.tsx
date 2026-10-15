@@ -1,10 +1,11 @@
+import type { BillType } from '../../shared/api/types'
 import { Button } from '../../shared/components/Button'
 import { Fact, List } from '../../shared/components/List'
 import { SheetActions } from '../../shared/components/Sheet'
 import { Note } from '../../shared/components/Text'
 import { formatDate } from '../../shared/format/date'
 import styles from './Bills.module.css'
-import { FREQUENCY_LABELS, type BillType } from './types'
+import { FREQUENCY_LABELS } from './types'
 
 interface BillTypeDetailProps {
   billType: BillType

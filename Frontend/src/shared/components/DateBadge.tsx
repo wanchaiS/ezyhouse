@@ -1,4 +1,4 @@
-import { formatShortDate } from '../../shared/format/date'
+import { formatShortDate } from '../format/date'
 import styles from './DateBadge.module.css'
 
 /** The day over the short month, at the start of a row. */

@@ -3,8 +3,8 @@
 
 export type SplitType = 'equal' | 'exact'
 export type Frequency = 'weekly' | 'fortnightly' | 'monthly' | 'quarterly'
-export type BillStatus = 'pending' | 'submitted'
-export type FurnitureStatus = 'owned' | 'sold' | 'disposed'
+/** Decides which tab shows an expense and who may change it; never how the money counts. */
+export type ExpenseTag = 'rent' | 'bills' | 'groceries' | 'furniture'
 
 export interface UserRef {
   id: number
@@ -22,13 +22,6 @@ export interface ShareInput {
   amount?: number
 }
 
-export interface PaidShare {
-  user: UserRef
-  amount: number
-  paid: boolean
-  paidDate: string | null
-}
-
 export interface User {
   id: number
   name: string
@@ -44,93 +37,61 @@ export interface Household {
   members: UserRef[]
 }
 
-export interface BalanceMember {
-  user: UserRef
-  /** > 0: the household owes you; < 0: you owe. */
-  net: number
-}
-
-export interface Debt {
-  from: UserRef
-  to: UserRef
-  amount: number
-}
-
-export interface Balances {
-  members: BalanceMember[]
-  debts: Debt[]
-}
-
-export interface Settlement {
+export interface Expense {
   id: number
-  from: UserRef
-  to: UserRef
+  tag: ExpenseTag
+  description: string
+  /** May be 0: a bill waiting for its amount. */
   amount: number
   date: string
+  paidBy: UserRef
   createdBy: UserRef
+  splitType: SplitType
+  shares: Share[]
+  /** Whether the viewer may edit or delete it. */
+  canChange: boolean
+  /** Rent created by a schedule. */
+  rentScheduleId: number | null
+  /** Rent created by a schedule: the last day it covers. */
+  periodEnd: string | null
+  /** Bills created by a bill type. */
+  billTypeId: number | null
 }
 
-export interface SettlementInput {
-  fromUserId: number
-  toUserId: number
+export interface ExpenseInput {
+  description: string
   amount: number
+  date: string
+  paidByUserId: number
+  splitType: SplitType
+  shares: ShareInput[]
 }
 
-export interface RentPeriod {
+export interface NewExpenseInput extends ExpenseInput {
+  tag: ExpenseTag
+}
+
+export interface RentSchedule {
   id: number
-  scheduleId: number
+  amount: number
+  frequency: Frequency
   startDate: string
-  endDate: string
-  amount: number
-  payee: UserRef
-  shares: PaidShare[]
-}
-
-export interface Bill {
-  id: number
-  billType: { id: number; name: string }
-  dueDate: string
-  status: BillStatus
-  amount: number | null
-  payee: UserRef | null
-  submittedDate: string | null
-  /** Empty while pending. */
-  shares: PaidShare[]
-}
-
-export interface Purchase {
-  date: string
-  amount: number
-  paidBy: UserRef
+  endDate: string | null
   splitType: SplitType
   shares: Share[]
+  /** null once the schedule has ended. */
+  nextDueDate: string | null
 }
 
-export interface Sale {
-  date: string
-  amount: number
-  receivedBy: UserRef
-  splitType: SplitType
-  shares: Share[]
-}
-
-/** `amount` may be 0. */
-export interface Disposal {
-  date: string
-  amount: number
-  paidBy: UserRef
-  splitType: SplitType
-  shares: Share[]
-}
-
-export interface Furniture {
+export interface BillType {
   id: number
   name: string
-  status: FurnitureStatus
-  createdBy: UserRef
-  purchase: Purchase
-  sale: Sale | null
-  disposal: Disposal | null
+  frequency: Frequency
+  startDate: string
+  endDate: string | null
+  members: UserRef[]
+  /** null once the bill type has ended. */
+  nextDueDate: string | null
 }
 
 export interface Contribution {

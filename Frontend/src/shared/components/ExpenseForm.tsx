@@ -1,20 +1,21 @@
 import { Controller, useForm, useWatch, type UseFormSetError } from 'react-hook-form'
-import { applyFieldErrors } from '../../shared/api/problem'
-import type { UserRef } from '../../shared/api/types'
-import { Button } from '../../shared/components/Button'
-import { DateInput } from '../../shared/components/DateInput'
-import { ErrorMessage } from '../../shared/components/ErrorMessage'
-import { Field, FieldRow, Input } from '../../shared/components/Field'
-import { MemberSelect } from '../../shared/components/MemberSelect'
-import { MoneyInput } from '../../shared/components/MoneyInput'
-import { SheetActions } from '../../shared/components/Sheet'
-import { SplitEditor, type SplitValue } from '../../shared/components/SplitEditor'
-import { today } from '../../shared/format/date'
-import { parseMoney } from '../../shared/format/money'
-import styles from './Groceries.module.css'
-import type { Expense, ExpenseInput } from './types'
+import { applyFieldErrors } from '../api/problem'
+import type { Expense, ExpenseInput, ExpenseTag, UserRef } from '../api/types'
+import { today } from '../format/date'
+import { parseMoney } from '../format/money'
+import { Button } from './Button'
+import { DateInput } from './DateInput'
+import { ErrorMessage } from './ErrorMessage'
+import styles from './Expense.module.css'
+import { Field, FieldRow, Input } from './Field'
+import { MemberSelect } from './MemberSelect'
+import { MoneyInput } from './MoneyInput'
+import { SheetActions } from './Sheet'
+import { SplitEditor, type SplitValue } from './SplitEditor'
 
 interface ExpenseFormProps {
+  /** Decides only the wording; the fields are the same for every tag. */
+  tag: ExpenseTag
   members: UserRef[]
   meId: number
   /** The expense being edited; omit to add one. */
@@ -22,6 +23,13 @@ interface ExpenseFormProps {
   /** Rejects with the API error, which the form shows. */
   onSave: (input: ExpenseInput) => Promise<unknown>
   onCancel: () => void
+}
+
+const WORDING: Record<ExpenseTag, { label: string; placeholder: string; add: string }> = {
+  groceries: { label: 'What was it?', placeholder: 'e.g. Woolworths', add: 'Add expense' },
+  furniture: { label: 'What is it?', placeholder: 'e.g. Couch', add: 'Add furniture' },
+  rent: { label: 'What is it?', placeholder: 'e.g. Rent', add: 'Add rent' },
+  bills: { label: 'Which bill?', placeholder: 'e.g. Electricity', add: 'Add bill' },
 }
 
 interface ExpenseFormValues {
@@ -36,12 +44,13 @@ interface ExpenseFormValues {
 type ServerFields = Omit<ExpenseFormValues, 'split'> & Pick<ExpenseInput, 'splitType' | 'shares'>
 const SERVER_FIELDS = ['description', 'amount', 'date', 'paidByUserId', 'splitType', 'shares'] as const
 
-export function ExpenseForm({ members, meId, expense, onSave, onCancel }: ExpenseFormProps) {
+export function ExpenseForm({ tag, members, meId, expense, onSave, onCancel }: ExpenseFormProps) {
   const { control, register, handleSubmit, setError, formState } = useForm<ExpenseFormValues>({
     defaultValues: expense
       ? {
           description: expense.description,
-          amount: expense.amount.toFixed(2),
+          // A bill still at $0 is waiting for its amount, so the field starts empty rather than "0.00".
+          amount: expense.amount === 0 ? '' : expense.amount.toFixed(2),
           date: expense.date,
           paidByUserId: expense.paidBy.id,
           split: {
@@ -62,6 +71,7 @@ export function ExpenseForm({ members, meId, expense, onSave, onCancel }: Expens
   })
   const { errors, isSubmitting } = formState
   const amount = parseMoney(useWatch({ control, name: 'amount' }))
+  const wording = WORDING[tag]
 
   // applyFieldErrors only passes names from SERVER_FIELDS, so no nested "shares.N" paths arrive.
   const setServerError: UseFormSetError<ServerFields> = (name, error, options) =>
@@ -86,10 +96,10 @@ export function ExpenseForm({ members, meId, expense, onSave, onCancel }: Expens
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      <Field label="What was it?" error={errors.description?.message}>
+      <Field label={wording.label} error={errors.description?.message}>
         <Input
           {...register('description', { required: 'Say what it was' })}
-          placeholder="e.g. Woolworths"
+          placeholder={wording.placeholder}
           aria-invalid={!!errors.description}
         />
       </Field>
@@ -136,7 +146,7 @@ export function ExpenseForm({ members, meId, expense, onSave, onCancel }: Expens
       <ErrorMessage message={errors.root?.message} />
       <SheetActions>
         <Button type="submit" variant="primary" block disabled={isSubmitting}>
-          {expense ? 'Save' : 'Add expense'}
+          {expense ? 'Save' : wording.add}
         </Button>
         <Button variant="plain" block onClick={onCancel}>
           Cancel

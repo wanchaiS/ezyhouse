@@ -1,6 +1,6 @@
 import { Controller, useForm } from 'react-hook-form'
 import { applyFieldErrors } from '../../shared/api/problem'
-import type { Frequency, UserRef } from '../../shared/api/types'
+import type { BillType, Frequency, UserRef } from '../../shared/api/types'
 import { Avatar } from '../../shared/components/Avatar'
 import { Button } from '../../shared/components/Button'
 import { DateInput } from '../../shared/components/DateInput'
@@ -10,7 +10,7 @@ import { SheetActions } from '../../shared/components/Sheet'
 import { Note } from '../../shared/components/Text'
 import { today } from '../../shared/format/date'
 import styles from './Bills.module.css'
-import { FREQUENCY_LABELS, type BillType, type BillTypeInput } from './types'
+import { FREQUENCY_LABELS, type BillTypeInput } from './types'
 
 interface BillTypeFormProps {
   /** The bill type being edited; omitted for a new one. */
@@ -85,6 +85,7 @@ export function BillTypeForm({ billType, members, onSubmit, onCancel }: BillType
       <Controller
         name="memberIds"
         control={control}
+        rules={{ validate: (ids) => ids.length > 0 || 'Pick at least one person to share this bill.' }}
         render={({ field }) => (
           <div className={styles.members}>
             <span className={styles.label}>Shared by</span>

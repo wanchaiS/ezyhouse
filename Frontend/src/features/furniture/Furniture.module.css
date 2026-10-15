@@ -1,9 +1,2 @@
-/* The mockup's screenFurniture and item sheet styles not covered by shared components. */
-.iconCircle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
-.iconCircle svg { width: 18px; height: 18px; }
-.filter { margin: 4px 0 14px; }
-.count { opacity: .6; margin-left: 4px; font-variant-numeric: tabular-nums; }
-.titlePill { margin-left: 6px; vertical-align: 2px; }
-.section + .section { margin-top: 12px; }
-.centerNote { font-size: 13px; color: var(--muted); margin: 14px 4px 0; text-align: center; }
-.fieldError { font-size: 13px; color: var(--neg); margin: -6px 4px 12px; }
+/* One column at every width, capped so amounts stay near their text on wide screens. */
+.page { max-width: 760px; }

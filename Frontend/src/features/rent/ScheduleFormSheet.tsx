@@ -1,6 +1,6 @@
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { applyFieldErrors } from '../../shared/api/problem'
-import type { Frequency, UserRef } from '../../shared/api/types'
+import type { Frequency, RentSchedule, UserRef } from '../../shared/api/types'
 import { Button } from '../../shared/components/Button'
 import { DateInput } from '../../shared/components/DateInput'
 import { ErrorMessage } from '../../shared/components/ErrorMessage'
@@ -12,7 +12,8 @@ import { Note } from '../../shared/components/Text'
 import { today } from '../../shared/format/date'
 import { parseMoney } from '../../shared/format/money'
 import { FREQUENCY_LABELS } from './format'
-import type { RentSchedule, RentScheduleInput } from './types'
+import styles from './Rent.module.css'
+import type { RentScheduleInput } from './types'
 
 interface ScheduleFormSheetProps {
   open: boolean
@@ -120,6 +121,7 @@ function ScheduleFormBody({ schedule, members, onClose, onSave }: Omit<ScheduleF
       <Controller
         name="split"
         control={control}
+        rules={{ validate: (split) => split.shares.length > 0 || 'Pick at least one person to share the rent.' }}
         render={({ field }) => (
           <SplitEditor
             members={members}
@@ -129,8 +131,9 @@ function ScheduleFormBody({ schedule, members, onClose, onSave }: Omit<ScheduleF
           />
         )}
       />
+      {errors.split?.message && <p className={styles.fieldError}>{errors.split.message}</p>}
       {schedule && (
-        <Note>Changes apply from the next period. Periods already created keep their amount and split.</Note>
+        <Note>Changes apply to rent created from now on. Rent already created keeps its amount and split.</Note>
       )}
       <ErrorMessage message={errors.root?.message} />
       <SheetActions>

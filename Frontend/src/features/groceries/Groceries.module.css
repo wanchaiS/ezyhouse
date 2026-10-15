@@ -1,24 +1,2 @@
-/* Phone: balances, then expenses, then settlements. Desktop: expenses beside the two cards. */
-.layout { display: grid; gap: 12px; grid-template-areas: "balances" "expenses" "settlements"; }
-.balances { grid-area: balances; }
-.expenses { grid-area: expenses; min-width: 0; }
-.settlements { grid-area: settlements; }
-.expenses > div:first-child > h2 { margin-top: 12px; }
-@media (min-width: 820px) {
-  .layout { gap: 16px; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); grid-template-areas: "expenses balances" "expenses settlements"; grid-template-rows: auto 1fr; align-items: start; }
-  .expenses > div:first-child > h2 { margin-top: 0; }
-}
-
-.big { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; }
-.pos { color: var(--pos); }
-.neg { color: var(--neg); }
-.sub { font-size: 13px; color: var(--muted); }
-.lines { margin-top: 8px; }
-.line { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; }
-.who { display: flex; align-items: center; gap: 8px; }
-.subhead { font-size: 13px; font-weight: 600; color: var(--muted); margin: 16px 0 0; }
-.flush { margin: 0 -16px; }
-
-.bigAmount { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 0 4px; font-variant-numeric: tabular-nums; }
-.centerNote { font-size: 13px; color: var(--muted); margin: 14px 4px 0; text-align: center; }
-.fieldError { font-size: 13px; color: var(--neg); margin: -6px 4px 12px; }
+/* One column at every width, capped so amounts stay near their text on wide screens. */
+.page { max-width: 760px; }

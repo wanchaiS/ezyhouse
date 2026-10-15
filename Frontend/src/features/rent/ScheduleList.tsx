@@ -1,8 +1,8 @@
+import type { RentSchedule } from '../../shared/api/types'
 import { List, Row } from '../../shared/components/List'
 import { formatDate, formatShortDate } from '../../shared/format/date'
 import { formatMoney } from '../../shared/format/money'
 import { FREQUENCY_LABELS } from './format'
-import type { RentSchedule } from './types'
 
 interface ScheduleListProps {
   schedules: RentSchedule[]

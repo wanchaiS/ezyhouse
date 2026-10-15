@@ -1,83 +1,52 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { getBills } from '../../shared/api/bills'
+import { getBillTypes } from '../../shared/api/billTypes'
+import { getExpenses } from '../../shared/api/expenses'
 import { useHousehold } from '../../shared/api/household'
 import { keys } from '../../shared/api/keys'
 import { useMe } from '../../shared/api/me'
-import type { Bill, BillStatus } from '../../shared/api/types'
 import { Button, IconButton, TextButton } from '../../shared/components/Button'
 import { ErrorMessage } from '../../shared/components/ErrorMessage'
-import { PlusIcon } from '../../shared/components/icons'
+import { ExpenseSheet, type ExpenseSheetState } from '../../shared/components/ExpenseSheet'
+import { FirstRun } from '../../shared/components/FirstRun'
+import { BillIcon, PlusIcon } from '../../shared/components/icons'
 import { PageHeader } from '../../shared/components/PageHeader'
-import { Segmented } from '../../shared/components/Segmented'
 import { Sheet, SheetActions } from '../../shared/components/Sheet'
 import { Spinner } from '../../shared/components/Spinner'
-import { Note, SectionTitle } from '../../shared/components/Text'
+import { Lead, Note } from '../../shared/components/Text'
 import { useToast } from '../../shared/components/toastContext'
-import {
-  billTypesKey,
-  createBillType,
-  deleteBillType,
-  getBillTypes,
-  setBillSharePaid,
-  submitBill,
-  updateBillType,
-} from './api'
-import { BillDetail } from './BillDetail'
-import { BillList } from './BillList'
-import styles from './Bills.module.css'
+import { createBillType, deleteBillType, updateBillType } from './api'
+import { BillCards } from './BillCards'
 import { BillTypeDetail } from './BillTypeDetail'
 import { BillTypeForm } from './BillTypeForm'
-import { BillTypeList } from './BillTypeList'
-import { SubmitBillForm } from './SubmitBillForm'
-import type { BillTypeInput, SubmitBillInput } from './types'
+import type { BillTypeInput } from './types'
 
-type SheetState =
-  | { kind: 'submit'; bill: Bill }
-  | { kind: 'bill'; billId: number }
+// The bill type sheets; ids rather than objects, so a sheet shows the latest data after a refetch.
+type TypeSheet =
   | { kind: 'type'; typeId: number }
   | { kind: 'typeForm'; typeId?: number }
   | { kind: 'deleteType'; typeId: number }
   | null
 
-const FILTERS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'submitted', label: 'Submitted' },
-] as const
-
 export function BillsPage() {
   const queryClient = useQueryClient()
   const showToast = useToast()
-  const [status, setStatus] = useState<BillStatus>('pending')
-  const [sheet, setSheet] = useState<SheetState>(null)
+  const [sheet, setSheet] = useState<TypeSheet>(null)
+  const [expenseSheet, setExpenseSheet] = useState<ExpenseSheetState>(null)
 
   const me = useMe()
   const household = useHousehold()
-  const bills = useQuery({ queryKey: keys.billList(status), queryFn: () => getBills(status) })
-  const billTypes = useQuery({ queryKey: billTypesKey, queryFn: getBillTypes })
+  const bills = useQuery({ queryKey: keys.expenseList('bills'), queryFn: () => getExpenses('bills') })
+  const billTypes = useQuery({ queryKey: keys.billTypes, queryFn: getBillTypes })
 
-  // Bill type changes add or remove placeholders, so the bill lists refresh too.
+  // A new bill type due today creates its first bill straight away, and a deleted one unlinks
+  // its bills, so the bills refresh with the bill types.
   const refreshBillTypes = () =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: billTypesKey }),
-      queryClient.invalidateQueries({ queryKey: keys.bills }),
+      queryClient.invalidateQueries({ queryKey: keys.billTypes }),
+      queryClient.invalidateQueries({ queryKey: keys.expenses }),
+      queryClient.invalidateQueries({ queryKey: keys.balances }),
     ])
-
-  const submit = useMutation({
-    mutationFn: ({ billId, input }: { billId: number; input: SubmitBillInput }) => submitBill(billId, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: keys.bills })
-      setSheet(null)
-      showToast('Bill submitted')
-    },
-  })
-
-  const tick = useMutation({
-    mutationFn: ({ billId, userId, paid }: { billId: number; userId: number; paid: boolean }) =>
-      setBillSharePaid(billId, userId, paid),
-    // Keeps the ticks disabled until the list shows the new state.
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.bills }),
-  })
 
   const saveType = useMutation({
     mutationFn: ({ id, input }: { id?: number; input: BillTypeInput }) =>
@@ -98,40 +67,36 @@ export function BillsPage() {
     },
   })
 
-  function open(next: SheetState) {
-    tick.reset()
+  function open(next: TypeSheet) {
     removeType.reset()
     setSheet(next)
   }
 
-  const loadError = me.error ?? household.error ?? billTypes.error
-  if (loadError) return <ErrorMessage error={loadError} />
-  if (!me.data || !household.data || !billTypes.data) return <Spinner />
+  const loadError = me.error ?? household.error ?? billTypes.error ?? bills.error
+  if (loadError) {
+    return (
+      <>
+        <PageHeader title="Bills" />
+        <ErrorMessage error={loadError} />
+      </>
+    )
+  }
+  if (!me.data || !household.data || !billTypes.data || !bills.data) return <Spinner />
 
   const meId = me.data.id
   const { primary, members } = household.data
   const isPrimary = primary.id === meId
-  const findType = (id: number) => billTypes.data.find((billType) => billType.id === id)
-
-  // Pending: soonest first; submitted: newest first.
-  const shownBills = [...(bills.data ?? [])].sort((a, b) =>
-    status === 'pending' ? a.dueDate.localeCompare(b.dueDate) : b.dueDate.localeCompare(a.dueDate),
-  )
-  const viewedBill = sheet?.kind === 'bill' ? bills.data?.find((bill) => bill.id === sheet.billId) : undefined
-  const viewedType = sheet && 'typeId' in sheet && sheet.typeId !== undefined ? findType(sheet.typeId) : undefined
+  const viewedType =
+    sheet && sheet.typeId !== undefined ? billTypes.data.find((billType) => billType.id === sheet.typeId) : undefined
 
   function sheetTitle() {
     switch (sheet?.kind) {
-      case 'submit':
-        return `${sheet.bill.billType.name} bill`
-      case 'bill':
-        return viewedBill?.billType.name ?? 'Bill'
       case 'type':
         return viewedType?.name
       case 'typeForm':
         return sheet.typeId === undefined ? 'New bill type' : 'Edit bill type'
       case 'deleteType':
-        return 'Delete this bill type?'
+        return `Delete ${viewedType?.name ?? 'this bill'}?`
       default:
         return ''
     }
@@ -139,31 +104,6 @@ export function BillsPage() {
 
   function sheetBody() {
     switch (sheet?.kind) {
-      case 'submit': {
-        const bill = sheet.bill
-        return (
-          <SubmitBillForm
-            dueDate={bill.dueDate}
-            typeMembers={findType(bill.billType.id)?.members ?? members}
-            members={members}
-            onSubmit={(input) => submit.mutateAsync({ billId: bill.id, input })}
-            onCancel={() => setSheet(null)}
-          />
-        )
-      }
-      case 'bill':
-        return (
-          viewedBill && (
-            <BillDetail
-              bill={viewedBill}
-              meId={meId}
-              isPrimary={isPrimary}
-              saving={tick.isPending}
-              error={tick.error}
-              onTick={(userId, paid) => tick.mutate({ billId: viewedBill.id, userId, paid })}
-            />
-          )
-        )
       case 'type':
         return (
           viewedType && (
@@ -187,7 +127,7 @@ export function BillsPage() {
       case 'deleteType':
         return (
           <>
-            <Note>Bills still waiting for an amount are removed. Past bills stay in the history.</Note>
+            <Note>Bills already created stay. No new ones are created.</Note>
             <ErrorMessage error={removeType.error} />
             <SheetActions>
               <Button
@@ -221,31 +161,41 @@ export function BillsPage() {
           )
         }
       />
-      <div className={styles.filter}>
-        <Segmented options={FILTERS} value={status} onChange={setStatus} />
-      </div>
-      {bills.isError ? (
-        <ErrorMessage error={bills.error} />
-      ) : bills.isPending ? (
-        <Spinner />
+      {!billTypes.data.length && !bills.data.length ? (
+        <FirstRun
+          icon={<BillIcon />}
+          title="No bills yet"
+          action={
+            isPrimary && (
+              <Button variant="primary" onClick={() => open({ kind: 'typeForm' })}>
+                Add your first bill
+              </Button>
+            )
+          }
+        >
+          {isPrimary
+            ? 'Add each bill your house shares once, say internet, monthly. A new one appears every time it’s due; you enter the amount, and everyone’s share counts on Home.'
+            : `${primary.name} adds the bills your house shares. When one arrives, ${primary.name} enters the amount and your share shows here.`}
+        </FirstRun>
       ) : (
-        <BillList
-          status={status}
-          bills={shownBills}
-          meId={meId}
-          isPrimary={isPrimary}
-          primaryName={primary.name}
-          onEnter={(bill) => open({ kind: 'submit', bill })}
-          onView={(bill) => open({ kind: 'bill', billId: bill.id })}
-        />
+        <>
+          <Lead>
+            {isPrimary
+              ? 'Enter each bill when it arrives. Everyone’s share counts in the balances on Home.'
+              : `${primary.name} enters each bill when it arrives. Settle up on Home.`}
+          </Lead>
+          <BillCards
+            bills={bills.data}
+            billTypes={billTypes.data}
+            meId={meId}
+            isPrimary={isPrimary}
+            primary={primary}
+            onEnter={(bill) => setExpenseSheet({ kind: 'edit', expense: bill })}
+            onOpenBill={(bill) => setExpenseSheet({ kind: 'view', expense: bill })}
+            onOpenType={(billType) => open({ kind: 'type', typeId: billType.id })}
+          />
+        </>
       )}
-      <SectionTitle>Bill types</SectionTitle>
-      <BillTypeList
-        billTypes={billTypes.data}
-        isPrimary={isPrimary}
-        onView={(billType) => open({ kind: 'type', typeId: billType.id })}
-      />
-      <Note>Bills aren't part of balances. Everyone owes the primary who paid the provider.</Note>
       <Sheet
         open={sheet !== null}
         onClose={() => setSheet(null)}
@@ -258,6 +208,14 @@ export function BillsPage() {
       >
         {sheetBody()}
       </Sheet>
+      <ExpenseSheet
+        state={expenseSheet}
+        onChange={setExpenseSheet}
+        tag="bills"
+        members={members}
+        meId={meId}
+        primaryName={primary.name}
+      />
     </>
   )
 }

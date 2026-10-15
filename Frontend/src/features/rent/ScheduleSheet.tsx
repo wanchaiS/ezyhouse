@@ -1,4 +1,4 @@
-import type { UserRef } from '../../shared/api/types'
+import type { RentSchedule, UserRef } from '../../shared/api/types'
 import { Avatar } from '../../shared/components/Avatar'
 import { Button, TextButton } from '../../shared/components/Button'
 import { Fact, List, Row } from '../../shared/components/List'
@@ -8,7 +8,6 @@ import { Note, SectionTitle } from '../../shared/components/Text'
 import { formatDate } from '../../shared/format/date'
 import { formatMoney } from '../../shared/format/money'
 import { FREQUENCY_LABELS } from './format'
-import type { RentSchedule } from './types'
 import styles from './Rent.module.css'
 
 interface ScheduleSheetProps {
@@ -38,7 +37,7 @@ export function ScheduleSheet({ schedule, onClose, isPrimary, primary, onEdit, o
           <List>
             <Fact label="Started">{formatDate(schedule.startDate)}</Fact>
             <Fact label="Ends">{schedule.endDate ? formatDate(schedule.endDate) : 'Ongoing'}</Fact>
-            <Fact label="Next period">{schedule.nextDueDate ? formatDate(schedule.nextDueDate) : '—'}</Fact>
+            <Fact label="Next rent">{schedule.nextDueDate ? formatDate(schedule.nextDueDate) : 'Ended'}</Fact>
             <Fact label="Split">{schedule.splitType === 'equal' ? 'Equally' : 'Exact amounts'}</Fact>
           </List>
           <SectionTitle>Each period</SectionTitle>
@@ -54,7 +53,7 @@ export function ScheduleSheet({ schedule, onClose, isPrimary, primary, onEdit, o
           </List>
           {isPrimary ? (
             <>
-              <Note>Changes apply from the next period. Periods already created keep their amount and split.</Note>
+              <Note>Changes apply to rent created from now on. Rent already created keeps its amount and split.</Note>
               <SheetActions>
                 <Button variant="quietDanger" block onClick={() => onDelete(schedule)}>
                   Delete
