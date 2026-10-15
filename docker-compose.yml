@@ -1,0 +1,61 @@
+# The whole app: MySQL, the API and the web app.
+#
+#   docker compose up -d --build --wait   everything; open http://localhost:8080
+#   docker compose up -d --wait db        MySQL only, to run the API and the app yourself
+#
+# Host ports can be changed without editing this file, e.g. WEB_PORT=9000 docker compose up -d.
+name: ezyhouse
+
+services:
+  db:
+    image: mysql:8.0
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ezyhouse
+      MYSQL_USER: ezyhouse
+      MYSQL_PASSWORD: admin123
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ezyhouse-mysql:/var/lib/mysql
+    # Lets `--wait` and the API wait until MySQL accepts connections. Checking over TCP matters:
+    # on first start MySQL runs a temporary setup server that doesn't listen on TCP.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  api:
+    build: ./Backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Development applies the migrations, adds the demo data to an empty database and serves Swagger.
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__EzyHouse: Server=db;Port=3306;Database=ezyhouse;User=ezyhouse;Password=admin123;
+      DemoData__Seed: ${DEMO_DATA:-true}
+      # "Today" decides when rent and bills fall due, so it must be the household's date, not UTC.
+      TZ: Australia/Sydney
+    ports:
+      - "${API_PORT:-5080}:8080"   # Swagger: http://localhost:5080/swagger
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  web:
+    build: ./Frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  ezyhouse-mysql:

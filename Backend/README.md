@@ -15,11 +15,11 @@ built. The design, and the reasons behind it, are in [backend.md](backend.md).
 
 ## Run it
 
-From this `Backend/` folder:
+MySQL runs from the `docker-compose.yml` at the repo root. From the repo root:
 
 ```bash
-docker compose up -d --wait                                   # MySQL 8 on localhost:3306
-dotnet run --project src/EzyHouse.Api --launch-profile http   # the API on localhost:5219
+docker compose up -d --wait db                                          # MySQL 8 on localhost:3306
+dotnet run --project Backend/src/EzyHouse.Api --launch-profile http      # the API on localhost:5219
 ```
 
 `--wait` returns once MySQL accepts connections. The first time takes up to a minute while the
@@ -33,10 +33,34 @@ background job creates rent and bill expenses as they fall due: at start-up, the
 > groceries and furniture) and the migration history starts again. A database created by an earlier
 > version can't be upgraded: if you ran the API before, drop the old `ezyhouse` database first, with
 > `docker compose down -v` (see [Start again](#start-again-with-fresh-demo-data)) or
-> `DROP DATABASE ezyhouse;` in your own MySQL.
+> `DROP DATABASE ezyhouse;` in your own MySQL. MySQL used to start from `Backend/docker-compose.yml`;
+> if its container is still running, remove it once with `docker rm -f backend-mysql-1`.
 
 In Visual Studio or Rider: open `EzyHouse.slnx`, set **EzyHouse.Api** as the start-up project and
-choose the **http** profile. MySQL still needs `docker compose up -d --wait` first.
+choose the **http** profile. MySQL still needs `docker compose up -d --wait db` first.
+
+## Run the whole app in Docker
+
+No .NET or Node needed, only Docker Desktop. From the repo root:
+
+```bash
+docker compose up -d --build --wait     # MySQL, the API and the web app
+```
+
+Then open **<http://localhost:8080>** and log in with the demo data below. Swagger is at
+<http://localhost:5080/swagger>. The first build takes a few minutes; later ones reuse the cache.
+
+| Service | Built from | What it does |
+|---|---|---|
+| `db` | the `mysql:8.0` image | the database, kept in the `ezyhouse-mysql` volume |
+| `api` | `Backend/Dockerfile` | the API in Development, so it migrates, seeds and serves Swagger; dates in Sydney time |
+| `web` | `Frontend/Dockerfile` | nginx serving the built app and forwarding `/api` to `api` on the same origin |
+
+- **No demo data:** `DEMO_DATA=false docker compose up -d --build --wait` on an empty database.
+- **Ports in use:** change them without editing the file, e.g.
+  `WEB_PORT=9000 API_PORT=5081 DB_PORT=3307 docker compose up -d --wait`.
+- **Stop:** `docker compose down` keeps the data; `docker compose down -v` deletes it.
+- After changing code, rebuild with `docker compose up -d --build --wait`.
 
 ### Try it in Swagger
 
@@ -86,19 +110,22 @@ Visual Studio or Rider, use the Test Explorer.
 
 ## Start again with fresh demo data
 
+From the repo root:
+
 ```bash
 docker compose down -v        # -v deletes the database volume
-docker compose up -d --wait
+docker compose up -d --wait db
 ```
 
-Then run the API again: it recreates the tables and the demo data.
+Then run the API again: it recreates the tables and the demo data. (Running everything in Docker?
+`docker compose up -d --build --wait` instead of the second line.)
 
 To start with **no** demo data instead, as a brand-new user would see it, run the API with the
 demo data switched off. Demo data is only added at start-up, so later restarts must keep the switch
 off too:
 
 ```bash
-DemoData__Seed=false dotnet run --project src/EzyHouse.Api --launch-profile http
+DemoData__Seed=false dotnet run --project Backend/src/EzyHouse.Api --launch-profile http
 ```
 
 ## Change the database schema
@@ -115,11 +142,11 @@ dotnet ef migrations add <Name> --project src/EzyHouse.Infrastructure --startup-
 
 | Symptom | Fix |
 |---|---|
-| `Unable to connect to any of the specified MySQL hosts` | Docker Desktop isn't running, or MySQL isn't up yet. Start Docker Desktop, then `docker compose up -d --wait`. |
-| `docker compose up` says port 3306 is in use | Another MySQL is running. Stop it, or use it as described under "What you need". |
+| `Unable to connect to any of the specified MySQL hosts` | Docker Desktop isn't running, or MySQL isn't up yet. Start Docker Desktop, then `docker compose up -d --wait db` from the repo root. |
+| `docker compose up` says port 3306 is in use | Another MySQL is running: the old `backend-mysql-1` (`docker rm -f backend-mysql-1`) or your own. Stop it, use it as described under "What you need", or pick another port with `DB_PORT=3307` and match it in the connection string. |
 | `dotnet run` says port 5219 is in use | The API is already running in another terminal or in your editor. |
-| `NETSDK1045: The current .NET SDK does not support targeting .NET 10.0` | Install the .NET 10 SDK. |
-| `Access denied for user 'ezyhouse'` | The database volume was created with other credentials. Run `docker compose down -v`, then `docker compose up -d --wait`. |
+| `NETSDK1045: The current .NET SDK does not support targeting .NET 10.0` | Install the .NET 10 SDK, or run everything in Docker instead. |
+| `Access denied for user 'ezyhouse'` | The database volume was created with other credentials. Run `docker compose down -v`, then `docker compose up -d --wait db`. |
 
 The database password and the JWT signing key in `appsettings.json` are demo-only values.
 

@@ -18,6 +18,10 @@ login cookie just works. To point at another backend or use another port:
 API_TARGET=http://localhost:5300 npm run dev -- --port 5311
 ```
 
+Or run the whole app (database, API and this app) in Docker from the repo root, with no Node or
+.NET installed: `docker compose up -d --build --wait`, then open <http://localhost:8080>. See
+[the backend README](../Backend/README.md#run-the-whole-app-in-docker).
+
 ## Scripts
 
 | | |
@@ -33,3 +37,6 @@ API_TARGET=http://localhost:5300 npm run dev -- --port 5311
 - `src/shared/`: only what two or more slices use: `api/` (Axios client, query keys, types, shared
   calls), `components/` (each with its own `.module.css`), `format/` (money and dates),
   `styles/tokens.css` (the design tokens).
+- `Dockerfile`, `nginx.conf`: the production build, served by nginx, which forwards `/api` to the
+  API container on the same origin (the login cookie needs that, as the Vite proxy does in
+  development).
