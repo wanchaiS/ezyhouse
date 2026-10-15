@@ -6,6 +6,7 @@ import { Money } from '../../shared/components/Money'
 import { Note } from '../../shared/components/Text'
 import { formatMoney } from '../../shared/format/money'
 import styles from './Groceries.module.css'
+import { BalancesChart } from './BalancesChart'
 
 interface BalancesCardProps {
   balances: Balances
@@ -35,6 +36,8 @@ export function BalancesCard({ balances, meId, onSettle }: BalancesCardProps) {
           "You're all settled"
         )}
       </div>
+
+      <BalancesChart members={balances.members} meId={meId} />
 
       <div className={styles.lines}>
         {balances.members.map(({ user, net }) => (
