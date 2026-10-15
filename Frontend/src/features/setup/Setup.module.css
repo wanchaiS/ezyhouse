@@ -1,0 +1,24 @@
+.page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.lead {
+  color: var(--muted);
+  margin: -6px 4px 18px;
+}
+
+.or {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 14px 0;
+}
+
+.stackActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 28px;
+}
