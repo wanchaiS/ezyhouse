@@ -103,10 +103,7 @@ export function RentPage() {
   const findSchedule = (id: number | null) => schedules.data.find((schedule) => schedule.id === id) ?? null
   const shareProps = { meId, isPrimary, busy: tick.isPending }
   const tickIn = (periodId: number) => (userId: number, paid: boolean) => tick.mutate({ periodId, userId, paid })
-  // A Sheet's native close event arrives after the next sheet has been chosen (e.g. Edit from the
-  // details), so each sheet only clears the state while it is still the open one.
-  const closeSheet = (kind: NonNullable<OpenSheet>['kind']) => () =>
-    setSheet((open) => (open?.kind === kind ? null : open))
+  const closeSheet = () => setSheet(null)
 
   const emptyText = schedules.data.length
     ? 'No rent due right now.'
@@ -170,14 +167,14 @@ export function RentPage() {
 
       <PeriodSheet
         period={sheet?.kind === 'period' ? findPeriod(sheet.id) : null}
-        onClose={closeSheet('period')}
+        onClose={closeSheet}
         {...shareProps}
         tickError={tick.error}
         onTick={tickIn(sheet?.kind === 'period' ? sheet.id : 0)}
       />
       <ScheduleSheet
         schedule={sheet?.kind === 'schedule' ? findSchedule(sheet.id) : null}
-        onClose={closeSheet('schedule')}
+        onClose={closeSheet}
         isPrimary={isPrimary}
         primary={primary}
         onEdit={(schedule) => setSheet({ kind: 'form', id: schedule.id })}
@@ -188,14 +185,14 @@ export function RentPage() {
       />
       <ScheduleFormSheet
         open={sheet?.kind === 'form'}
-        onClose={closeSheet('form')}
+        onClose={closeSheet}
         schedule={sheet?.kind === 'form' ? findSchedule(sheet.id) : null}
         members={members}
         onSave={(input) => save.mutateAsync({ id: sheet?.kind === 'form' ? sheet.id : null, input })}
       />
       <DeleteScheduleSheet
         schedule={sheet?.kind === 'delete' ? findSchedule(sheet.id) : null}
-        onClose={closeSheet('delete')}
+        onClose={closeSheet}
         onConfirm={(schedule) => remove.mutate(schedule)}
         deleting={remove.isPending}
         error={remove.error}
