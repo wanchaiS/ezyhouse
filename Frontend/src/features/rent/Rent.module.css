@@ -1,0 +1,15 @@
+.label { font-size: 13px; color: var(--muted); }
+.big { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.bigAmount { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 0 4px; font-variant-numeric: tabular-nums; }
+.you { color: var(--muted); font-weight: 400; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.sheetHead { display: flex; align-items: baseline; gap: 12px; }
+.sheetHead > span { flex: 1; }
+.sheetHead button { margin-right: 4px; font-size: 16px; }
+.center { text-align: center; }
+
+/* Desktop: periods on the left, schedules on the right. */
+.columns { display: grid; gap: 0; align-items: start; }
+@media (min-width: 820px) {
+  .columns { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 24px; }
+}
