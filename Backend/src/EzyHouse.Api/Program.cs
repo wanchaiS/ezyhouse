@@ -1,6 +1,4 @@
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using EzyHouse.Api.Core;
 using EzyHouse.Api.Features.Auth;
 using EzyHouse.Api.Features.Balances;
@@ -29,9 +27,8 @@ builder.Services.AddDbContext<EzyHouseDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("EzyHouse"),
                      new MySqlServerVersion(new Version(8, 0, 36))));
 
-// JSON: camelCase (the default) and lowercase camelCase enum strings, as API.md requires
-builder.Services.AddControllers().AddJsonOptions(o =>
-    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false)));
+// JSON: camelCase (the default), lowercase enum strings and two-decimal money, as API.md requires
+builder.Services.AddControllers().AddJsonOptions(o => ApiJsonOptions.Apply(o.JsonSerializerOptions));
 
 // Errors: AppException subclasses become ProblemDetails responses
 builder.Services.AddProblemDetails();
