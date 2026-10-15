@@ -1,0 +1,10 @@
+/* The mockup's screenAuth, centred in a narrow column on wider screens. */
+.auth { max-width: 420px; margin: 0 auto; padding: 76px 24px 24px; text-align: center; }
+.auth form { text-align: left; margin-top: 28px; }
+.auth form [role="alert"] { margin: 0 0 12px; }
+.brandMark { width: 64px; height: 64px; border-radius: 18px; background: var(--accent); color: #fff; display: grid; place-items: center; margin: 0 auto 16px; }
+.brandMark svg { width: 34px; height: 34px; }
+.auth h1 { font-size: 26px; }
+.muted { color: var(--muted); margin: 6px 0 0; }
+.switch { margin-top: 18px; color: var(--muted); }
+.link { color: var(--accent); font-weight: 600; }
