@@ -1,0 +1,23 @@
+/* The mockup's screenBills styles not covered by shared components. */
+.iconCircle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.iconCircle svg { width: 18px; height: 18px; }
+.filter { margin: 4px 0 12px; }
+.waiting { font-size: 13px; color: var(--muted); }
+.muted { color: var(--muted); font-weight: 400; }
+.center { text-align: center; }
+
+.titleRow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.titleRow button { font-size: 16px; }
+.bigAmount { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin: 0 4px; font-variant-numeric: tabular-nums; }
+
+/* "Shared by" checkboxes, as in the mockup's bill type form. */
+.label { display: block; font-size: 13px; color: var(--muted); margin: 0 4px 5px; }
+.error { display: block; font-size: 13px; color: var(--neg); margin: 5px 4px 0; }
+.people { background: #fff; border-radius: 12px; margin-top: 8px; }
+.person { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; }
+.person + .person { border-top: 1px solid var(--line); }
+.person label { flex: 1; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.person input[type=checkbox] { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin: 0; flex: none; border: 1.5px solid #c4c4cc; border-radius: 50%; display: grid; place-items: center; }
+.person input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+.person input[type=checkbox]:checked::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.members { margin-bottom: 12px; }
