@@ -1,0 +1,16 @@
+/* The mockup's screenHousehold and leaveBlockedDetail styles not covered by shared components. */
+.label, .sub { font-size: 13px; color: var(--muted); }
+.code { font: 700 26px ui-monospace, Menlo, monospace; letter-spacing: .1em; margin: 6px 0 2px; }
+.muted { color: var(--muted); font-weight: 400; }
+.iconCircle { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+.iconCircle svg { width: 18px; height: 18px; }
+.stackActions { display: flex; flex-direction: column; gap: 8px; margin-top: 28px; }
+.reason { padding: 14px; line-height: 1.4; }
+.reason + .reason { border-top: 1px solid var(--line); }
+
+/* Desktop: the code and members on the left, bond and leaving on the right. */
+.columns { display: grid; gap: 0; align-items: start; }
+@media (min-width: 820px) {
+  .columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+  .columns > div > :first-child { margin-top: 0; }
+}
