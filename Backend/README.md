@@ -55,11 +55,17 @@ also set an HttpOnly cookie, `ezyhouse_token`, which the API accepts instead of 
 
 Dates are relative to the day the database was seeded, so rent periods and bills are always due.
 
-## Connect the React frontend
+## Run the React frontend
 
-- API base URL: `http://localhost:5219/api`
-- CORS allows `http://localhost:5173`, Vite's default. For another origin, add it to
-  `Cors:AllowedOrigins` in `src/EzyHouse.Api/appsettings.json`.
+With the API running, start the app from `../Frontend` (see [its README](../Frontend/README.md)):
+
+```bash
+cd ../Frontend && npm install && npm run dev    # http://localhost:5173
+```
+
+Vite forwards `/api` to `http://localhost:5219`, so the app and the API share an origin. That
+matters because the login cookie is `SameSite=Strict` and isn't sent on cross-origin calls, so the
+app must always go through the proxy, never to `http://localhost:5219` directly.
 
 ## Run the tests
 
