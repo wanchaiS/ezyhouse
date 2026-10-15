@@ -40,7 +40,9 @@ Open **<http://localhost:5219/swagger>**.
 2. Click **Authorize** and paste the token on its own, without "Bearer".
 3. Try `GET /api/household`, `GET /api/balances` and `GET /api/rent-periods`.
 
-Without a token every endpoint except register and login returns 401.
+Without a token every endpoint except register, login and logout returns 401. Login and register
+also set an HttpOnly cookie, `ezyhouse_token`, which the API accepts instead of the header;
+`POST /api/auth/logout` clears it.
 
 ### Demo data
 
@@ -65,7 +67,7 @@ Dates are relative to the day the database was seeded, so rent periods and bills
 dotnet test EzyHouse.slnx
 ```
 
-110 NUnit tests. They use an in-memory SQLite database, so MySQL doesn't need to be running. In
+114 NUnit tests. They use an in-memory SQLite database, so MySQL doesn't need to be running. In
 Visual Studio or Rider, use the Test Explorer.
 
 ## Start again with fresh demo data
@@ -127,7 +129,7 @@ Paths are relative to `src/` (or `tests/` for the tests). Each technique does re
 | **Error handling** | `EzyHouse.Domain/Exceptions/AppException.cs`, `EzyHouse.Api/Core/AppExceptionHandler.cs` | one exception type per status (400, 401, 403, 404, 409), turned into ProblemDetails in one place |
 | **Validation** | `EzyHouse.Api/Core/MoneyAttribute.cs`, `EzyHouse.Api/Features/*/*Dtos.cs` | `[Required]`, `[EmailAddress]`, `[StringLength]` and a custom `[Money]` on request fields |
 | | `EzyHouse.Domain/Entities/Furniture.cs`, `Bill.cs`, `Bond.cs` | lifecycle rules: e.g. a sold item can't be sold again (409) |
-| **NUnit** | `EzyHouse.Tests/` | 110 tests: `Domain/` (pure rules), `Features/` (each service against a real database), `Core/`, `Infrastructure/` |
+| **NUnit** | `EzyHouse.Tests/` | 114 tests: `Domain/` (pure rules), `Features/` (each service against a real database, plus the login cookie), `Core/`, `Infrastructure/` |
 | **Database + EF + LINQ** (bonus) | `EzyHouse.Infrastructure/Data/EzyHouseDbContext.cs`, `Data/Configurations/`, `Migrations/` | MySQL through Pomelo EF Core, Code First; LINQ to Entities in every `*Repository.cs` |
 | **Non-Windows-Forms UI** (bonus) | `../API.md` | the React frontend calls this Web API |
 | **High cohesion, low coupling** | `EzyHouse.Api/Features/` | one folder per feature; features never reference each other; dependencies injected through interfaces |

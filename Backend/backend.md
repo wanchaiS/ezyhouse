@@ -4,7 +4,7 @@ The EzyHouse backend is a C# ASP.NET Core Web API on **.NET 10**, backed by MySQ
 Framework Core. The React frontend talks to it over the REST contract in [API.md](../API.md).
 
 **Status:** every API.md endpoint is built and has been called over HTTP against MySQL with the
-demo data; 110 NUnit tests pass. To run it, see [README.md](README.md). This document explains how
+demo data; 114 NUnit tests pass. To run it, see [README.md](README.md). This document explains how
 the code is organised and **why**, so anyone in the team can change it, or explain it in the demo.
 
 ## Contents
@@ -167,8 +167,10 @@ In order:
    always written with two decimal places.
 3. **Errors:** `AddProblemDetails()` and `AppExceptionHandler` (5.8).
 4. **JWT bearer** authentication, with `MapInboundClaims = false` so the user id stays in `sub`.
+   An `OnMessageReceived` event reads the token from the `ezyhouse_token` cookie (`AuthCookie`)
+   when the request has no `Authorization` header, so the header wins (5.9).
 5. **Authorization fallback policy:** every endpoint needs a signed-in user unless it opts out
-   with `[AllowAnonymous]`. Only register and login opt out.
+   with `[AllowAnonymous]`. Only register, login and logout opt out.
 6. **CORS** for the React dev server.
 7. **Shared services:**
    - singletons: `IClock` → `SystemClock`, both `ISplitStrategy` classes, `SplitCalculator`, `BalanceCalculator`
@@ -575,12 +577,21 @@ public abstract class AppException(string message) : Exception(message)
 **Decision:**
 - Our own `Users` table.
 - Passwords hashed with ASP.NET's built-in `PasswordHasher<User>`, registered in `AuthFeature`. It ships with ASP.NET, so no package is needed.
-- `JwtTokenService` issues a token with `sub` (user id), `name` and `email`, valid for 24 hours.
+- `JwtTokenService` issues a token with `sub` (user id), `name` and `email`, valid for `Jwt:ExpiryMinutes` (1440, 24 hours).
+- Register and login return the token in the JSON **and** set it as the cookie `ezyhouse_token`: HttpOnly, SameSite=Strict, Path=/, Max-Age equal to the token lifetime, and Secure only when the request is HTTPS (Safari refuses Secure cookies on `http://localhost`). The name and options live in `AuthCookie`.
+- The API takes the token from the `Authorization: Bearer` header first and falls back to the cookie, so Swagger's **Authorize** button keeps working.
+- `POST /api/auth/logout` deletes the cookie with the same options, so the browser really removes it. Tokens are stateless, so a copied token stays valid until it expires.
 - Emails are stored in lower case.
 
 **Why:** ASP.NET Identity's ready-made endpoints don't match API.md: different URLs, register
 returns no token, and the response shapes and tokens differ. It also adds about seven unused tables.
 Its extras (lockout, password reset, email confirmation) aren't in scope.
+
+**Why a cookie:** the React app never touches the token, so script injected into the page can't
+read it. **CSRF:** SameSite=Strict means the browser doesn't send the cookie on requests started
+by another site, and every write takes a JSON body, which a plain cross-site form can't send.
+Rejected: antiforgery tokens, which add a token round trip and a header on every write for no gain
+in a same-origin app.
 
 ---
 
@@ -589,7 +600,7 @@ Its extras (lockout, password reset, email confirmation) aren't in scope.
 API.md has the request and response shapes. This section lists the rules each feature enforces,
 beyond the shared ones in section 5:
 
-- **Login (401):** login is required everywhere except register and login.
+- **Login (401):** login is required everywhere except register, login and logout.
 - **Household (403):** you must be in a household for every household endpoint.
 - **404 for missing records:** a record that doesn't exist, or belongs to another household, is 404.
 - **Splits:** every split goes through `SplitCalculator`.
@@ -599,8 +610,10 @@ beyond the shared ones in section 5:
 - **`POST /api/auth/register`:**
   - A duplicate email is 409.
   - The password must be at least 8 characters.
-  - Returns a token and the user.
-- **`POST /api/auth/login`:** an unknown email or a wrong password gives the same 401 message.
+  - Returns a token and the user, and sets the `ezyhouse_token` cookie.
+- **`POST /api/auth/login`:** an unknown email or a wrong password gives the same 401 message. On
+  success it returns a token and the user, and sets the cookie.
+- **`POST /api/auth/logout`:** clears the cookie and returns 204. Works without being logged in.
 - **`GET /api/me`:** returns the user, or 401 if the token's user no longer exists.
 
 ### Household (`Features/Households`)
@@ -704,13 +717,13 @@ the seeding day, so rent periods and bills are always due.
 
 ## 7. Tests
 
-110 NUnit tests, written as Arrange-Act-Assert with `Assert.That(actual, Is.EqualTo(expected))`.
+114 NUnit tests, written as Arrange-Act-Assert with `Assert.That(actual, Is.EqualTo(expected))`.
 Run them with `dotnet test EzyHouse.slnx`, or from Test Explorer.
 
 | Folder | Tests | What they cover |
 |---|---|---|
 | `Domain/` | 34 | pure rules, no database: equal and exact splits, `SplitCalculator`, `AddFrequency`, schedule slots and month-end anchoring, forward-only generation, balances (incl. the couch and cancelling debts), lifecycle methods, `HasAtMostTwoDecimals` |
-| `Features/` | 67 | each feature's service against a real database: its permission checks (403), another household's records (404), its business rules (409), and every leave check |
+| `Features/` | 71 | each feature's service against a real database: its permission checks (403), another household's records (404), its business rules (409), and every leave check; the login cookie set by register/login and cleared by logout |
 | `Core/` | 7 | rent/bill generation and household balances against a real database; the API's JSON settings |
 | `Infrastructure/` | 2 | the model builds; household scoping |
 
@@ -728,7 +741,7 @@ Run them with `dotnet test EzyHouse.slnx`, or from Test Explorer.
 
 ## 8. Status and remaining work
 
-**Done:** every API.md endpoint, the 110 tests, demo data, and the README with run steps and the
+**Done:** every API.md endpoint, the 114 tests, demo data, and the README with run steps and the
 technique table.
 
 **Still to do, before Friday 16 October 2026, 11:59pm:**

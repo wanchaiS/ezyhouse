@@ -18,7 +18,7 @@ Frontend ↔ backend contract. Endpoint shapes and top-level schemas only.
 ## Conventions
 
 - Base path `/api`. JSON uses camelCase.
-- Every endpoint except `/api/auth/*` requires `Authorization: Bearer <token>`.
+- Every endpoint except `/api/auth/*` requires `Authorization: Bearer <token>`, or the `ezyhouse_token` cookie set by register/login (see Auth). If both are sent, the header wins.
 - IDs are integers.
 - Money is a number with exactly 2 decimal places. More decimals → 400.
 - Dates are `YYYY-MM-DD`.
@@ -65,7 +65,11 @@ AuthResult { token, user: User }
 |---|---|---|---|---|
 | POST | `/api/auth/register` | `{ name, email, password }` | `AuthResult` | 409 email already used |
 | POST | `/api/auth/login` | `{ email, password }` | `AuthResult` | 401 |
+| POST | `/api/auth/logout` | — | 204, no body | |
 | GET | `/api/me` | — | `User` | |
+
+- Register and login also set the cookie `ezyhouse_token` (HttpOnly, SameSite=Strict, Path=/, lasts as long as the token; Secure only over HTTPS). The API accepts it instead of the `Authorization` header, so the browser app never needs to read or store the token itself.
+- Logout clears that cookie. It works without being logged in. The token itself stays valid until it expires, so a copy sent in the header still works.
 
 ## Household
 

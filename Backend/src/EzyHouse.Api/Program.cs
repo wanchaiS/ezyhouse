@@ -34,7 +34,7 @@ builder.Services.AddControllers().AddJsonOptions(o => ApiJsonOptions.Apply(o.Jso
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
-// Authentication: JWT bearer tokens
+// Authentication: JWT bearer tokens, from the Authorization header or the login cookie
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -45,6 +45,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+        };
+        options.Events = new JwtBearerEvents
+        {
+            // The header wins, so Swagger's Authorize button still works while a cookie is present
+            OnMessageReceived = ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Request.Headers.Authorization))
+                    ctx.Token = ctx.Request.Cookies[AuthCookie.Name];
+                return Task.CompletedTask;
+            },
         };
     });
 // Every endpoint needs a signed-in user unless it opts out with [AllowAnonymous]
