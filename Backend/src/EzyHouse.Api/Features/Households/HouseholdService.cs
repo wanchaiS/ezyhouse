@@ -110,7 +110,7 @@ public sealed class HouseholdService(
         }.OfType<string>().ToList();
 
         if (problems.Count > 0)
-            throw new BusinessRuleException(string.Join(" ", problems));
+            throw new BusinessRuleException(string.Join("\n", problems));
 
         foreach (BillType billType in await households.GetBillTypesWithMemberAsync(household.Id, userId))
             billType.Members.RemoveAll(member => member.Id == userId);

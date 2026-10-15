@@ -229,7 +229,7 @@ public class HouseholdServiceTests
 
         var refused = Assert.ThrowsAsync<BusinessRuleException>(() => ServiceFor(house.Alice).LeaveAsync());
 
-        Assert.That(refused!.Message, Is.EqualTo(string.Join(" ",
+        Assert.That(refused!.Message, Is.EqualTo(string.Join("\n",
             "You still owe money, or are owed money, for groceries or furniture. Settle up first.",
             "A rent share owed by you or to you is unpaid.",
             "You're in the split of a rent schedule that hasn't ended. Ask the primary to end it or take you off it.",

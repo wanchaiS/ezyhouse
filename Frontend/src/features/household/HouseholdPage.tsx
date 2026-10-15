@@ -26,11 +26,6 @@ type SheetState =
   | { kind: 'blocked'; reasons: string[] }
   | null
 
-// The 409's detail joins every reason into one string. Each reason starts "You…" or "A…" and
-// its follow-up sentence never does, so splitting here gives one row per reason; any other
-// wording simply stays one row.
-const REASON_BREAK = /(?<=\.)\s+(?=(?:You|A)\b)/
-
 export function HouseholdPage() {
   const queryClient = useQueryClient()
   const showToast = useToast()
@@ -64,7 +59,7 @@ export function HouseholdPage() {
     },
     onError: (error) => {
       if (toProblem(error).status === 409) {
-        setSheet({ kind: 'blocked', reasons: problemMessage(error).split(REASON_BREAK) })
+        setSheet({ kind: 'blocked', reasons: problemMessage(error).split('\n') })
       }
     },
   })

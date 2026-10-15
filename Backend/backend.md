@@ -458,7 +458,7 @@ List<string> problems = new[]
 }.OfType<string>().ToList();
 
 if (problems.Count > 0)
-    throw new BusinessRuleException(string.Join(" ", problems));
+    throw new BusinessRuleException(string.Join("\n", problems));   // one reason per line
 ```
 
 The five checks:

@@ -99,7 +99,7 @@ Household { id, name, inviteCode, primary: UserRef, members: UserRef[] }
 - any bill share owed by you or to you is unpaid
 - you are primary and other members remain ⚠ (hand over primary first)
 
-When leaving is blocked, the 409's `detail` lists every reason that applies, not just the first.
+When leaving is blocked, the 409's `detail` lists every reason that applies, not just the first, one per line.
 
 On leaving:
 - you are removed from every bill type's members ⚠
