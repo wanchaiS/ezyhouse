@@ -10,7 +10,7 @@ services:
   db:
     image: mysql:8.0
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "${DB_PORT:-3307}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ezyhouse
@@ -37,7 +37,7 @@ services:
     environment:
       # Development applies the migrations, adds the demo data to an empty database and serves Swagger.
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__EzyHouse: Server=db;Port=3306;Database=ezyhouse;User=ezyhouse;Password=admin123;
+      ConnectionStrings__EzyHouse: Server=db;Port=3307;Database=ezyhouse;User=ezyhouse;Password=admin123;
       DemoData__Seed: ${DEMO_DATA:-true}
       # "Today" decides when rent and bills fall due, so it must be the household's date, not UTC.
       TZ: Australia/Sydney

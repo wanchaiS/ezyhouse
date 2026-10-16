@@ -125,7 +125,7 @@ marking guide's terms, this is "high cohesion, low coupling".
 - **.NET 10 SDK.** Visual Studio 2022 can't build .NET 10 projects; use Visual Studio 2026, Rider,
   VS Code or the command line. Whether the lab PCs can build .NET 10 still needs checking (section 8).
 - **Docker Desktop** for MySQL 8 (`docker-compose.yml`): database `ezyhouse`, user `ezyhouse`,
-  password `admin123`, port 3306.
+  password `admin123`, port 3307.
 
 ### NuGet packages
 

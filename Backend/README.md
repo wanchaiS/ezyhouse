@@ -7,7 +7,7 @@ built. The design, and the reasons behind it, are in [backend.md](backend.md).
 ## What you need
 
 - **.NET 10 SDK.** `dotnet --version` should print `10.x`.
-- **Docker Desktop**, which runs MySQL 8 for you. Already running your own MySQL 8 on port 3306?
+- **Docker Desktop**, which runs MySQL 8 for you. Already running your own MySQL 8 on port 3307?
   Create a database `ezyhouse` and a user `ezyhouse` / `admin123` instead, or change
   `ConnectionStrings:EzyHouse` in `src/EzyHouse.Api/appsettings.json`.
 - An editor that supports .NET 10: Visual Studio 2026, Rider or VS Code, or just the command line.
@@ -18,7 +18,7 @@ built. The design, and the reasons behind it, are in [backend.md](backend.md).
 MySQL runs from the `docker-compose.yml` at the repo root. From the repo root:
 
 ```bash
-docker compose up -d --wait db                                          # MySQL 8 on localhost:3306
+docker compose up -d --wait db                                          # MySQL 8 on localhost:3307
 dotnet run --project Backend/src/EzyHouse.Api --launch-profile http      # the API on localhost:5219
 ```
 
@@ -143,7 +143,7 @@ dotnet ef migrations add <Name> --project src/EzyHouse.Infrastructure --startup-
 | Symptom | Fix |
 |---|---|
 | `Unable to connect to any of the specified MySQL hosts` | Docker Desktop isn't running, or MySQL isn't up yet. Start Docker Desktop, then `docker compose up -d --wait db` from the repo root. |
-| `docker compose up` says port 3306 is in use | Another MySQL is running: the old `backend-mysql-1` (`docker rm -f backend-mysql-1`) or your own. Stop it, use it as described under "What you need", or pick another port with `DB_PORT=3307` and match it in the connection string. |
+| `docker compose up` says port 3307 is in use | Another MySQL is running: the old `backend-mysql-1` (`docker rm -f backend-mysql-1`) or your own. Stop it, use it as described under "What you need", or pick another port with `DB_PORT=3307` and match it in the connection string. |
 | `dotnet run` says port 5219 is in use | The API is already running in another terminal or in your editor. |
 | `NETSDK1045: The current .NET SDK does not support targeting .NET 10.0` | Install the .NET 10 SDK, or run everything in Docker instead. |
 | `Access denied for user 'ezyhouse'` | The database volume was created with other credentials. Run `docker compose down -v`, then `docker compose up -d --wait db`. |

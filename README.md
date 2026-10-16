@@ -19,7 +19,7 @@ Everything runs in Docker, so the only thing to install is Docker Desktop. No .N
 
 - **Docker Desktop**, started. `docker compose version` should print v2 or later.
 - **Git.**
-- Free ports **8080** (the app), **5080** (the API) and **3306** (MySQL). Busy? See step 4.
+- Free ports **8080** (the app), **5080** (the API) and **3307** (MySQL). Busy? See step 4.
 
 ### 2. Get the code
 
@@ -65,7 +65,7 @@ WEB_PORT=9000 API_PORT=5081 DB_PORT=3307 docker compose up -d --build --wait
 |---|---|
 | App | <http://localhost:8080> |
 | API (Swagger) | <http://localhost:5080/swagger> |
-| MySQL | `localhost:3306`, database `ezyhouse`, user `ezyhouse` / `admin123` |
+| MySQL | `localhost:3307`, database `ezyhouse`, user `ezyhouse` / `admin123` |
 
 On first start the API creates the tables and adds a demo household:
 
@@ -104,7 +104,7 @@ hourly), in Sydney time.
 | Symptom | Fix |
 |---|---|
 | `Cannot connect to the Docker daemon` | Start Docker Desktop and wait until it says it's running. |
-| `port is already allocated` | Something else uses 8080, 5080 or 3306: often an older `backend-mysql-1` (step 3) or a local MySQL. Stop it, or choose other ports (step 4). |
+| `port is already allocated` | Something else uses 8080, 5080 or 3307: often an older `backend-mysql-1` (step 3) or a local MySQL. Stop it, or choose other ports (step 4). |
 | `up --wait` fails, or `docker compose ps` shows `api` exited | Read why with `docker compose logs api`. If it's about the database, start it fresh: `docker compose down -v`, then start again. |
 | `Access denied for user 'ezyhouse'` | The database volume was made with other credentials: `docker compose down -v`, then start again. |
 | A change in the code doesn't show | Rebuild: `docker compose up -d --build --wait`. |
